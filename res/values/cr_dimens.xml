@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2016-2025 crDroid Android Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+
+    <!-- Oval preview size -->
+    <dimen name="oval_notification_size">26dp</dimen>
+
+    <!-- Columbus -->
+    <dimen name="columbus_action_list_item_spacing_vertical">16.0dip</dimen>
+    <dimen name="columbus_animation_layout_height">320.0dip</dimen>
+    <dimen name="columbus_animation_layout_width">320.0dip</dimen>
+    <dimen name="columbus_app_icon_padding">16.0dip</dimen>
+    <dimen name="columbus_app_icon_size">32.0dip</dimen>
+    <dimen name="columbus_app_list_item_spacing_horizontal">16.0dip</dimen>
+    <dimen name="columbus_app_list_item_spacing_vertical">8.0dip</dimen>
+    <dimen name="columbus_app_list_padding">10.0dip</dimen>
+    <dimen name="columbus_enroll_illustration_stroke_width">10.0dip</dimen>
+    <dimen name="columbus_extras_icon_padding">12.0dip</dimen>
+    <dimen name="columbus_illustration_layout_height">240.0dip</dimen>
+    <dimen name="columbus_illustration_layout_width">240.0dip</dimen>
+    <dimen name="columbus_list_item_text_spacing">32.0dip</dimen>
+
+    <dimen name="package_list_padding_top">16dp</dimen>
+
+    <!-- Support -->
+    <dimen name="logo_vertical_margin">48dp</dimen>
+    <dimen name="logo_horizontal_margin">40dp</dimen>
+    <dimen name="logo_height">-2px</dimen>
+    <dimen name="logo_width">-1px</dimen>
+
+    <!-- Edge light -->
+    <dimen name="phone_preview_hardware_corner_radius">1.0999756dip</dimen>
+    <dimen name="phone_preview_hardware_power_above_volume_dy">-48.0dip</dimen>
+    <dimen name="phone_preview_hardware_power_height">26.0dip</dimen>
+    <dimen name="phone_preview_hardware_strip_width">2.5dip</dimen>
+    <dimen name="phone_preview_hardware_translation_x">3.5dip</dimen>
+    <dimen name="phone_preview_hardware_volume_height">52.0dip</dimen>
+    <dimen name="phone_preview_screen_height">380.0dip</dimen>
+    <dimen name="phone_preview_screen_width">190.0dip</dimen>
+    <dimen name="edge_light_preview_punchhole_margin_top">10.0dip</dimen>
+    <dimen name="edge_light_preview_punchhole_size">9.0dip</dimen>
+    <dimen name="edge_light_preview_shell_content_inset">6.0dip</dimen>
+    <dimen name="edge_light_preview_shell_corner_radius">28.0dip</dimen>
+</resources>

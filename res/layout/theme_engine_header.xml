@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS Theme Engine: full-span header item = palette-style selector +
+     pitch black toggle. Bound by ThemeEngine.HeaderHolder. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Theme style mode: Substratum (flat black + vivid accent) vs Monet -->
+    <TextView
+        android:id="@+id/theme_engine_mode_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/theme_engine_mode_title"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?android:attr/textColorSecondary" />
+
+    <RadioGroup
+        android:id="@+id/theme_engine_mode_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <RadioButton
+            android:id="@+id/theme_engine_mode_substratum"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/theme_engine_mode_substratum" />
+
+        <RadioButton
+            android:id="@+id/theme_engine_mode_monet"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/theme_engine_mode_monet" />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/theme_engine_mode_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="8dp"
+        android:text="@string/theme_engine_mode_summary"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:attr/textColorSecondary" />
+
+    <!-- Pitch black theme toggle (moved here from theme_global.xml) -->
+    <LinearLayout
+        android:id="@+id/theme_engine_pitch_black_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/custom_pitch_black_title"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/custom_pitch_black_summary"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorSecondary" />
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/theme_engine_pitch_black_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false" />
+
+    </LinearLayout>
+
+</LinearLayout>

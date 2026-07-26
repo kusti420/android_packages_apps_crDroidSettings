@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2025 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+     IchthysOS-only settings — things that do NOT exist in stock crDroid.
+     crDroid-inherited features live in their own tabs; only fully-custom
+     additions belong here.
+-->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
+
+    <!-- Global disable-all-vibration master toggle -->
+    <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+        android:key="disable_all_vibration"
+        android:icon="@drawable/ic_vibrate"
+        android:title="@string/disable_all_vibration_title"
+        android:summary="@string/disable_all_vibration_summary"
+        android:defaultValue="false" />
+
+    <!-- Pitch black theme moved to Themes > Global theme
+         (com.crdroid.settings.fragments.themes.ThemeGlobal). -->
+
+    <PreferenceCategory
+        android:key="ichthys_recents_category"
+        android:title="@string/ichthys_recents_category">
+
+        <!-- Recents implementation selector -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="recents_type"
+            android:icon="@drawable/ic_sysbar_recent"
+            android:title="@string/recents_type_title"
+            android:summary="%s"
+            android:entries="@array/recents_type_entries"
+            android:entryValues="@array/recents_type_values"
+            android:defaultValue="0" />
+
+        <!-- Slim Recents tuning (only relevant when recents_type = Slim) -->
+        <Preference
+            android:key="slim_recents_settings"
+            android:icon="@drawable/ic_memory"
+            android:title="@string/slim_recents_title"
+            android:summary="@string/slim_recents_summary"
+            android:fragment="com.crdroid.settings.fragments.recents.SlimRecents" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ichthys_volume_category"
+        android:title="@string/ichthys_volume_category">
+
+        <!-- Horizontal (8.1-style) volume slider -->
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="custom_volume_horizontal"
+            android:icon="@drawable/ic_sliders"
+            android:title="@string/custom_volume_horizontal_title"
+            android:summary="@string/custom_volume_horizontal_summary"
+            android:defaultValue="false" />
+
+        <!-- Media volume steps (needs a reboot to take effect) -->
+        <com.crdroid.settings.preferences.SecureSettingSeekBarPreference
+            android:key="custom_volume_steps"
+            android:icon="@drawable/ic_volume_vibrate"
+            android:title="@string/custom_volume_steps_title"
+            android:summary="@string/custom_volume_steps_summary"
+            android:max="200"
+            settings:min="5"
+            android:defaultValue="200" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ichthys_statusbar_category"
+        android:title="@string/ichthys_statusbar_category">
+
+        <!-- Status bar weather (OmniJaws) -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="status_bar_weather"
+            android:icon="@drawable/ic_weather"
+            android:title="@string/status_bar_weather_title"
+            android:summary="%s"
+            android:entries="@array/status_bar_weather_entries"
+            android:entryValues="@array/status_bar_weather_values"
+            android:defaultValue="0" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

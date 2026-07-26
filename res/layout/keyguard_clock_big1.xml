@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS custom lockscreen clock: Big Bold. Mirrors KeyguardCustomClockView.buildBig(). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/clock_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|top"
+    android:gravity="center_horizontal|top"
+    android:orientation="vertical">
+
+    <TextClock
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tag="text1|nolineheight"
+        android:fontFamily="sans-serif-black"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:textColor="#FFFFFFFF"
+        android:textSize="64sp"
+        android:format12Hour="hh:mm"
+        android:format24Hour="HH:mm" />
+
+    <TextClock
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tag="text2"
+        android:fontFamily="sans-serif"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:textColor="#FFFFFFFF"
+        android:textSize="13sp"
+        android:format12Hour="EEEE, MMMM d"
+        android:format24Hour="EEEE, MMMM d" />
+
+</LinearLayout>
