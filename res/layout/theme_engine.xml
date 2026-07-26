@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS Theme Engine.
+
+     The whole screen is ONE RecyclerView (like NavbarStyles' item_view.xml,
+     which works). The palette-style/pitch-black controls and the section
+     labels are full-span grid items (see ThemeEngine.AccentAdapter), so there
+     are no sibling header views for the PreferenceFragmentCompat recycler
+     management to fight with (that was overlapping the grid onto the header). -->
+<androidx.recyclerview.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/recycler_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="16dp"
+    android:scrollbars="vertical" />

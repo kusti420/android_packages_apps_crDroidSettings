@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Search-index stub for the ThemeEngine fragment. ThemeEngine renders a
+     custom RecyclerView layout (res/layout/theme_engine.xml) rather than a
+     PreferenceScreen, but BaseSearchIndexProvider needs an xml resource and,
+     more importantly, referencing this provider keeps the fragment class from
+     being stripped by R8. Keep this minimal.
+-->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/theme_engine_title">
+
+    <Preference
+        android:key="theme_engine"
+        android:title="@string/theme_engine_title"
+        android:summary="@string/theme_engine_summary" />
+
+</PreferenceScreen>

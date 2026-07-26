@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS: red stateful danger card. SettingsPreferenceGroupAdapter sets
+     state_single/first/middle/last via DrawableStateLayout.extraDrawableState. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_single="true" android:drawable="@drawable/ichthys_danger_bg_single" />
+    <item android:state_first="true"  android:drawable="@drawable/ichthys_danger_bg_top" />
+    <item android:state_middle="true" android:drawable="@drawable/ichthys_danger_bg_center" />
+    <item android:state_last="true"   android:drawable="@drawable/ichthys_danger_bg_bottom" />
+    <item android:drawable="@drawable/ichthys_danger_bg_single" />
+</selector>

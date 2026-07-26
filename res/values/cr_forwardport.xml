@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Custom Options forward-port (A16 -> A17): resources that crDroidSettings
+     references but that live in crDroid's Settings/SettingsLib forks (which we
+     don't have) or were dropped from AOSP's base values on A17. Re-declared here
+     so the merged Settings resource set links.
+-->
+<resources>
+
+    <!-- Dropped from AOSP A17 Settings base values (only translations remain). -->
+    <string name="doze_always_on_title">Always show time and info</string>
+
+    <!-- crDroid Settings-fork strings not present in this checkout. -->
+    <string name="clock_font_size_title">Clock font size</string>
+    <string name="disabled">Disabled</string>
+
+    <!-- crDroid SettingsLib-fork colored-button colors (appcompat-derived).
+         Mapped onto the AOSP SettingsLib material roles. -->
+    <color name="settingslib_btn_colored_background_material">@color/settingslib_materialColorPrimary</color>
+    <color name="settingslib_btn_colored_text_material">@color/settingslib_materialColorOnPrimary</color>
+
+</resources>
