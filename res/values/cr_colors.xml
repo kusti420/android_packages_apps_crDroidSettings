@@ -16,7 +16,12 @@
 -->
 <resources>
 
-    <color name="homepage_crdroid_background">@android:color/system_accent1_300</color>
+    <!-- IchthysOS: homepage tile colors for the settings entry. The expressive homepage draws every
+         top-level row's icon on a fixed pastel tile (see Settings res/values/colors.xml), so use the
+         same palette pair here instead of a system_accent tone that would drift with the wallpaper
+         and read differently from every neighbouring row. -->
+    <color name="homepage_crdroid_background">@color/homepage_purple_bg</color>
+    <color name="homepage_crdroid_foreground">@color/homepage_purple_fg</color>
 
     <color name="option_border_default">#5f6368</color>
 
