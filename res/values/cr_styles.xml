@@ -48,19 +48,27 @@
         <item name="tabSelectedTextColor">?android:attr/textColorPrimary</item>
 
         <item name="tabIndicatorFullWidth">false</item>
-        <item name="tabRippleColor">@android:color/system_accent1_200</item>
+        <!-- IchthysOS: these were pinned to fixed accent1 tones (200/300), which are light-theme
+             tones; in dark mode they came out as a mid tone that does not match anything else on
+             screen. Use the theme's accent/highlight so the tab strip follows the system palette in
+             both light and dark. -->
+        <item name="tabRippleColor">?android:attr/colorControlHighlight</item>
 
         <item name="tabIndicatorHeight">5dp</item>
-        <item name="tabIndicatorColor">@android:color/system_accent1_300</item>
+        <item name="tabIndicatorColor">?android:attr/colorAccent</item>
         <item name="tabInlineLabel">true</item>
         <item name="tabMode">scrollable</item>
 
     </style>
 
+    <!-- IchthysOS: accent1_600 is the LIGHT-theme accent tone and this overlay has no values-night
+         counterpart, so in dark mode the app bar resolved its accent to a dark tone that clashed
+         with the rest of the system. Follow the theme accent instead, which DeviceDefault already
+         swaps per light/dark. -->
     <style name="CrDroidMaterialOverlay" parent="ThemeOverlay.MaterialComponents">
-        <item name="colorAccent">@android:color/system_accent1_600</item>
-        <item name="colorPrimary">@android:color/system_accent1_600</item>
-        <item name="colorSecondary">@android:color/system_accent1_600</item>
+        <item name="colorAccent">?android:attr/colorAccent</item>
+        <item name="colorPrimary">?android:attr/colorAccent</item>
+        <item name="colorSecondary">?android:attr/colorAccent</item>
     </style>
 
     <style name="op_control_text_style_base">
