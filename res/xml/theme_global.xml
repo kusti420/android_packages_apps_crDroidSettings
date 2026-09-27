@@ -19,6 +19,15 @@
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
     android:title="@string/theme_global_title">
 
+    <!-- IchthysOS Theme Studio: presets, shapes, fonts, layouts and the ichthys.nix
+         import / export / generations (tracker#50). -->
+    <Preference
+        android:key="theme_studio"
+        android:icon="@drawable/ic_color_bucket"
+        android:title="@string/theme_studio_title"
+        android:summary="@string/theme_studio_summary"
+        android:fragment="com.crdroid.settings.fragments.themes.ThemeStudio" />
+
     <!-- IchthysOS Theme Engine (8.1/Substratum-inspired accent palette + custom picker).
          Built as a dedicated fragment (com.crdroid.settings.fragments.themes.ThemeEngine),
          NOT the stock Monet UI. -->

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <!-- IchthysOS Theme Studio (ichthys.nix front end, tracker#50) -->
+    <string name="theme_studio_title">Theme Studio</string>
+    <string name="theme_studio_summary">Presets, shapes, fonts and layouts. Import, export and roll back the whole OS config</string>
+    <string name="theme_studio_look_category">Look</string>
+    <string name="theme_studio_preset_title">Preset</string>
+    <string name="theme_studio_preset_none">None</string>
+    <string name="theme_studio_accent_title">Accent and palette</string>
+    <string name="theme_studio_radius_title">Corner radius</string>
+    <string name="theme_studio_radius_default">System default</string>
+    <string name="theme_studio_shape_title">Corner style</string>
+    <string name="theme_studio_font_title">System font</string>
+    <string name="theme_studio_font_default">Default</string>
+    <string name="theme_studio_layout_category">Layout</string>
+    <string name="theme_studio_statusbar_title">Status bar icons</string>
+    <string name="theme_studio_qs_title">Quick settings tiles</string>
+    <string name="theme_studio_config_category">ichthys.nix</string>
+    <string name="theme_studio_import_title">Import config</string>
+    <string name="theme_studio_import_summary">Load an ichthys.nix, review the changes, then apply</string>
+    <string name="theme_studio_export_title">Export config</string>
+    <string name="theme_studio_export_summary">Save the current setup as ichthys.nix</string>
+    <string name="theme_studio_generations_title">Generations</string>
+    <string name="theme_studio_generations_summary">Every change is a generation. Roll back to any of them</string>
+    <string name="theme_studio_generations_current">Generation %1$d is current</string>
+    <string name="theme_studio_unavailable">The configuration service isn\'t running</string>
+    <string name="theme_studio_review_title">Review changes</string>
+    <string name="theme_studio_apply">Replace</string>
+    <string name="theme_studio_merge">Merge</string>
+    <string name="theme_studio_review_hint">Replace: options the file doesn\'t set go back to defaults. Merge: only the options it sets change.</string>
+    <string name="theme_studio_no_changes">The config matches the current setup</string>
+    <string name="theme_studio_applied">Applied as generation %1$d</string>
+    <string name="theme_studio_error">Couldn\'t apply: %1$s</string>
+    <string name="theme_studio_exported">Config exported</string>
+    <string name="theme_studio_rollback_title">Roll back to generation %1$d?</string>
+    <string name="theme_studio_rollback">Roll back</string>
+    <string name="theme_studio_restart_hint">Some changes show after SystemUI restarts</string>
+
+    <string-array name="theme_studio_radius_entries" translatable="false">
+        <item>@string/theme_studio_radius_default</item>
+        <item>4 dp</item>
+        <item>8 dp</item>
+        <item>12 dp</item>
+        <item>16 dp</item>
+        <item>18 dp</item>
+        <item>22 dp</item>
+        <item>28 dp</item>
+        <item>32 dp</item>
+    </string-array>
+    <string-array name="theme_studio_radius_values" translatable="false">
+        <item>null</item>
+        <item>4</item>
+        <item>8</item>
+        <item>12</item>
+        <item>16</item>
+        <item>18</item>
+        <item>22</item>
+        <item>28</item>
+        <item>32</item>
+    </string-array>
+    <string-array name="theme_studio_shape_entries">
+        <item>Rounded</item>
+        <item>Pill</item>
+        <item>Squircle</item>
+    </string-array>
+    <string-array name="theme_studio_shape_values" translatable="false">
+        <item>rounded</item>
+        <item>pill</item>
+        <item>squircle</item>
+    </string-array>
+    <string-array name="theme_studio_statusbar_entries">
+        <item>One row</item>
+        <item>Zig-zag lattice</item>
+    </string-array>
+    <string-array name="theme_studio_statusbar_values" translatable="false">
+        <item>single</item>
+        <item>zigzag</item>
+    </string-array>
+    <string-array name="theme_studio_qs_entries">
+        <item>Grid</item>
+        <item>Shoal (honeycomb)</item>
+    </string-array>
+    <string-array name="theme_studio_qs_values" translatable="false">
+        <item>grid</item>
+        <item>shoal</item>
+    </string-array>
+</resources>

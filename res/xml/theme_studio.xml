@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- IchthysOS Theme Studio. Nothing here is persisted by the preference itself: every change is
+     applied through IchthysConfigService (ichthys.nix, merge mode) so it lands in a generation. -->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/theme_studio_title">
+
+    <PreferenceCategory
+        android:key="theme_studio_look"
+        android:title="@string/theme_studio_look_category">
+
+        <ListPreference
+            android:key="theme_studio_preset"
+            android:icon="@drawable/ic_color_bucket"
+            android:title="@string/theme_studio_preset_title"
+            android:summary="%s"
+            android:persistent="false" />
+
+        <Preference
+            android:key="theme_studio_accent"
+            android:icon="@drawable/ic_format_paint"
+            android:title="@string/theme_studio_accent_title"
+            android:fragment="com.crdroid.settings.fragments.themes.ThemeEngine" />
+
+        <ListPreference
+            android:key="theme_studio_radius"
+            android:icon="@drawable/ic_shapes"
+            android:title="@string/theme_studio_radius_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_radius_entries"
+            android:entryValues="@array/theme_studio_radius_values"
+            android:persistent="false" />
+
+        <ListPreference
+            android:key="theme_studio_shape"
+            android:icon="@drawable/ic_shapes"
+            android:title="@string/theme_studio_shape_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_shape_entries"
+            android:entryValues="@array/theme_studio_shape_values"
+            android:persistent="false" />
+
+        <ListPreference
+            android:key="theme_studio_font"
+            android:icon="@drawable/ic_font"
+            android:title="@string/theme_studio_font_title"
+            android:summary="%s"
+            android:persistent="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="theme_studio_layout"
+        android:title="@string/theme_studio_layout_category">
+
+        <ListPreference
+            android:key="theme_studio_statusbar"
+            android:icon="@drawable/ic_grid_view"
+            android:title="@string/theme_studio_statusbar_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_statusbar_entries"
+            android:entryValues="@array/theme_studio_statusbar_values"
+            android:persistent="false" />
+
+        <ListPreference
+            android:key="theme_studio_qs"
+            android:icon="@drawable/ic_qs_tile"
+            android:title="@string/theme_studio_qs_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_qs_entries"
+            android:entryValues="@array/theme_studio_qs_values"
+            android:persistent="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="theme_studio_config"
+        android:title="@string/theme_studio_config_category">
+
+        <Preference
+            android:key="theme_studio_import"
+            android:icon="@drawable/ic_backup"
+            android:title="@string/theme_studio_import_title"
+            android:summary="@string/theme_studio_import_summary" />
+
+        <Preference
+            android:key="theme_studio_export"
+            android:icon="@drawable/ic_backup"
+            android:title="@string/theme_studio_export_title"
+            android:summary="@string/theme_studio_export_summary" />
+
+        <Preference
+            android:key="theme_studio_generations"
+            android:icon="@drawable/ic_backup"
+            android:title="@string/theme_studio_generations_title"
+            android:summary="@string/theme_studio_generations_summary" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
