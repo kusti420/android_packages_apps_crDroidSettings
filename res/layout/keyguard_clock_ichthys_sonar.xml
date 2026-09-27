@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS lock screen clock, Sonar: hour and minute arcs. The face is drawn by SettingsLib's
+     com.android.settingslib.ichthys.clock.SonarArcsClockView; SystemUI's KeyguardCustomClockView inflates this
+     same layout and feeds it colours, options and doze state. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/clock_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|top"
+    android:gravity="center_horizontal|top"
+    android:orientation="vertical">
+
+    <com.android.settingslib.ichthys.clock.SonarArcsClockView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

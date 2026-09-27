@@ -58,6 +58,7 @@ public class LockScreen extends SettingsPreferenceFragment
     private static final String KEY_WEATHER = "lockscreen_weather_enabled";
     private static final String KEY_UDFPS_ANIMATIONS = "udfps_recognizing_animation_preview";
     private static final String KEY_UDFPS_ICONS = "udfps_icon_picker";
+    private static final String KEY_FP_EFFECTS = "ichthys_fingerprint_effects";
 
     private static final String KEY_FP_SUCCESS = "fp_success_vibrate";
     private static final String KEY_FP_ERROR = "fp_error_vibrate";
@@ -88,6 +89,7 @@ public class LockScreen extends SettingsPreferenceFragment
 
         boolean hasFingerprint = DeviceUtils.hasFingerprint(context);
         if (!hasFingerprint) {
+            gestCategory.removePreference(findPreference(KEY_FP_EFFECTS));
             gestCategory.removePreference(mUdfpsAnimations);
             gestCategory.removePreference(mUdfpsIcons);
             gestCategory.removePreference(mRippleEffect);
@@ -155,6 +157,13 @@ public class LockScreen extends SettingsPreferenceFragment
                 Settings.System.LOCKSCREEN_WEATHER_WIND_INFO, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
                 Settings.System.LOCKSCREEN_WEATHER_HUMIDITY_INFO, 0, UserHandle.USER_CURRENT);
+        // IchthysOS: options of the drawn lock screen clock faces.
+        Settings.Secure.putIntForUser(resolver, "ichthys_clock_show_date", 1,
+                UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(resolver, "ichthys_clock_dot_shape", 0,
+                UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(resolver, "ichthys_clock_unlit_dots", 1,
+                UserHandle.USER_CURRENT);
         PulseSettings.reset(mContext);
         MediaArtSettings.reset(mContext);
         UdfpsAnimation.Companion.reset(mContext);

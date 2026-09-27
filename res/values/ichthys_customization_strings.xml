@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS: lock screen clock faces and extra customization options. -->
+<resources>
+    <!-- Drawn clock faces -->
+    <string name="ichthys_clock_show_date_title">Show date</string>
+    <string name="ichthys_clock_show_date_summary">Draw the date on faces that have room for it</string>
+    <string name="ichthys_clock_dot_shape_title">Dot shape</string>
+    <string name="ichthys_clock_unlit_dots_title">Show unlit dots</string>
+    <string name="ichthys_clock_unlit_dots_summary">Draw the unused dots and letters faintly. Always hidden on the always-on display</string>
+
+    <string-array name="ichthys_clock_dot_shape_entries" translatable="false">
+        <item>Round</item>
+        <item>Square</item>
+        <item>Diamond</item>
+    </string-array>
+    <string-array name="ichthys_clock_dot_shape_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+</resources>

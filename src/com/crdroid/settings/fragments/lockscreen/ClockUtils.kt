@@ -78,6 +78,19 @@ object ClockUtils {
         R.layout.keyguard_clock_samurai, // 65
         R.layout.keyguard_clock_gateway, // 66
         R.layout.keyguard_clock_tall, // 67
+        // IchthysOS "Shoal" faces; indices mirrored in SystemUI KeyguardCustomClockView.
+        R.layout.keyguard_clock_ichthys_shoal, // 68
+        R.layout.keyguard_clock_ichthys_dotmatrix, // 69
+        R.layout.keyguard_clock_ichthys_binary, // 70
+        R.layout.keyguard_clock_ichthys_ring, // 71
+        R.layout.keyguard_clock_ichthys_radar, // 72
+        R.layout.keyguard_clock_ichthys_sonar, // 73
+        R.layout.keyguard_clock_ichthys_dayprogress, // 74
+        R.layout.keyguard_clock_ichthys_wordgrid, // 75
+        R.layout.keyguard_clock_ichthys_stacked, // 76
+        R.layout.keyguard_clock_ichthys_split, // 77
+        R.layout.keyguard_clock_ichthys_typo, // 78
+        R.layout.keyguard_clock_ichthys_oneui, // 79
     )
 
     fun getClockNames(): Array<String> {
@@ -150,6 +163,18 @@ object ClockUtils {
             "Samurai",
             "Gateway",
             "Tall clock",
+            "Shoal Lattice",
+            "Dot Matrix",
+            "Binary",
+            "Analog Ring",
+            "Radar",
+            "Sonar",
+            "Day Progress",
+            "Word Grid",
+            "Stacked Bold",
+            "Vertical Split",
+            "Typographic",
+            "One UI Stacked",
         )
     }
 }
