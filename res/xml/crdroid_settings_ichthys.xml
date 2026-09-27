@@ -47,13 +47,9 @@
             android:entryValues="@array/recents_type_values"
             android:defaultValue="0" />
 
-        <!-- Slim Recents tuning (only relevant when recents_type = Slim) -->
-        <Preference
-            android:key="slim_recents_settings"
-            android:icon="@drawable/ic_memory"
-            android:title="@string/slim_recents_title"
-            android:summary="@string/slim_recents_summary"
-            android:fragment="com.crdroid.settings.fragments.recents.SlimRecents" />
+        <!-- Slim Recents tuning page removed: SystemUI's Slim recents reads none of the
+             recent_panel_* / slim_* keys (they are only declared in Settings.java), so every
+             option on it was a no-op. The Slim style itself uses its built-in defaults. -->
 
     </PreferenceCategory>
 
