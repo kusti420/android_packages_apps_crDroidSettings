@@ -72,6 +72,16 @@
             android:persistent="false" />
 
         <ListPreference
+            android:key="theme_studio_icon_style"
+            android:icon="@drawable/ic_grid_view"
+            android:title="@string/theme_studio_icon_style_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_icon_style_entries"
+            android:entryValues="@array/theme_studio_icon_style_values"
+            android:dependency="theme_studio_badges"
+            android:persistent="false" />
+
+        <ListPreference
             android:key="theme_studio_font"
             android:icon="@drawable/ic_font"
             android:title="@string/theme_studio_font_title"

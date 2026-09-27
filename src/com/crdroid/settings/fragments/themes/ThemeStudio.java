@@ -79,6 +79,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
     private static final String KEY_QS = "theme_studio_qs";
     private static final String KEY_SURFACE = "theme_studio_surface";
     private static final String KEY_BADGES = "theme_studio_badges";
+    private static final String KEY_ICON_STYLE = "theme_studio_icon_style";
     private static final String KEY_IMPORT = "theme_studio_import";
     private static final String KEY_EXPORT = "theme_studio_export";
     private static final String KEY_GENERATIONS = "theme_studio_generations";
@@ -100,7 +101,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
         mService = IIchthysConfig.Stub.asInterface(ServiceManager.getService("ichthys_config"));
 
         for (String key : new String[] {KEY_PRESET, KEY_RADIUS, KEY_SHAPE, KEY_FONT,
-                KEY_STATUSBAR, KEY_QS, KEY_SURFACE, KEY_BADGES}) {
+                KEY_STATUSBAR, KEY_QS, KEY_SURFACE, KEY_BADGES, KEY_ICON_STYLE}) {
             final Preference p = findPreference(key);
             if (p != null) {
                 p.setOnPreferenceChangeListener(this);
@@ -231,6 +232,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 }
                 setValue(KEY_PRESET, live.get("theme.preset"), "koi");
                 setValue(KEY_SURFACE, live.get("theme.surface"), "hairline");
+                setValue(KEY_ICON_STYLE, live.get("theme.iconStyle"), "mono");
                 final androidx.preference.TwoStatePreference badges = findPreference(KEY_BADGES);
                 if (badges != null) {
                     badges.setChecked(!Boolean.FALSE.equals(live.get("theme.iconBadges")));
@@ -294,6 +296,10 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 break;
             case KEY_SURFACE:
                 path = "theme.surface";
+                value = v;
+                break;
+            case KEY_ICON_STYLE:
+                path = "theme.iconStyle";
                 value = v;
                 break;
             case KEY_BADGES:
