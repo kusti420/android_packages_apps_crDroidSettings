@@ -79,5 +79,11 @@ public class SlimRecents extends SettingsPreferenceFragment {
     }
 
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
-            new BaseSearchIndexProvider(R.xml.slim_recents_settings);
+            new BaseSearchIndexProvider(R.xml.slim_recents_settings) {
+                // IchthysOS: no longer linked (its keys have no consumer); keep it out of search.
+                @Override
+                protected boolean isPageSearchEnabled(android.content.Context context) {
+                    return false;
+                }
+            };
 }
