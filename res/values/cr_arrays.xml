@@ -254,26 +254,41 @@
          icon in the unified battery, and landscape/rlandscape/filled-circle/hidden (values 4-7)
          are rejected outright by STATUS_BAR_BATTERY_STYLE_VALIDATOR (InclusiveIntegerRange 0-3).
          Only expose the values that actually take effect and render distinctly. -->
+    <!-- IchthysOS: every style is drawn by SystemUI's UnifiedBattery / IchthysBatteryStyles
+         (tracker#37). Values are LineageSettings STATUS_BAR_BATTERY_STYLE; 4-6 are IchthysOS. -->
     <string-array name="status_bar_battery_style_entries" translatable="false">
-        <item>@string/status_bar_battery_style_icon_portrait</item>
+        <item>@string/ichthys_battery_style_classic</item>
+        <item>@string/ichthys_battery_style_landscape</item>
+        <item>@string/status_bar_battery_style_circle</item>
+        <item>@string/status_bar_battery_style_dotted_circle</item>
+        <item>@string/status_bar_battery_style_filled_circle</item>
         <item>@string/status_bar_battery_style_text</item>
+        <item>@string/status_bar_battery_style_hidden</item>
     </string-array>
 
     <string-array name="status_bar_battery_style_values" translatable="false">
         <item>0</item>
+        <item>4</item>
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
         <item>2</item>
+        <item>6</item>
     </string-array>
 
     <string-array name="status_bar_battery_percent_entries" translatable="false">
         <item>@string/status_bar_battery_percent_hidden</item>
         <item>@string/status_bar_battery_percent_text_inside</item>
-        <item>@string/status_bar_battery_percent_text_next</item>
+        <item>@string/status_bar_battery_percent_text_next_left</item>
+        <item>@string/status_bar_battery_percent_text_next_right</item>
     </string-array>
 
+    <!-- IchthysOS: 3 = next to the icon, on its right -->
     <string-array name="status_bar_battery_percent_values" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
     </string-array>
 
     <!-- Quick settings - Battery percent. Same values as the status bar array, plus -1 = leave the
@@ -282,7 +297,8 @@
         <item>@string/qs_battery_percent_default</item>
         <item>@string/status_bar_battery_percent_hidden</item>
         <item>@string/status_bar_battery_percent_text_inside</item>
-        <item>@string/status_bar_battery_percent_text_next</item>
+        <item>@string/status_bar_battery_percent_text_next_left</item>
+        <item>@string/status_bar_battery_percent_text_next_right</item>
     </string-array>
 
     <string-array name="qs_show_battery_percent_values" translatable="false">
@@ -290,6 +306,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
     </string-array>
 
     <!-- Status bar - Battery Bar -->
@@ -306,11 +323,12 @@
     </string-array>
 
     <!-- QS battery style  -->
+    <!-- IchthysOS: QS header style override, same values as status_bar_battery_style_values
+         (tracker#37); -1 follows the status bar. -->
     <string-array name="qs_battery_style_entries" translatable="false">
         <item>@string/qs_use_status_bar_battery_style</item>
-        <item>@string/status_bar_battery_style_icon_portrait</item> 
-        <item>@string/status_bar_battery_style_icon_rlandscape</item> 
-        <item>@string/status_bar_battery_style_icon_landscape</item> 
+        <item>@string/ichthys_battery_style_classic</item>
+        <item>@string/ichthys_battery_style_landscape</item>
         <item>@string/status_bar_battery_style_circle</item>
         <item>@string/status_bar_battery_style_dotted_circle</item>
         <item>@string/status_bar_battery_style_filled_circle</item>
@@ -321,13 +339,37 @@
     <string-array name="qs_battery_style_values" translatable="false">
         <item>-1</item>
         <item>0</item>
+        <item>4</item>
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>2</item>
         <item>6</item>
-        <item>7</item>
+    </string-array>
+
+    <!-- IchthysOS: battery icon color modes (tracker#37) -->
+    <string-array name="ichthys_battery_fill_mode_entries" translatable="false">
+        <item>@string/ichthys_battery_fill_mode_tint</item>
+        <item>@string/ichthys_battery_fill_mode_custom</item>
+        <item>@string/ichthys_battery_fill_mode_accent</item>
+    </string-array>
+
+    <string-array name="ichthys_battery_fill_mode_values" translatable="false">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
+    </string-array>
+
+    <string-array name="ichthys_battery_state_colors_entries" translatable="false">
+        <item>@string/ichthys_battery_state_colors_off</item>
+        <item>@string/ichthys_battery_state_colors_theme</item>
+        <item>@string/ichthys_battery_state_colors_custom</item>
+    </string-array>
+
+    <string-array name="ichthys_battery_state_colors_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
 
     <!-- Network Traffic -->

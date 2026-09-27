@@ -46,6 +46,7 @@ import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.fragments.statusbar.BatteryBar;
+import com.crdroid.settings.fragments.statusbar.BatteryIcon;
 import com.crdroid.settings.fragments.statusbar.Clock;
 import com.crdroid.settings.fragments.statusbar.DynamicBar;
 import com.crdroid.settings.fragments.statusbar.NetworkTrafficSettings;
@@ -246,6 +247,7 @@ public class StatusBar extends SettingsPreferenceFragment implements
                 Settings.System.LOCKSCREEN_SHOW_CUSTOM_CARRIER_TEXT, "", UserHandle.USER_CURRENT);
 
         BatteryBar.reset(mContext);
+        BatteryIcon.reset(mContext);
         Clock.reset(mContext);
         DynamicBar.Companion.reset(mContext);
         NetworkTrafficSettings.reset(mContext);

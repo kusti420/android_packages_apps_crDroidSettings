@@ -526,6 +526,40 @@
     <string name="status_bar_battery_percent_text_next">Next to the icon</string> 
     <string name="status_bar_battery_percent_text_next_right">Next to the icon (right)</string> 
     <string name="status_bar_battery_percent_text_next_left">Next to the icon (left)</string> 
+
+    <!-- IchthysOS: battery icon options (tracker#37) -->
+    <string name="ichthys_battery_style_classic">Classic (upright)</string>
+    <string name="ichthys_battery_style_landscape">Landscape (pill)</string>
+    <string name="ichthys_battery_icon_title">Battery icon</string>
+    <string name="ichthys_battery_icon_summary">Size, colors, charging and saver indicators</string>
+    <string name="ichthys_battery_icon_look_category">Icon</string>
+    <string name="ichthys_battery_icon_percent_category">Percentage</string>
+    <string name="ichthys_battery_icon_colors_category">Colors</string>
+    <string name="ichthys_battery_scale_title">Icon size</string>
+    <string name="ichthys_battery_frame_thickness_title">Frame thickness</string>
+    <string name="ichthys_battery_frame_thickness_summary">Outline of the classic icon and ring of the circle styles</string>
+    <string name="ichthys_battery_charging_indicator_title">Charging bolt</string>
+    <string name="ichthys_battery_charging_indicator_summary">Show a bolt in the icon while charging</string>
+    <string name="ichthys_battery_powersave_indicator_title">Battery saver mark</string>
+    <string name="ichthys_battery_powersave_indicator_summary">Show a plus in the icon while battery saver is on</string>
+    <string name="ichthys_battery_percent_charging_only_title">Only while charging</string>
+    <string name="ichthys_battery_percent_charging_only_summary">Hide the percentage unless the phone is charging</string>
+    <string name="ichthys_battery_percent_bold_title">Bold percentage</string>
+    <string name="ichthys_battery_percent_bold_summary">Use a bold font for the percentage next to the icon</string>
+    <string name="ichthys_battery_fill_mode_title">Icon color</string>
+    <string name="ichthys_battery_fill_mode_tint">Match status bar icons</string>
+    <string name="ichthys_battery_fill_mode_custom">Custom color</string>
+    <string name="ichthys_battery_fill_mode_accent">System accent</string>
+    <string name="ichthys_battery_fill_color_title">Custom icon color</string>
+    <string name="ichthys_battery_state_colors_title">Charging, saver and low colors</string>
+    <string name="ichthys_battery_state_colors_off">Off (always icon color)</string>
+    <string name="ichthys_battery_state_colors_theme">Default (green, yellow, red)</string>
+    <string name="ichthys_battery_state_colors_custom">Custom colors</string>
+    <string name="ichthys_battery_charging_color_title">Charging color</string>
+    <string name="ichthys_battery_powersave_color_title">Battery saver color</string>
+    <string name="ichthys_battery_low_color_title">Low battery color</string>
+    <string name="ichthys_battery_low_level_title">Low battery level</string>
+    <string name="ichthys_battery_low_level_summary">At or below this level the icon uses the low battery color</string>
     <string name="status_bar_battery_text_charging_title">Battery percentage when charging</string>
     <string name="status_bar_battery_text_charging_summary">Always display battery percentage when charging</string>
 

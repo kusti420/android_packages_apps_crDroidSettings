@@ -208,6 +208,14 @@
             android:summary="@string/status_bar_battery_text_charging_summary"
             android:defaultValue="true" />
 
+        <!-- IchthysOS: icon size, colors and indicators (tracker#37) -->
+        <Preference
+            android:key="battery_icon"
+            android:icon="@drawable/ic_battery"
+            android:title="@string/ichthys_battery_icon_title"
+            android:summary="@string/ichthys_battery_icon_summary"
+            android:fragment="com.crdroid.settings.fragments.statusbar.BatteryIcon" />
+
         <Preference
             android:key="batterybar"
             android:icon="@drawable/ic_car_battery"
