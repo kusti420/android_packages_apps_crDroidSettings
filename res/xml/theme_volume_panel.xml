@@ -20,7 +20,7 @@
     android:title="@string/theme_volume_panel_title">
 
     <!-- Premade volume slider looks. Backend: Settings.System "volume_panel_style", read by the
-         SystemUI volume dialog to swap the slider rendering. 0 = Default (AOSP), 1 = One UI. -->
+         SystemUI volume dialog to swap the slider rendering. 0 = Default (AOSP), 1 = One UI (IchthysOS default). -->
     <com.crdroid.settings.preferences.SystemSettingListPreference
         android:key="volume_panel_style"
         android:icon="@drawable/ic_volume_vibrate"
@@ -28,6 +28,6 @@
         android:summary="%s"
         android:entries="@array/volume_panel_style_entries"
         android:entryValues="@array/volume_panel_style_values"
-        android:defaultValue="0" />
+        android:defaultValue="1" />
 
 </PreferenceScreen>
