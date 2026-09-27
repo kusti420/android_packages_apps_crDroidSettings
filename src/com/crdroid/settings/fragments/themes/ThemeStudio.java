@@ -77,6 +77,8 @@ public class ThemeStudio extends SettingsPreferenceFragment
     private static final String KEY_FONT = "theme_studio_font";
     private static final String KEY_STATUSBAR = "theme_studio_statusbar";
     private static final String KEY_QS = "theme_studio_qs";
+    private static final String KEY_SURFACE = "theme_studio_surface";
+    private static final String KEY_BADGES = "theme_studio_badges";
     private static final String KEY_IMPORT = "theme_studio_import";
     private static final String KEY_EXPORT = "theme_studio_export";
     private static final String KEY_GENERATIONS = "theme_studio_generations";
@@ -98,7 +100,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
         mService = IIchthysConfig.Stub.asInterface(ServiceManager.getService("ichthys_config"));
 
         for (String key : new String[] {KEY_PRESET, KEY_RADIUS, KEY_SHAPE, KEY_FONT,
-                KEY_STATUSBAR, KEY_QS}) {
+                KEY_STATUSBAR, KEY_QS, KEY_SURFACE, KEY_BADGES}) {
             final Preference p = findPreference(key);
             if (p != null) {
                 p.setOnPreferenceChangeListener(this);
@@ -227,7 +229,12 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 if (!isAdded()) {
                     return;
                 }
-                setValue(KEY_PRESET, live.get("theme.preset"), "none");
+                setValue(KEY_PRESET, live.get("theme.preset"), "koi");
+                setValue(KEY_SURFACE, live.get("theme.surface"), "hairline");
+                final androidx.preference.TwoStatePreference badges = findPreference(KEY_BADGES);
+                if (badges != null) {
+                    badges.setChecked(!Boolean.FALSE.equals(live.get("theme.iconBadges")));
+                }
                 setValue(KEY_RADIUS, live.get("theme.shape.radius"), NULL);
                 setValue(KEY_SHAPE, live.get("theme.shape.style"), "rounded");
                 setValue(KEY_FONT, live.get("theme.font.body"), NULL);
@@ -241,7 +248,11 @@ public class ThemeStudio extends SettingsPreferenceFragment
     }
 
     private void setValue(String key, Object value, String fallback) {
-        final ListPreference p = findPreference(key);
+        final Preference found = findPreference(key);
+        if (!(found instanceof ListPreference)) {
+            return;
+        }
+        final ListPreference p = (ListPreference) found;
         if (p == null) {
             return;
         }
@@ -280,6 +291,14 @@ public class ThemeStudio extends SettingsPreferenceFragment
             case KEY_QS:
                 path = "quickSettings.style";
                 value = v;
+                break;
+            case KEY_SURFACE:
+                path = "theme.surface";
+                value = v;
+                break;
+            case KEY_BADGES:
+                path = "theme.iconBadges";
+                value = (Boolean) newValue;
                 break;
             default:
                 return false;

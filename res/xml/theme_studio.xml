@@ -56,6 +56,22 @@
             android:persistent="false" />
 
         <ListPreference
+            android:key="theme_studio_surface"
+            android:icon="@drawable/ic_shapes"
+            android:title="@string/theme_studio_surface_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_surface_entries"
+            android:entryValues="@array/theme_studio_surface_values"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="theme_studio_badges"
+            android:icon="@drawable/ic_grid_view"
+            android:title="@string/theme_studio_badges_title"
+            android:summary="@string/theme_studio_badges_summary"
+            android:persistent="false" />
+
+        <ListPreference
             android:key="theme_studio_font"
             android:icon="@drawable/ic_font"
             android:title="@string/theme_studio_font_title"

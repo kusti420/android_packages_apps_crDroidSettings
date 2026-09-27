@@ -38,6 +38,23 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
 
     private var pager: ViewPager2? = null
     private var tabs: TabLayout? = null
+
+    private val shoalBadger =
+        object : androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
+            override fun onFragmentViewCreated(
+                fm: androidx.fragment.app.FragmentManager,
+                f: Fragment,
+                v: View,
+                savedInstanceState: Bundle?,
+            ) {
+                val page = f as? androidx.preference.PreferenceFragmentCompat ?: return
+                val color =
+                    if (f is IchthysOS) com.android.settings.ichthys.ShoalStyle.accent(v.context)
+                    else com.android.settings.ichthys.ShoalStyle.hue(
+                        TAB_FRAGMENTS.indexOf(f.javaClass))
+                com.android.settings.ichthys.ShoalStyle.badgeAll(page.preferenceScreen, color)
+            }
+        }
     private var mediator: TabLayoutMediator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,6 +107,11 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
         pager!!.adapter = adapter
         pager!!.offscreenPageLimit = 1
 
+        // IchthysOS Shoal: every tab page's row icons become outlined badges, one hue per tab
+        // (the IchthysOS tab takes the accent). Done here, once per page view, instead of in each
+        // page fragment.
+        childFragmentManager.registerFragmentLifecycleCallbacks(shoalBadger, false)
+
         mediator = TabLayoutMediator(tabs!!, pager!!) { tab, position ->
             tab.setText(TAB_TITLES[position])
         }.also { it.attach() }
@@ -98,6 +120,7 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
     }
 
     override fun onDestroyView() {
+        childFragmentManager.unregisterFragmentLifecycleCallbacks(shoalBadger)
         mediator?.detach()
         mediator = null
         pager = null
@@ -166,6 +189,14 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
             R.string.misc_title,
             R.string.ichthys_title,
             R.string.about_crdroid
+        )
+
+        /** Tab page classes in TAB_TITLES order (for the per-tab badge hue). */
+        private val TAB_FRAGMENTS = listOf(
+            StatusBar::class.java, QuickSettings::class.java, LockScreen::class.java,
+            Buttons::class.java, Navigation::class.java, UserInterface::class.java,
+            Notifications::class.java, Sound::class.java, Miscellaneous::class.java,
+            IchthysOS::class.java, About::class.java
         )
     }
 }

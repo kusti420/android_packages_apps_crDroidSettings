@@ -99,4 +99,16 @@
         <item>grid</item>
         <item>shoal</item>
     </string-array>
+    <!-- Shoal: surfaces and icon badges (theme.surface, theme.iconBadges) -->
+    <string name="theme_studio_surface_title">Surfaces</string>
+    <string-array name="theme_studio_surface_entries" translatable="false">
+        <item>Hairline outlines (Koi)</item>
+        <item>Tonal fills (Abyss)</item>
+    </string-array>
+    <string-array name="theme_studio_surface_values" translatable="false">
+        <item>hairline</item>
+        <item>tonal</item>
+    </string-array>
+    <string name="theme_studio_badges_title">Icon badges</string>
+    <string name="theme_studio_badges_summary">Show Settings icons as outlined, color-coded badges</string>
 </resources>
