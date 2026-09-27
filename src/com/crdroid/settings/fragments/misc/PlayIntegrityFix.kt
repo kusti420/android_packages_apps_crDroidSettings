@@ -55,7 +55,7 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
                         PIF_CONFIG_KEY,
                         normalized
                     )
-                    killPackage(VENDING_PACKAGE)
+                    restartSpoofTargets()
                     toast(getString(R.string.pif_imported_as, PIF_CONFIG_NAME))
                     refreshStatus()
                 } catch (e: Exception) {
@@ -169,6 +169,7 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
                         PIF_CONFIG_KEY,
                         null
                     )
+                    restartSpoofTargets()
                     toast(getString(R.string.pif_deleted, PIF_CONFIG_NAME))
                     refreshStatus()
                 } catch (e: Exception) {
@@ -256,7 +257,7 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
                             PIF_CONFIG_KEY,
                             result.pifData.toString(2)
                         )
-                        killPackage(VENDING_PACKAGE)
+                        restartSpoofTargets()
                         toast(getString(R.string.pif_fetched_model, result.model))
                         refreshStatus()
                     }
@@ -271,6 +272,18 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
                 fetchPref?.isEnabled = true
             }
         }
+    }
+
+    /**
+     * IchthysOS: the spoof is applied when a target process starts (PropImitationHooks), so
+     * restart every target, not just the Play Store: microG's GmsCore (where DroidGuard runs) and
+     * its separate DroidGuard helper too. Otherwise a new or deleted config only took effect on
+     * the next reboot.
+     */
+    private fun restartSpoofTargets() {
+        killPackage(VENDING_PACKAGE)
+        killPackage(GMS_PACKAGE)
+        killPackage(MICROG_DROIDGUARD_PACKAGE)
     }
 
     private fun killPackage(pkg: String) {
@@ -295,6 +308,8 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
         private const val FLASH_API = "https://content-flashstation-pa.googleapis.com/v1/builds"
         private const val PIXEL_BULLETIN_URL = "https://source.android.com/docs/security/bulletin/pixel"
         private const val VENDING_PACKAGE = "com.android.vending"
+        private const val GMS_PACKAGE = "com.google.android.gms"
+        private const val MICROG_DROIDGUARD_PACKAGE = "org.microg.gms.droidguard"
         private const val PHOTOS_PACKAGE = "com.google.android.apps.photos"
 
         private val DEVICE_MODEL_MAP = mapOf(
@@ -354,8 +369,10 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
          */
         private fun normalizePifPayload(raw: String): String {
             val trimmed = raw.trim()
-            if (trimmed.isEmpty()) return "{}"
-            if (trimmed.startsWith("{")) return trimmed
+            if (trimmed.isEmpty()) throw IllegalArgumentException("empty file")
+            // Reject malformed JSON here: storing it would leave an inert config the screen can't
+            // show or delete. JSONObject throws with a readable message.
+            if (trimmed.startsWith("{")) return JSONObject(trimmed).toString(2)
             val json = JSONObject()
             trimmed.lines().forEach { line ->
                 val stripped = line.trim()
@@ -367,6 +384,7 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
                     if (key.isNotEmpty()) json.put(key, value)
                 }
             }
+            if (json.length() == 0) throw IllegalArgumentException("no KEY=value entries found")
             return json.toString(2)
         }
 
