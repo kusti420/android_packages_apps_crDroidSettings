@@ -111,7 +111,7 @@
             android:icon="@drawable/ic_account_circle"
             android:title="@string/contacts_lockdown_title"
             android:summary="@string/contacts_lockdown_summary"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
 
     </PreferenceCategory>
 

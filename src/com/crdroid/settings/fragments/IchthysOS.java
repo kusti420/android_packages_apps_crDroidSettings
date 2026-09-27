@@ -134,10 +134,9 @@ public class IchthysOS extends SettingsPreferenceFragment {
         Settings.Secure.putIntForUser(resolver, "custom_pitch_black", 0, UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver, "custom_volume_horizontal", 0, UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver, "custom_volume_steps", 0, UserHandle.USER_CURRENT);
-        // Global, not per-user: the contacts lockdown is one switch for the whole device. Clearing
-        // it does not hand back the permissions the sweep took away — those stay denied until the
-        // user grants them again per app.
-        Settings.Global.putInt(resolver, CONTACTS_LOCKDOWN_PREF, 0);
+        // Global, not per-user: the contacts lockdown is one switch for the whole device, and on
+        // by default (an unset value counts as on in system_server and PermissionController).
+        Settings.Global.putInt(resolver, CONTACTS_LOCKDOWN_PREF, 1);
     }
 
     @Override
