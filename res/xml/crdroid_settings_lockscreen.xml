@@ -146,6 +146,14 @@
             android:summary="@string/udfps_recog_animation_effect_summary"
             android:fragment="com.crdroid.settings.fragments.lockscreen.UdfpsAnimation" />
 
+        <!-- IchthysOS: built-in press effects, pressed icon, idle icons, result effects, haptics -->
+        <Preference
+            android:key="ichthys_fingerprint_effects"
+            android:icon="@drawable/ic_fp_selector"
+            android:title="@string/ichthys_fp_effects_title"
+            android:summary="@string/ichthys_fp_effects_summary"
+            android:fragment="com.crdroid.settings.fragments.lockscreen.FingerprintEffects" />
+
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="fp_success_vibrate"
             android:icon="@drawable/ic_fp"

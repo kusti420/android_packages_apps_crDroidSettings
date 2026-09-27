@@ -38,6 +38,7 @@ import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.fragments.lockscreen.PulseSettings;
 import com.crdroid.settings.fragments.lockscreen.MediaArtSettings;
+import com.crdroid.settings.fragments.lockscreen.FingerprintEffects;
 import com.crdroid.settings.fragments.lockscreen.UdfpsAnimation;
 import com.crdroid.settings.fragments.lockscreen.UdfpsIconPicker;
 import com.crdroid.settings.utils.DeviceUtils;
@@ -133,6 +134,7 @@ public class LockScreen extends SettingsPreferenceFragment
 
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
+        FingerprintEffects.reset(mContext);
         Settings.Secure.putIntForUser(resolver,
                 Settings.Secure.LOCKSCREEN_SMARTSPACE_ENABLED, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
@@ -202,6 +204,7 @@ public class LockScreen extends SettingsPreferenceFragment
 
                     boolean hasFingerprint = DeviceUtils.hasFingerprint(context);
                     if (!hasFingerprint) {
+                        keys.add(KEY_FP_EFFECTS);
                         keys.add(KEY_UDFPS_ANIMATIONS);
                         keys.add(KEY_UDFPS_ICONS);
                         keys.add(KEY_RIPPLE_EFFECT);

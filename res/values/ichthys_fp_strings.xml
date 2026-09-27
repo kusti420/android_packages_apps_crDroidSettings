@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- IchthysOS: Fingerprint effects page (FingerprintEffects / fingerprint_effects.xml). -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="ichthys_fp_effects_title">Fingerprint effects</string>
+    <string name="ichthys_fp_effects_summary">Press animations, icon styles, unlock effects and haptics</string>
+
+    <string name="ichthys_fp_press_category">While pressing</string>
+    <string name="ichthys_fp_anim_effect_title">Animation</string>
+    <string name="ichthys_fp_anim_speed_title">Animation speed</string>
+    <string name="ichthys_fp_anim_scale_title">Animation size</string>
+    <string name="ichthys_fp_anim_color_mode_title">Animation color</string>
+    <string name="ichthys_fp_custom_color_title">Custom color</string>
+    <string name="ichthys_fp_anim_offset_x_title">Horizontal offset</string>
+    <string name="ichthys_fp_anim_offset_y_title">Vertical offset</string>
+    <string name="ichthys_fp_anim_bp_title">In app prompts</string>
+    <string name="ichthys_fp_anim_bp_summary">Also play when an app asks for your fingerprint</string>
+    <string name="ichthys_fp_anim_enroll_title">While enrolling</string>
+    <string name="ichthys_fp_anim_enroll_summary">Also play while adding a fingerprint</string>
+
+    <string name="ichthys_fp_pressed_category">Pressed icon</string>
+    <string name="ichthys_fp_pressed_style_title">Style</string>
+    <string name="ichthys_fp_color_mode_title">Color</string>
+    <string name="ichthys_fp_pressed_size_title">Size</string>
+
+    <string name="ichthys_fp_icon_category">Lock screen icon</string>
+    <string name="ichthys_fp_icon_style_title">Icon style</string>
+    <string name="ichthys_fp_icon_opacity_title">Opacity</string>
+    <string name="ichthys_fp_icon_aod_title">Use on always-on display</string>
+    <string name="ichthys_fp_icon_aod_summary">Show this icon on the always-on display too</string>
+
+    <string name="ichthys_fp_result_category">Unlock feedback</string>
+    <string name="ichthys_fp_success_effect_title">On success</string>
+    <string name="ichthys_fp_fail_effect_title">On failure</string>
+    <string name="ichthys_fp_haptic_success_title">Success vibration</string>
+    <string name="ichthys_fp_haptic_error_title">Failure vibration</string>
+
+    <string-array name="ichthys_fp_anim_effect_entries" translatable="false">
+        <item>None</item>
+        <item>Animation pack</item>
+        <item>Ripple rings</item>
+        <item>Radar sweep</item>
+        <item>Particle burst</item>
+        <item>Shoal lattice</item>
+        <item>Pulse</item>
+        <item>Aurora arcs</item>
+        <item>Spinner</item>
+        <item>Scanlines</item>
+    </string-array>
+    <string-array name="ichthys_fp_anim_effect_values" translatable="false">
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_anim_color_mode_entries" translatable="false">
+        <item>Accent</item>
+        <item>White</item>
+        <item>Custom</item>
+        <item>Rainbow</item>
+    </string-array>
+    <string-array name="ichthys_fp_anim_color_mode_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_color_mode3_entries" translatable="false">
+        <item>Accent</item>
+        <item>White</item>
+        <item>Custom</item>
+    </string-array>
+    <string-array name="ichthys_fp_color_mode3_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_pressed_style_entries" translatable="false">
+        <item>None</item>
+        <item>Solid disc</item>
+        <item>Ring</item>
+        <item>Glow</item>
+    </string-array>
+    <string-array name="ichthys_fp_pressed_style_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_icon_style_entries" translatable="false">
+        <item>System</item>
+        <item>Classic</item>
+        <item>Minimal</item>
+        <item>Dotted</item>
+        <item>Ring</item>
+        <item>Split</item>
+        <item>Radar</item>
+        <item>Pulse ring</item>
+        <item>Shoal</item>
+    </string-array>
+    <string-array name="ichthys_fp_icon_style_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_icon_color_mode_entries" translatable="false">
+        <item>Follow theme</item>
+        <item>Accent</item>
+        <item>Custom</item>
+    </string-array>
+    <string-array name="ichthys_fp_icon_color_mode_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_success_effect_entries" translatable="false">
+        <item>None</item>
+        <item>Ring fill</item>
+        <item>Check mark</item>
+        <item>Burst</item>
+    </string-array>
+    <string-array name="ichthys_fp_success_effect_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_fail_effect_entries" translatable="false">
+        <item>None</item>
+        <item>Shake</item>
+        <item>Red flash</item>
+    </string-array>
+    <string-array name="ichthys_fp_fail_effect_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="ichthys_fp_haptic_success_entries" translatable="false">
+        <item>System default</item>
+        <item>Tick</item>
+        <item>Double click</item>
+        <item>Heavy click</item>
+        <item>Long</item>
+    </string-array>
+    <string-array name="ichthys_fp_haptic_error_entries" translatable="false">
+        <item>System default</item>
+        <item>Buzz</item>
+        <item>Double click</item>
+        <item>Heavy click</item>
+        <item>Long buzz</item>
+    </string-array>
+    <string-array name="ichthys_fp_haptic_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+</resources>
