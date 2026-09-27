@@ -64,7 +64,7 @@
             android:icon="@drawable/ic_weather"
             android:title="@string/lockscreen_smartspace_title"
             android:summary="@string/lockscreen_smartspace_summary"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
 
     </PreferenceCategory>
 
