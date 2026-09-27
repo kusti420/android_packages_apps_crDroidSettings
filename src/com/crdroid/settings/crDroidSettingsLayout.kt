@@ -192,7 +192,7 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
         )
 
         /** Tab page classes in TAB_TITLES order (for the per-tab badge hue). */
-        private val TAB_FRAGMENTS = listOf(
+        private val TAB_FRAGMENTS: List<Class<*>> = listOf(
             StatusBar::class.java, QuickSettings::class.java, LockScreen::class.java,
             Buttons::class.java, Navigation::class.java, UserInterface::class.java,
             Notifications::class.java, Sound::class.java, Miscellaneous::class.java,
