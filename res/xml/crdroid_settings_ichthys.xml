@@ -113,6 +113,16 @@
             android:summary="@string/contacts_lockdown_summary"
             android:defaultValue="true" />
 
+        <!-- Clipboard lockdown. Enforced in ClipboardService: apps only read clip contents
+             right after a verified user tap/keypress (e.g. Paste); the keyboard, SystemUI and
+             the copying app itself are exempt. Clips also auto-clear after a few minutes. -->
+        <com.crdroid.settings.preferences.GlobalSettingSwitchPreference
+            android:key="ichthys_clipboard_lockdown"
+            android:icon="@drawable/ic_content_copy"
+            android:title="@string/clipboard_lockdown_title"
+            android:summary="@string/clipboard_lockdown_summary"
+            android:defaultValue="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

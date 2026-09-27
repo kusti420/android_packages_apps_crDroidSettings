@@ -77,6 +77,8 @@
     <string name="ichthys_privacy_category">Privacy</string>
     <string name="contacts_lockdown_title">Lock down contacts</string>
     <string name="contacts_lockdown_summary">Take contacts access away from every app and refuse new requests outright — apps that ask are denied immediately, without a permission dialog. Your phone, messaging and contacts apps keep full access. Turning this back off does not restore anything; grant contacts per app if you change your mind</string>
+    <string name="clipboard_lockdown_title">Clipboard lockdown</string>
+    <string name="clipboard_lockdown_summary">Apps can copy, but can only read the clipboard right after you tap Paste or press a key in them. Your keyboard can always paste. Copied items are cleared after 5 minutes</string>
     <string name="ichthys_statusbar_category">Status bar</string>
     <string name="status_bar_weather_title">Status bar weather</string>
     <string name="status_bar_weather_summary">Show the current temperature in the status bar (requires a configured weather service)</string>

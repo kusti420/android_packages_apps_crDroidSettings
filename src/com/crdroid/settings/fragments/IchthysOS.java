@@ -137,6 +137,8 @@ public class IchthysOS extends SettingsPreferenceFragment {
         // Global, not per-user: the contacts lockdown is one switch for the whole device, and on
         // by default (an unset value counts as on in system_server and PermissionController).
         Settings.Global.putInt(resolver, CONTACTS_LOCKDOWN_PREF, 1);
+        // Clipboard lockdown (ClipboardService), also a global on-by-default switch.
+        Settings.Global.putInt(resolver, "ichthys_clipboard_lockdown", 1);
     }
 
     @Override
