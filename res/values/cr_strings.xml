@@ -676,7 +676,18 @@
     <string name="screen_on_memory_reclaim_summary">Kill cached background apps shortly after the screen turns on to free memory</string>
     <!-- Unrestricted background mode -->
     <string name="unrestricted_background_title">Unrestricted background</string>
-    <string name="unrestricted_background_summary">Lifts Doze, standby and battery optimization for all apps so demanding tasks keep running. Drains battery faster — turn on only when needed.</string>
+    <string name="unrestricted_background_mode_off">Off</string>
+    <string name="unrestricted_background_mode_selected">Selected apps</string>
+    <string name="unrestricted_background_mode_everything">Everything</string>
+    <string name="unrestricted_background_summary_off">Normal battery management for all apps</string>
+    <string name="unrestricted_background_summary_selected">Selected apps: no Doze, standby or foreground-service time limits, never frozen, killed last when memory runs low. The rest of the phone keeps normal battery management.</string>
+    <string name="unrestricted_background_summary_everything">Doze, app standby, the app freezer and the phantom process killer are off for the whole phone, plus the selected-app protections. Noticeably faster battery drain and more heat. Use only while needed.</string>
+    <string name="unrestricted_background_apps_title">Selected apps</string>
+    <string name="unrestricted_background_apps_none">No apps selected</string>
+    <plurals name="unrestricted_background_apps_count">
+        <item quantity="one">%d app selected</item>
+        <item quantity="other">%d apps selected</item>
+    </plurals>
     <string name="unrestricted_background_persist_title">Keep enabled after reboot</string>
     <string name="unrestricted_background_persist_summary">Stay on across restarts. Off by default, so a reboot automatically returns the phone to normal battery management.</string>
 

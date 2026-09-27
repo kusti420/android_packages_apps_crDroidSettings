@@ -118,22 +118,30 @@
         android:summary="@string/screen_on_memory_reclaim_summary"
         android:defaultValue="true" />
 
-    <!-- Unrestricted background mode (mutually exclusive with screen-on memory reclaim;
-         title tinted red in Miscellaneous.java as a caution). -->
-    <com.crdroid.settings.preferences.DangerSwitchPreference
-        android:key="unrestricted_background"
+    <!-- IchthysOS: Unrestricted background (tracker#39). Mode list + app picker + keep-after-
+         reboot, all Settings.Global, applied live by UnrestrictedBackgroundController. Rows sit
+         on the red danger card; the picker and persist rows are enabled in Miscellaneous.java
+         only while a mode is on. -->
+    <com.crdroid.settings.preferences.DangerGlobalListPreference
+        android:key="ichthys_unrestricted_bg_mode"
         android:icon="@drawable/ic_battery_alert"
         android:title="@string/unrestricted_background_title"
-        android:summary="@string/unrestricted_background_summary"
-        android:defaultValue="false" />
+        android:entries="@array/unrestricted_background_mode_entries"
+        android:entryValues="@array/unrestricted_background_mode_values"
+        android:defaultValue="0" />
 
-    <com.crdroid.settings.preferences.DangerSwitchPreference
-        android:key="unrestricted_background_persist"
+    <Preference
+        android:key="ichthys_unrestricted_bg_apps"
+        android:icon="@drawable/ic_apps"
+        android:title="@string/unrestricted_background_apps_title"
+        android:fragment="com.crdroid.settings.fragments.misc.UnrestrictedBackgroundApps" />
+
+    <com.crdroid.settings.preferences.DangerGlobalSwitchPreference
+        android:key="ichthys_unrestricted_bg_persist"
         android:icon="@drawable/ic_restart"
         android:title="@string/unrestricted_background_persist_title"
         android:summary="@string/unrestricted_background_persist_summary"
-        android:defaultValue="false"
-        android:dependency="unrestricted_background" />
+        android:defaultValue="false" />
 
     <!-- IchthysOS: global "Manage app if unused" (app hibernation / auto-archive) master switch.
          Maps to Settings.Global.app_hibernation_enabled (default 1). Turn OFF to stop ALL apps

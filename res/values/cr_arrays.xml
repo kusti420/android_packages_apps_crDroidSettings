@@ -1508,4 +1508,17 @@
     <string-array name="charging_control_mode_values_fine_grained_control" translatable="false">
         <item>3</item>
     </string-array>
+    <!-- IchthysOS: Unrestricted background modes (Settings.Global ichthys_unrestricted_bg_mode) -->
+    <string-array name="unrestricted_background_mode_entries" translatable="false">
+        <item>@string/unrestricted_background_mode_off</item>
+        <item>@string/unrestricted_background_mode_selected</item>
+        <item>@string/unrestricted_background_mode_everything</item>
+    </string-array>
+
+    <string-array name="unrestricted_background_mode_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
 </resources>

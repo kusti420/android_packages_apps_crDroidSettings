@@ -29,7 +29,6 @@ import android.provider.Settings;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
-import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.R;
@@ -38,6 +37,7 @@ import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.fragments.misc.SensorBlock;
+import com.crdroid.settings.fragments.misc.UnrestrictedBackgroundApps;
 
 import java.util.List;
 
@@ -54,9 +54,15 @@ public class Miscellaneous extends SettingsPreferenceFragment implements
     private static final String POCKET_JUDGE = "pocket_judge";
     private static final String KEY_GMS_CERT_SPOOF = "pi_gms_cert_chain";
     private static final String KEY_THREE_FINGERS_SWIPE = "three_fingers_swipe";
+    private static final String KEY_UNRESTRICTED_MODE = "ichthys_unrestricted_bg_mode";
+    private static final String KEY_UNRESTRICTED_APPS = "ichthys_unrestricted_bg_apps";
+    private static final String KEY_UNRESTRICTED_PERSIST = "ichthys_unrestricted_bg_persist";
 
     private Preference mPocketJudge;
     private ListPreference mThreeFingersSwipeAction;
+    private ListPreference mUnrestrictedMode;
+    private Preference mUnrestrictedApps;
+    private Preference mUnrestrictedPersist;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,41 +87,61 @@ public class Miscellaneous extends SettingsPreferenceFragment implements
         setupUnrestrictedBackground(prefScreen);
     }
 
-    // IchthysOS: "Unrestricted background" caution styling + mutual exclusion with
-    // "Screen-on memory reclaim" (the two do opposite things, so only one may be on).
+    // IchthysOS: "Unrestricted background" (tracker#39). The mode row explains what the chosen
+    // mode does; the app picker and keep-after-reboot rows only apply while a mode is on.
     private void setupUnrestrictedBackground(PreferenceScreen prefScreen) {
-        final SwitchPreferenceCompat reclaim =
-                (SwitchPreferenceCompat) prefScreen.findPreference("screen_on_memory_reclaim");
-        final SwitchPreferenceCompat unrestricted =
-                (SwitchPreferenceCompat) prefScreen.findPreference("unrestricted_background");
-        if (unrestricted == null) return;
-        final SwitchPreferenceCompat persist =
-                (SwitchPreferenceCompat) prefScreen.findPreference("unrestricted_background_persist");
+        mUnrestrictedMode = (ListPreference) prefScreen.findPreference(KEY_UNRESTRICTED_MODE);
+        mUnrestrictedApps = prefScreen.findPreference(KEY_UNRESTRICTED_APPS);
+        mUnrestrictedPersist = prefScreen.findPreference(KEY_UNRESTRICTED_PERSIST);
+        if (mUnrestrictedMode == null) return;
 
-        // Both rows render on a solid red "danger" pill (@layout/preference_danger_background),
-        // like the power-menu Emergency button, so it's obvious these aren't everyday toggles.
-        // Title/summary are already white via the layout; whiten the glyph so it stays legible
-        // on the red background.
-        whitenIcon(unrestricted);
-        whitenIcon(persist);
+        // Both danger rows render on a solid red card, like the power-menu Emergency button, so
+        // it's obvious these aren't everyday toggles. Whiten the glyphs to stay legible on red.
+        whitenIcon(mUnrestrictedMode);
+        whitenIcon(mUnrestrictedPersist);
 
-        if (reclaim == null) return;
-        unrestricted.setEnabled(!reclaim.isChecked());
-        reclaim.setOnPreferenceChangeListener((p, v) -> {
-            final boolean on = (Boolean) v;
-            if (on && unrestricted.isChecked()) {
-                unrestricted.setChecked(false); // persists 0 -> backend reverts
-            }
-            unrestricted.setEnabled(!on);
+        mUnrestrictedMode.setOnPreferenceChangeListener((p, v) -> {
+            updateUnrestrictedBackground(Integer.parseInt((String) v));
             return true;
         });
-        unrestricted.setOnPreferenceChangeListener((p, v) -> {
-            final boolean on = (Boolean) v;
-            if (on && reclaim.isChecked()) {
-                reclaim.setChecked(false);
-            }
-            return true;
-        });
+        updateUnrestrictedBackground(mUnrestrictedMode.getValue() == null
+                ? 0 : Integer.parseInt(mUnrestrictedMode.getValue()));
+    }
+
+    private void updateUnrestrictedBackground(int mode) {
+        final int summary;
+        switch (mode) {
+            case 1:
+                summary = R.string.unrestricted_background_summary_selected;
+                break;
+            case 2:
+                summary = R.string.unrestricted_background_summary_everything;
+                break;
+            default:
+                summary = R.string.unrestricted_background_summary_off;
+                break;
+        }
+        mUnrestrictedMode.setSummary(summary);
+        if (mUnrestrictedApps != null) {
+            mUnrestrictedApps.setEnabled(mode != 0);
+            final int count = UnrestrictedBackgroundApps.read(getContext()).size();
+            mUnrestrictedApps.setSummary(count == 0
+                    ? getString(R.string.unrestricted_background_apps_none)
+                    : getResources().getQuantityString(
+                            R.plurals.unrestricted_background_apps_count, count, count));
+        }
+        if (mUnrestrictedPersist != null) {
+            mUnrestrictedPersist.setEnabled(mode != 0);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Back from the app picker: refresh the selected-apps count.
+        if (mUnrestrictedMode != null && mUnrestrictedMode.getValue() != null) {
+            updateUnrestrictedBackground(Integer.parseInt(mUnrestrictedMode.getValue()));
+        }
     }
 
     // Tints the preference's glyph white so it stays legible on the red danger pill,
@@ -167,6 +193,10 @@ public class Miscellaneous extends SettingsPreferenceFragment implements
                 Settings.System.SCREEN_ON_MEMORY_RECLAIM, 1, UserHandle.USER_CURRENT);
         LineageSettings.System.putIntForUser(resolver,
                 LineageSettings.System.AUTO_BRIGHTNESS_ONE_SHOT, 0, UserHandle.USER_CURRENT);
+        // Unrestricted background is device-wide (Settings.Global): off, not kept, no apps.
+        Settings.Global.putInt(resolver, KEY_UNRESTRICTED_MODE, 0);
+        Settings.Global.putInt(resolver, KEY_UNRESTRICTED_PERSIST, 0);
+        Settings.Global.putString(resolver, UnrestrictedBackgroundApps.KEY_PACKAGES, null);
         SensorBlock.reset(mContext);
     }
 

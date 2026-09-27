@@ -48,6 +48,11 @@ public class DangerSwitchPreference extends SecureSettingSwitchPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
+        bindDanger(holder);
+    }
+
+    /** Applies the red danger card look; shared with the other Danger* preferences. */
+    static void bindDanger(PreferenceViewHolder holder) {
         holder.itemView.setBackgroundResource(R.drawable.ichthys_danger_bg_stateful);
         final TextView title = (TextView) holder.findViewById(android.R.id.title);
         if (title != null) {
