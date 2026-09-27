@@ -113,6 +113,15 @@
             android:summary="@string/contacts_lockdown_summary"
             android:defaultValue="true" />
 
+        <!-- Backstage: apps kept "in the foreground" on a hidden display
+             (IchthysBackstageService, kusti420/ichthysos-tracker#38). -->
+        <Preference
+            android:key="ichthys_backstage"
+            android:icon="@drawable/ic_screensaver"
+            android:title="@string/backstage_title"
+            android:summary="@string/backstage_summary"
+            android:fragment="com.crdroid.settings.fragments.backstage.Backstage" />
+
         <!-- Clipboard lockdown. Enforced in ClipboardService: apps only read clip contents
              right after a verified user tap/keypress (e.g. Paste); the keyboard, SystemUI and
              the copying app itself are exempt. Clips also auto-clear after a few minutes. -->

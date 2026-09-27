@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <!-- IchthysOS: Backstage (kusti420/ichthysos-tracker#38) -->
+    <string name="backstage_title">Backstage</string>
+    <string name="backstage_summary">Keep apps running as if they were open, on a hidden screen</string>
+    <string name="backstage_intro">Apps in Backstage keep running as if they were open on screen, for example to finish an upload that stops when you leave the app. You can use the phone and lock it as usual; the apps are never shown anywhere. Use the notification to bring an app back. Backstage uses more battery and is cleared when the phone restarts. Up to 3 apps at a time.</string>
+    <string name="backstage_apps_category">Apps</string>
+    <string name="backstage_app_running">In Backstage</string>
+    <string name="backstage_full">Backstage is full (3 apps)</string>
+    <string name="backstage_max_hours_title">Stop automatically after</string>
+    <string-array name="backstage_max_hours_entries" translatable="false">
+        <item>Never</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>4 hours</item>
+        <item>8 hours</item>
+        <item>12 hours</item>
+    </string-array>
+    <string-array name="backstage_max_hours_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>8</item>
+        <item>12</item>
+    </string-array>
+</resources>
