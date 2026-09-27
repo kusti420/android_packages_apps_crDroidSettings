@@ -39,7 +39,6 @@ import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.utils.DeviceUtils;
-import com.crdroid.settings.utils.TelephonyUtils;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -80,11 +79,12 @@ public class Sound extends SettingsPreferenceFragment {
         mVolumePanelLeft = prefScreen.findPreference(KEY_VOLUME_PANEL_LEFT);
         mVolumePanelLeft.setChecked(isAudioPanelOnLeft);
 
-        boolean voiceCapable = TelephonyUtils.isVoiceCapable(context);
         boolean hapticAvailable = DeviceUtils.hasVibrator(context);
 
-        if (!voiceCapable || !hapticAvailable) {
-            final PreferenceCategory vibCategory = prefScreen.findPreference(KEY_VIBRATE_CATEGORY);
+        // IchthysOS: the in-call vibration options were only read by the Lineage Dialer
+        // (InCallVibrationHandler), which IchthysOS removes in favour of Fossify Phone.
+        final PreferenceCategory vibCategory = prefScreen.findPreference(KEY_VIBRATE_CATEGORY);
+        if (vibCategory != null) {
             prefScreen.removePreference(vibCategory);
         }
         if (!hapticAvailable) {
@@ -147,15 +147,13 @@ public class Sound extends SettingsPreferenceFragment {
                 public List<String> getNonIndexableKeys(Context context) {
                     List<String> keys = super.getNonIndexableKeys(context);
 
-                    boolean voiceCapable = TelephonyUtils.isVoiceCapable(context);
                     boolean hapticAvailable = DeviceUtils.hasVibrator(context);
 
-                    if (!voiceCapable || !hapticAvailable) {
-                        keys.add(KEY_VIBRATE_CATEGORY);
-                        keys.add(KEY_VIBRATE_CONNECT);
-                        keys.add(KEY_VIBRATE_CALLWAITING);
-                        keys.add(KEY_VIBRATE_DISCONNECT);
-                    }
+                    // IchthysOS: always removed, see onCreate.
+                    keys.add(KEY_VIBRATE_CATEGORY);
+                    keys.add(KEY_VIBRATE_CONNECT);
+                    keys.add(KEY_VIBRATE_CALLWAITING);
+                    keys.add(KEY_VIBRATE_DISCONNECT);
                     if (!hapticAvailable) {
                         keys.add(KEY_VOLUME_HAPTIC);
                     }

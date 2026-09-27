@@ -53,7 +53,6 @@ import com.crdroid.settings.fragments.statusbar.NetworkTrafficSettings;
 import com.crdroid.settings.fragments.statusbar.StatusBarIcons;
 import com.crdroid.settings.preferences.SystemSettingSeekBarPreference;
 import com.crdroid.settings.utils.DeviceUtils;
-import com.crdroid.settings.utils.TelephonyUtils;
 
 import lineageos.preference.LineageSystemSettingListPreference;
 import lineageos.providers.LineageSettings;
@@ -122,14 +121,12 @@ public class StatusBar extends SettingsPreferenceFragment implements
             mQuickPulldown.setEntryValues(R.array.status_bar_quick_qs_pulldown_values_rtl);
         }
 
-        if (!TelephonyUtils.isVoiceCapable(mContext)) {
-            Preference carrierCategory = findPreference(STATUS_BAR_CARRIER_KEY);
-            if (carrierCategory != null) {
-                prefScreen.removePreference(carrierCategory);
-            }
-        } else {
-            mCustomCarrierTextPref = findPreference(CUSTOM_CARRIER_LABEL);
-            updateCustomCarrierTextSummary();
+        // IchthysOS: the lock screen carrier label options (lockscreen_show_carrier and the
+        // custom carrier text) have no consumer in the A17 SystemUI port, so the category is
+        // always removed rather than offering switches that do nothing.
+        Preference carrierCategory = findPreference(STATUS_BAR_CARRIER_KEY);
+        if (carrierCategory != null) {
+            prefScreen.removePreference(carrierCategory);
         }
     }
 
@@ -292,10 +289,9 @@ public class StatusBar extends SettingsPreferenceFragment implements
                 public List<String> getNonIndexableKeys(Context context) {
                     List<String> keys = super.getNonIndexableKeys(context);
 
-                    if (!TelephonyUtils.isVoiceCapable(context)) {
-                        keys.add(CARRIER_NAME);
-                        keys.add(CUSTOM_CARRIER_LABEL);
-                    }
+                    // IchthysOS: carrier label options are always removed (no consumer).
+                    keys.add(CARRIER_NAME);
+                    keys.add(CUSTOM_CARRIER_LABEL);
                     return keys;
                 }
             };

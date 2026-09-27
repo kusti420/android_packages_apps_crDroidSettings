@@ -27,15 +27,9 @@
             android:title="@string/qs_tile_gradient_title"
             android:summary="@string/qs_tile_gradient_summary" />
 
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="qs_brightness_slider_gradient"
-            android:title="@string/qs_brightness_slider_gradient_title"
-            android:summary="@string/qs_brightness_slider_gradient_summary" />
+        <!-- IchthysOS: removed qs_brightness_slider_gradient (no consumer). -->
 
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="volume_slider_gradient"
-            android:title="@string/volume_slider_gradient_title"
-            android:summary="@string/volume_slider_gradient_summary" />
+        <!-- IchthysOS: removed volume_slider_gradient (no consumer). -->
     </PreferenceCategory>
 
     <PreferenceCategory

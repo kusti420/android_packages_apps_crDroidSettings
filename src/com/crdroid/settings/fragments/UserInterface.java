@@ -51,9 +51,7 @@ public class UserInterface extends SettingsPreferenceFragment implements
 
     public static final String TAG = "UserInterface";
 
-    private static final String KEY_FORCE_FULL_SCREEN = "display_cutout_force_fullscreen_settings";
 
-    private Preference mShowCutoutForce;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,13 +62,9 @@ public class UserInterface extends SettingsPreferenceFragment implements
         Context mContext = getActivity().getApplicationContext();
         final PreferenceScreen prefScreen = getPreferenceScreen();
 
-	    final String displayCutout =
-            mContext.getResources().getString(com.android.internal.R.string.config_mainBuiltInDisplayCutout);
-
-        if (TextUtils.isEmpty(displayCutout)) {
-            mShowCutoutForce = (Preference) findPreference(KEY_FORCE_FULL_SCREEN);
-            prefScreen.removePreference(mShowCutoutForce);
-        }
+        // IchthysOS: "force fullscreen for display cutout" was removed from the XML. Its
+        // activity was never declared (tapping it crashed Settings) and nothing in the window
+        // manager reads force_fullscreen_cutout_apps in this tree, so it could not do anything.
     }
 
     @Override
@@ -110,12 +104,6 @@ public class UserInterface extends SettingsPreferenceFragment implements
                 public List<String> getNonIndexableKeys(Context context) {
                     List<String> keys = super.getNonIndexableKeys(context);
 
-	                final String displayCutout =
-                        context.getResources().getString(com.android.internal.R.string.config_mainBuiltInDisplayCutout);
-
-                    if (TextUtils.isEmpty(displayCutout)) {
-                        keys.add(KEY_FORCE_FULL_SCREEN);
-                    }
 
                     return keys;
                 }

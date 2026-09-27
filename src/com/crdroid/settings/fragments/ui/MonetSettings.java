@@ -39,6 +39,7 @@ import com.crdroid.settings.preferences.colorpicker.ColorPickerPreference;
 import com.crdroid.settings.preferences.CustomSeekBarPreference;
 
 import java.lang.CharSequence;
+import java.util.List;
 
 import lineageos.providers.LineageSettings;
 
@@ -133,6 +134,17 @@ public class MonetSettings extends DashboardFragment implements
         mChromaPref.setOnPreferenceChangeListener(this);
         mWholePalettePref.setOnPreferenceChangeListener(this);
         mTintBackgroundPref.setOnPreferenceChangeListener(this);
+
+        // IchthysOS: SystemUI's ThemeOverlayController in this tree only understands the AOSP
+        // style / color source / accent fields. The crDroid extras below are written into the
+        // overlay JSON but nothing reads them, so they are hidden rather than offered. They stay
+        // attached to their fields, so the rest of this fragment works unchanged.
+        for (Preference dead : new Preference[] {mAccentBackgroundPref, mBgColorPref,
+                mLuminancePref, mChromaPref, mWholePalettePref, mTintBackgroundPref}) {
+            if (dead != null && dead.getParent() != null) {
+                dead.getParent().removePreference(dead);
+            }
+        }
     }
 
     public static void reset(Context mContext) {
@@ -416,5 +428,18 @@ public class MonetSettings extends DashboardFragment implements
     }
 
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
-            new BaseSearchIndexProvider(R.xml.monet_engine);
+            new BaseSearchIndexProvider(R.xml.monet_engine) {
+                @Override
+                public List<String> getNonIndexableKeys(Context context) {
+                    List<String> keys = super.getNonIndexableKeys(context);
+                    // IchthysOS: hidden in onCreate (no consumer), so keep them out of search.
+                    keys.add(PREF_ACCENT_BACKGROUND);
+                    keys.add(PREF_BG_COLOR);
+                    keys.add(PREF_LUMINANCE_FACTOR);
+                    keys.add(PREF_CHROMA_FACTOR);
+                    keys.add(PREF_WHOLE_PALETTE);
+                    keys.add(PREF_TINT_BACKGROUND);
+                    return keys;
+                }
+            };
 }

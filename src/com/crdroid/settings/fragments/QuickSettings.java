@@ -59,6 +59,8 @@ public class QuickSettings extends SettingsPreferenceFragment implements
     private static final String KEY_SHOW_AUTO_BRIGHTNESS = "qs_show_auto_brightness";
     private static final String KEY_SHOW_VOLUME_SLIDER = "qs_show_volume_slider";
     private static final String KEY_SHOW_RINGER_MODE = "qs_show_ringer_mode";
+    private static final String[] DEAD_KEYS = {
+            KEY_SHOW_VOLUME_SLIDER, KEY_SHOW_RINGER_MODE, "qs_show_data_usage", "qs_header_image"};
     private static final String KEY_QS_TILE_HAPTIC = "qs_tile_haptic";
     private static final String KEY_QS_PANEL_STYLE = "qs_panel_style";
     private static final String KEY_QS_TILE_SHAPE = "qs_tile_shape";
@@ -123,6 +125,16 @@ public class QuickSettings extends SettingsPreferenceFragment implements
 
         mShowRingerMode = findPreference(KEY_SHOW_RINGER_MODE);
         mShowRingerMode.setEnabled(showSlider);
+
+        // IchthysOS: these options have no consumer in the A17 SystemUI port (the QS volume
+        // slider, ringer toggle, footer data usage and header image were not carried over), so
+        // they are detached instead of offered. The fields stay valid for the code below.
+        for (String key : DEAD_KEYS) {
+            Preference dead = findPreference(key);
+            if (dead != null && dead.getParent() != null) {
+                dead.getParent().removePreference(dead);
+            }
+        }
 
         mQsPanelStyle = findPreference(KEY_QS_PANEL_STYLE);
         mQsPanelStyle.setOnPreferenceChangeListener(this);
@@ -228,6 +240,7 @@ public class QuickSettings extends SettingsPreferenceFragment implements
                 public List<String> getNonIndexableKeys(Context context) {
                     List<String> keys = super.getNonIndexableKeys(context);
                     final Resources res = context.getResources();
+                    keys.addAll(java.util.Arrays.asList(DEAD_KEYS));
 
                     boolean automaticAvailable = res.getBoolean(
                             com.android.internal.R.bool.config_automatic_brightness_available);
