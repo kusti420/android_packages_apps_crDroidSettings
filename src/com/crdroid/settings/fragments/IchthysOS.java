@@ -139,6 +139,8 @@ public class IchthysOS extends SettingsPreferenceFragment {
         Settings.Global.putInt(resolver, CONTACTS_LOCKDOWN_PREF, 1);
         // Clipboard lockdown (ClipboardService), also a global on-by-default switch.
         Settings.Global.putInt(resolver, "ichthys_clipboard_lockdown", 1);
+        // Sensor anti-fingerprinting (SensorService), global and on by default.
+        Settings.Global.putInt(resolver, "ichthys_sensor_fingerprint_protection", 1);
     }
 
     @Override

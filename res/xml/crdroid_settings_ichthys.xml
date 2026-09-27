@@ -132,6 +132,15 @@
             android:summary="@string/clipboard_lockdown_summary"
             android:defaultValue="true" />
 
+        <!-- Sensor anti-fingerprinting for non-system apps (SensorService,
+             kusti420/ichthysos-tracker#30). Unset counts as on. -->
+        <com.crdroid.settings.preferences.GlobalSettingSwitchPreference
+            android:key="ichthys_sensor_fingerprint_protection"
+            android:icon="@drawable/ic_sensor_privacy"
+            android:title="@string/sensor_protection_title"
+            android:summary="@string/sensor_protection_summary"
+            android:defaultValue="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
