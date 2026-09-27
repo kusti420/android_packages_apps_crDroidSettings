@@ -784,8 +784,6 @@ O donație mică ajută la menținerea acestui proiect în viață și la îmbun
     <string name="system_black_theme_title">Folosește tema neagră</string>
     <string name="system_black_theme_summary">Forțează culorile negre de fundal</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Butonul pentru ștergerea tuturor notificărilor</string>
-    <string name="notification_material_dismiss_summary">Înlocuiți textul șterge tot cu un buton plutitor</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animație gest înapoi</string>
     <string name="back_gesture_arrow_summary">Arată o săgeată animată pentru gestul înapoi</string>

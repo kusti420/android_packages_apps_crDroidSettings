@@ -791,8 +791,6 @@
     <string name="system_black_theme_title">استخدام \"المظهر الداكن\"</string>
     <string name="system_black_theme_summary">فرض ألوان الخلفية السوداء</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">مسح كافة الإشعارات</string>
-    <string name="notification_material_dismiss_summary">استبدال زر إزالة الإشعارات النصيه بالزر العائم</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">تأثير إيماء الرجوع</string>
     <string name="back_gesture_arrow_summary">إظهار سهم متحرك لإيماء الرجوع</string>

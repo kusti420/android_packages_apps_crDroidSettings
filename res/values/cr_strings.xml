@@ -22,9 +22,20 @@
     <string name="recents_type_title">Recents style</string>
     <string name="recents_type_stock">Stock (Launcher overview)</string>
     <string name="recents_type_classic">Classic (vertical task list)</string>
-    <string name="recents_type_slim">Slim (side panel)</string>
+    <string name="recents_type_slim">Omni Slim (side panel)</string>
+    <!-- Recents styles hosted by OneUiRecentsActivity (recents_type 3-7). Value 3 recreates AOSP
+         Android 7.1.1's card stack (TaskStackLayoutAlgorithm), NOT Samsung's Grace UX variant —
+         Grace UX's geometry could not be verified from any legitimate source, so a Samsung-specific
+         cascade is deferred until it can be measured on a real 7.1.1 device. Values 4-7 are named
+         after Home Up's Task changer layouts, which is what they recreate. -->
+    <string name="recents_type_grace">Cascade (Android 7.1.1)</string>
+    <string name="recents_type_grid">Grid (three-column cards)</string>
+    <string name="recents_type_stack">Tilt stack (One UI)</string>
+    <string name="recents_type_list">Vertical list (One UI)</string>
+    <string name="recents_type_slim_list">Slim list (One UI)</string>
+    <string name="recents_type_grace_ux">Grace UX (Samsung 7.0)</string>
     <string name="custom_pitch_black_title">Pitch black theme</string>
-    <string name="custom_pitch_black_summary">Use pure black for dark surfaces and backgrounds instead of dark grey</string>
+    <string name="custom_pitch_black_summary">Deepen the Abyss background to pure black for OLED. Has no effect on Monet</string>
     <!-- IchthysOS tab: Recents -->
     <string name="ichthys_recents_category">Recents</string>
     <string name="slim_recents_title">Slim Recents settings</string>
@@ -62,6 +73,10 @@
     <string name="custom_volume_horizontal_summary">Android 8.1-style horizontal volume panel with a live step number</string>
     <string name="custom_volume_steps_title">Media volume steps</string>
     <string name="custom_volume_steps_summary">Number of steps for the media volume slider (requires a reboot)</string>
+    <string name="ichthys_battery_category">Battery</string>
+    <string name="ichthys_privacy_category">Privacy</string>
+    <string name="contacts_lockdown_title">Lock down contacts</string>
+    <string name="contacts_lockdown_summary">Take contacts access away from every app and refuse new requests outright — apps that ask are denied immediately, without a permission dialog. Your phone, messaging and contacts apps keep full access. Turning this back off does not restore anything; grant contacts per app if you change your mind</string>
     <string name="ichthys_statusbar_category">Status bar</string>
     <string name="status_bar_weather_title">Status bar weather</string>
     <string name="status_bar_weather_summary">Show the current temperature in the status bar (requires a configured weather service)</string>
@@ -132,52 +147,15 @@
     <string name="changelog_crdroid_summary">View changes in the ROM installed</string>
     <string name="changelog_crdroid_error">Unable to load changelog</string>
 
-    <!-- About crDroid -->
-    <string name="about_crdroid">About crDroid</string>
+    <!-- About IchthysOS -->
+    <string name="about_crdroid">About IchthysOS</string>
     <string name="about_device_name">Device</string>
 
-    <!-- Share crDroid -->
-    <string name="share_crdroid_title">Share crDroid</string>
-    <string name="share_crdroid_summary">Let others know about crDroid</string>
-    <string name="share_message">Check out if #crDroidAndroid is available for your device @ https://crdroid.net/</string>
-    <string name="share_chooser_title">Share crDroid</string>
-
-    <!-- Sites crDroid -->
+    <!-- IchthysOS links -->
     <string name="crdroid_source_title">GitHub</string>
-    <string name="crdroid_source_summary">We love open source, check us out</string>
-    <string name="crdroid_telegram_title">crDroid community</string>
-    <string name="crdroid_telegram_summary">We are on telegram. Join us!</string>
-    <string name="crdroid_telegram_channel_title">Updates channel</string>
-    <string name="crdroid_telegram_channel_summary">Get notified of new builds on Telegram</string>
-    <string name="crdroid_website_title">Official website</string>
-    <string name="crdroid_website_summary">Visit our official website</string>
-    <string name="crdroid_translate_title">Translations</string>
-    <string name="crdroid_translate_summary">Help with localisation of ROM in your language!</string>
-    <string name="crdroid_sponsor_title" translatable="false">ScopeHosts</string>
-    <string name="crdroid_sponsor_summary">Visit our website host partner</string>
-    <string name="crdroid_buildserversponsor_title" translatable="false">InterServer</string>
-    <string name="crdroid_buildserversponsor_summary">We recommend their servers if interested in one</string>
-
-    <!-- Support crDroid -->
-    <string name="crdroid_donate_preference_title">Support us</string>
-    <string name="crdroid_donate_preference_summary">Donate to support further development</string>
-    <string name="crdroid_donate_title">crDroid needs your help!</string>
-    <string name="crdroid_donate_notification_text">Tap to learn more</string>
-    <string name="crdroid_donate_message">crDroid Android is an open-source project which needs your help to keep website online, our build servers running, and to deliver high-quality builds for your device.\n\n
-A small donation helps keep this project alive and improving. You can dismiss this message, but your support means a lot to us.</string>
-    <string name="crdroid_donate_button">Donate now</string>
-    <string name="crdroid_later_button">Maybe next month</string>
-    <string name="crdroid_channel_name">crDroid notifications</string>
-    <string name="crdroid_channel_desc">Project specific notifications</string>
-    <string name="crdroid_donate_still_needed">We still need €%,d this month. Help us reach our goal.</string>
-    <string name="crdroid_donate_thank_you">We appreciate all donations for this month. You can still contribute and make a difference!</string>
-    <string name="crdroid_donate_raised">€%,d raised</string>
-    <string name="crdroid_donate_total">of €%,d goal</string>
-    <string name="crdroid_donate_loading">Updating progress...</string>
-
-    <!-- OTA -->
-    <string name="crdroid_update_title">Updates</string>
-    <string name="crdroid_update_summary">Check and download latest update</string>
+    <string name="crdroid_source_summary">IchthysOS source code</string>
+    <string name="crdroid_telegram_title">IchthysOS Community</string>
+    <string name="crdroid_telegram_summary">Join us on Telegram!</string>
 
     <!-- Units -->
     <string name="unit_seconds">seconds</string>
@@ -205,6 +183,37 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <!-- Statusbar categories -->
     <string name="status_bar_icons_category_title">Icons</string>
     <string name="status_bar_battery_category_title">Battery customizations</string>
+
+    <!-- Status bar icon manager, see also status_bar_icons_title/summary further down -->
+    <string name="status_bar_icons_system_category">System</string>
+    <string name="status_bar_icons_connectivity_category">Connectivity</string>
+    <string name="status_bar_icons_sound_category">Sound</string>
+    <string name="status_bar_icons_privacy_category">Privacy</string>
+    <string name="status_bar_icon_clock_title">Clock</string>
+    <string name="status_bar_icon_battery_title">Battery</string>
+    <string name="status_bar_icon_alarm_clock_title">Alarm</string>
+    <string name="status_bar_icon_rotate_title">Auto-rotate</string>
+    <string name="status_bar_icon_screen_record_title">Screen recording</string>
+    <string name="status_bar_icon_connected_display_title">Connected display</string>
+    <string name="status_bar_icon_managed_profile_title">Work profile</string>
+    <string name="status_bar_icon_ime_title">Keyboard</string>
+    <string name="status_bar_icon_wifi_title">Wi-Fi</string>
+    <string name="status_bar_icon_mobile_title">Mobile signal</string>
+    <string name="status_bar_icon_airplane_title">Airplane mode</string>
+    <string name="status_bar_icon_hotspot_title">Hotspot</string>
+    <string name="status_bar_icon_bluetooth_title">Bluetooth</string>
+    <string name="status_bar_icon_ethernet_title">Ethernet</string>
+    <string name="status_bar_icon_vpn_title">VPN</string>
+    <string name="status_bar_icon_data_saver_title">Data Saver</string>
+    <string name="status_bar_icon_tty_title">TTY</string>
+    <string name="status_bar_icon_zen_title">Do Not Disturb</string>
+    <string name="status_bar_icon_mute_title">Ringer muted</string>
+    <string name="status_bar_icon_volume_title">Ringer vibrate</string>
+    <string name="status_bar_icon_headset_title">Headset</string>
+    <string name="status_bar_icon_location_title">Location</string>
+    <string name="status_bar_icon_microphone_title">Microphone</string>
+    <string name="status_bar_icon_camera_title">Camera</string>
+    <string name="status_bar_icon_sensors_off_title">Sensors off</string>
 
     <!-- Gestures -->
     <string name="gestures_title">Gestures</string>
@@ -553,6 +562,7 @@ A small donation helps keep this project alive and improving. You can dismiss th
 
     <!-- QS battery -->
     <string name="qs_use_status_bar_battery_style">Follow status bar style</string>
+    <string name="qs_battery_percent_default">Default (follow status bar position)</string>
 
     <!-- Battery estimate -->
     <string name="battery_estimate_title">Battery estimate</string>
@@ -684,6 +694,10 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <!-- Quick Settings brightness icon -->
     <string name="qs_show_auto_brightness_title">Auto brightness icon</string>
     <string name="qs_show_auto_brightness_summary">Show toggle for adaptive brightness near the slider</string>
+
+    <!-- Auto-brightness minimum floor (second slider handle) -->
+    <string name="auto_brightness_min_floor_title">Auto-brightness minimum floor</string>
+    <string name="auto_brightness_min_floor_summary">Add a second handle to the brightness slider that sets the lowest brightness adaptive brightness may reach, so the screen never dims below it in the current environment</string>
 
     <!-- Statusbar colored icons -->
     <string name="statusbar_colored_icons_title">Colored icons</string>
@@ -1012,9 +1026,6 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <string name="system_black_theme_summary">Force black background colors</string>
 
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Clear all notification button</string>
-    <string name="notification_material_dismiss_summary">Replace clear all notification text with material style floating button</string>
-
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Back gesture animation</string>
     <string name="back_gesture_arrow_summary">Show an animated arrow for back gesture</string>
@@ -1057,6 +1068,10 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <!-- Screenshot shutter sound  -->
     <string name="screenshot_shutter_sound_title">Screenshot sound</string>
     <string name="screenshot_shutter_sound_summary">Play sound when screenshot is taken</string>
+
+    <!-- Audio focus -->
+    <string name="disable_audio_focus_title">Disable audio focus</string>
+    <string name="disable_audio_focus_summary">Allow multiple apps to play audio at the same time</string>
 
     <!-- QS tiles layout  -->
     <string name="qs_layout_category_title">Tiles layout</string>
@@ -1778,11 +1793,63 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <string name="theme_engine_recent_label">Recent custom colors</string>
     <string name="theme_engine_applied">Accent applied</string>
     <string name="theme_engine_mode_title">Palette style</string>
-    <string name="theme_engine_mode_substratum">Substratum</string>
+    <string name="theme_engine_mode_substratum">Abyss</string>
     <string name="theme_engine_mode_monet">Monet</string>
-    <string name="theme_engine_mode_summary">Substratum uses pitch-black surfaces with one vivid accent (8.1/Substratum look). Monet derives a Material You tonal palette from the accent.</string>
+    <string name="theme_engine_mode_summary">Abyss derives cool, near-black surfaces from your accent and paints that accent flat everywhere. Monet derives a Material You tonal palette from it instead.</string>
     <string name="theme_engine_mode_applied">Palette style applied</string>
     <!-- IchthysOS: global app hibernation master switch (Misc settings) -->
     <string name="app_hibernation_title">Manage apps if unused</string>
     <string name="app_hibernation_summary">Master switch for auto-hibernating/archiving unused apps. Turn off to keep every app active — no permissions removed and no auto-archive, for all apps.</string>
+
+    <!-- IchthysOS: charging control. Taken verbatim from LineageParts (lineage-23.0)
+         res/values/strings.xml so the existing LineageOS translations stay applicable, except
+         charging_control_summary which is new here (LineageParts uses a dynamic
+         enabled/disabled summary provider; this screen is a static entry in the IchthysOS tab). -->
+    <string name="charging_control_title">Charging control</string>
+    <string name="charging_control_summary">Limit charging or time a full charge to protect battery health</string>
+    <string name="charging_control_enable_title">Enable charging control</string>
+    <string name="charging_control_mode_title">Charging mode</string>
+    <string name="charging_control_mode_auto_title">Automatic schedule</string>
+    <string name="charging_control_mode_auto_summary">Automatically determine when to start charging based on alarms set</string>
+    <string name="charging_control_mode_custom_title">Custom schedule</string>
+    <string name="charging_control_mode_custom_summary">Set a target time to full charge</string>
+    <string name="charging_control_mode_limit_title">Limit charging</string>
+    <string name="charging_control_mode_limit_summary">Limit charging to a certain percentage</string>
+    <string name="charging_control_start_time_title">Start time</string>
+    <string name="charging_control_start_time_summary">Charging control activates when you start charging after %s</string>
+    <string name="charging_control_target_time_title">Target time to full charge</string>
+    <string name="charging_control_target_time_summary">Battery will be fully charged by %s</string>
+    <string name="charging_control_limit_title">Limit</string>
+
+    <!-- IchthysOS: duress / emergency wipe credential -->
+    <string name="ichthys_security_category">Security</string>
+    <string name="duress_credential_title">Emergency wipe code (duress PIN)</string>
+    <!-- Search keywords. The feature is known as a "duress PIN"/"duress code" outside this ROM,
+         so make it findable by those names as well as by the user-facing title. -->
+    <string name="duress_credential_keywords" translatable="false">duress, duress pin, duress code, duress password, emergency wipe, emergency wipe code, wipe code, wipe pin, panic pin, panic code, self destruct, secondary pin, second pin, fake pin, distress pin, erase data</string>
+    <string name="duress_credential_summary">A duress PIN: a second lock screen code that permanently destroys all data on this device</string>
+    <string name="duress_set_title">Set emergency wipe code (duress PIN)</string>
+    <string name="duress_status_not_set">Not set</string>
+    <string name="duress_status_set">Set. Entering it at the lock screen destroys all data on this device.</string>
+    <string name="duress_requires_lockscreen">Set a PIN or password for this device first</string>
+    <string name="duress_remove_title">Remove emergency wipe code</string>
+    <string name="duress_remove_summary">Stop the emergency wipe code from working</string>
+    <string name="duress_footer">If this code is entered anywhere your normal PIN or password is asked for, this device immediately destroys the encryption keys for all of its user data and restarts to erase itself. This cannot be undone, cannot be cancelled once started, and there is no recovery. Nothing is backed up first.\n\nThe code must be different from your real PIN or password, and at least 4 characters long. It cannot be recovered or shown later — only replaced or removed.\n\nStorage on a removable SD card is not encrypted by this device and is not erased.</string>
+    <string name="duress_set_dialog_message">Choose a code you will never type by accident. It must be a different value from your real PIN or password.</string>
+    <string name="duress_set_confirm">Continue</string>
+    <string name="duress_entry_hint">Emergency wipe code</string>
+    <string name="duress_entry_confirm_hint">Re-enter emergency wipe code</string>
+    <string name="duress_final_warning_title">This permanently destroys your data</string>
+    <string name="duress_final_warning_message">Once this code is set, entering it at any lock screen or credential prompt will destroy every encryption key on this device and erase it. There is no confirmation step, no undo and no recovery. Make sure anything you care about is backed up elsewhere.</string>
+    <string name="duress_final_warning_confirm">I understand, set the code</string>
+    <string name="duress_saved">Emergency wipe code set</string>
+    <string name="duress_removed">Emergency wipe code removed</string>
+    <string name="duress_error_mismatch">The two entries do not match</string>
+    <string name="duress_error_too_short">Must be at least %1$d characters</string>
+    <string name="duress_error_too_short_generic">That code is too short</string>
+    <string name="duress_error_same_as_real">That is your real PIN or password. Choose a different code.</string>
+    <string name="duress_error_wrong_type">The emergency code must be the same kind (PIN or password) as your real lock screen credential</string>
+    <string name="duress_error_autoconfirm_length">PIN auto-confirm is on, so the emergency PIN must have exactly the same number of digits as your real PIN — otherwise it could never be typed at the lock screen</string>
+    <string name="duress_error_generic">Could not set the emergency wipe code</string>
+    <string name="duress_unsupported_type">Emergency wipe codes are only supported when your lock screen uses a PIN or a password</string>
 </resources>

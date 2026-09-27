@@ -22,7 +22,7 @@
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_columns"
         android:title="@string/qs_columns_portrait_title"
-        android:max="6"
+        android:max="10"
         settings:min="2"
         settings:interval="1"
         android:defaultValue="4" />
@@ -30,7 +30,7 @@
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_columns_landscape"
         android:title="@string/qs_columns_landscape_title"
-        android:max="6"
+        android:max="10"
         settings:min="2"
         settings:interval="1"
         android:defaultValue="4" />
@@ -38,7 +38,7 @@
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_rows"
         android:title="@string/qs_rows_portrait_title"
-        android:max="5"
+        android:max="8"
         settings:min="2"
         settings:interval="1"
         android:defaultValue="4" />
@@ -46,7 +46,7 @@
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_rows_landscape"
         android:title="@string/qs_rows_landscape_title"
-        android:max="3"
+        android:max="5"
         settings:min="1"
         settings:interval="1"
         android:defaultValue="2" />
@@ -54,7 +54,7 @@
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qqs_tiles_rows"
         android:title="@string/qqs_rows_portrait_title"
-        android:max="3"
+        android:max="5"
         settings:min="1"
         settings:interval="1"
         android:defaultValue="2" />

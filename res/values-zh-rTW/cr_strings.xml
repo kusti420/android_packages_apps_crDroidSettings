@@ -779,8 +779,6 @@
     <string name="system_black_theme_title">使用深色主題</string>
     <string name="system_black_theme_summary">強制使用黑色背景</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">全部清除按鈕</string>
-    <string name="notification_material_dismiss_summary">以浮動按鈕取代「清除所有通知」文字</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">返回手勢動畫</string>
     <string name="back_gesture_arrow_summary">觸發返回手勢時顯示動畫</string>

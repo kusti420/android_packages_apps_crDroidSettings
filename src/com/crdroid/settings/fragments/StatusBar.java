@@ -49,6 +49,7 @@ import com.crdroid.settings.fragments.statusbar.BatteryBar;
 import com.crdroid.settings.fragments.statusbar.Clock;
 import com.crdroid.settings.fragments.statusbar.DynamicBar;
 import com.crdroid.settings.fragments.statusbar.NetworkTrafficSettings;
+import com.crdroid.settings.fragments.statusbar.StatusBarIcons;
 import com.crdroid.settings.preferences.SystemSettingSeekBarPreference;
 import com.crdroid.settings.utils.DeviceUtils;
 import com.crdroid.settings.utils.TelephonyUtils;
@@ -248,6 +249,7 @@ public class StatusBar extends SettingsPreferenceFragment implements
         Clock.reset(mContext);
         DynamicBar.Companion.reset(mContext);
         NetworkTrafficSettings.reset(mContext);
+        StatusBarIcons.reset(mContext);
     }
 
     private void updateQuickPulldownSummary(int value) {

@@ -782,8 +782,6 @@ Küçük bir bağış, bu projenin devam etmesine ve gelişmesine yardımcı olu
     <string name="system_black_theme_title">Siyah temayı kullan</string>
     <string name="system_black_theme_summary">Siyah arka plan rengine zorla</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Tüm bildirimleri temizleme tuşu</string>
-    <string name="notification_material_dismiss_summary">Tümünü temizleme bildirim metnini materyal stili kayan tuş ile değiştirin</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Geri hareketi animasyonu</string>
     <string name="back_gesture_arrow_summary">Geri hareketi için animasyonlu bir ok göster</string>

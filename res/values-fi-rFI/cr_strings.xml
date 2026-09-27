@@ -783,8 +783,6 @@ Voit hylätä tämän viestin mutta tukesi auttaa paljon.</string>
     <string name="system_black_theme_title">Käytä mustaa teemaa</string>
     <string name="system_black_theme_summary">Pakota mustat taustavärit</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Tyhjennä kaikki ilmoitukset -painike</string>
-    <string name="notification_material_dismiss_summary">Korvaa tyhjennä kaikki ilmoitusteksti materiaalityylillä kelluvalla painikkeella</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Takaisin eleen animaatio</string>
     <string name="back_gesture_arrow_summary">Näytä animoitu nuoli takaisin-eleelle</string>

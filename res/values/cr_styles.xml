@@ -65,10 +65,26 @@
          counterpart, so in dark mode the app bar resolved its accent to a dark tone that clashed
          with the rest of the system. Follow the theme accent instead, which DeviceDefault already
          swaps per light/dark. -->
-    <style name="CrDroidMaterialOverlay" parent="ThemeOverlay.MaterialComponents">
-        <item name="colorAccent">?android:attr/colorAccent</item>
-        <item name="colorPrimary">?android:attr/colorAccent</item>
-        <item name="colorSecondary">?android:attr/colorAccent</item>
+    <!-- IchthysOS: this MUST be a full Theme.MaterialComponents, not a ThemeOverlay.
+         com.google.android.material.tabs.TabLayout runs ThemeEnforcement.checkAppCompatTheme()
+         in its constructor, which demands the inflating context's theme descend from
+         Theme.AppCompat. A ThemeOverlay is merged onto the host theme rather than being such a
+         theme itself, so with Settings' platform activity theme the check threw
+         IllegalArgumentException, the tab host failed to inflate, and the whole IchthysOS tab
+         crashed on open. LayoutInflater applies this via android:theme as a ContextThemeWrapper,
+         which copies the activity theme first and then layers this on top - so the
+         ?android:attr/* references below still resolve to the live platform accent. -->
+    <style name="CrDroidMaterialOverlay" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- IchthysOS: these MUST be concrete colours, not ?android:attr/colorAccent.
+             ThemeEnforcement's check is literally hasValue(androidx.appcompat.R.attr.colorPrimary).
+             A theme attribute reference that does not resolve in the host theme comes back as
+             TYPE_NULL, so pointing colorPrimary at ?android:attr/colorAccent OVERRODE the valid
+             value inherited from Theme.MaterialComponents with nothing - hasValue() returned false
+             and every Material widget in the tab host threw. system_accent1_500 is the user's
+             accent as a real colour resource, so it always resolves. -->
+        <item name="colorAccent">@android:color/system_accent1_500</item>
+        <item name="colorPrimary">@android:color/system_accent1_500</item>
+        <item name="colorSecondary">@android:color/system_accent1_500</item>
     </style>
 
     <style name="op_control_text_style_base">

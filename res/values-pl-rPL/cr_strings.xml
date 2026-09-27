@@ -786,8 +786,6 @@ Niewielka darowizna pomaga utrzymać ten projekt i ulepszać go. Możesz zignoro
     <string name="system_black_theme_title">Używaj czarnego motywu</string>
     <string name="system_black_theme_summary">Wymuszaj czarne kolory tła</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Przycisk \"Wyczyść wszystkie powiadomienia\"</string>
-    <string name="notification_material_dismiss_summary">Zamień tekst \"Wyczyść wszystkie powiadomienia\" na pływający przycisk</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animacja gestu \"Wstecz\"</string>
     <string name="back_gesture_arrow_summary">Pokaż animowaną strzałkę dla gestu wstecz</string>

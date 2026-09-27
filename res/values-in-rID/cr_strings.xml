@@ -780,8 +780,6 @@ Donasi kecil akan membantu proyek ini tetap berjalan dan berkembang. Anda dapat 
     <string name="system_black_theme_title">Gunakan tema gelap</string>
     <string name="system_black_theme_summary">Paksa warna latar belakang hitam</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Tombol hapus semua notifikasi</string>
-    <string name="notification_material_dismiss_summary">Ganti teks hapus semua notifikasi dengan tombol mengambang gaya material</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animasi gestur kembali</string>
     <string name="back_gesture_arrow_summary">Tampilkan animasi panah untuk gestur kembali</string>

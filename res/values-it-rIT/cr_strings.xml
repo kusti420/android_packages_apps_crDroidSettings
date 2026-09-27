@@ -782,8 +782,6 @@ Una piccola donazione aiuta a mantenere vivo e a migliorare questo progetto. Puo
     <string name="system_black_theme_title">Usa il tema scuro</string>
     <string name="system_black_theme_summary">Forza i colori di sfondo scuri</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Pulsante cancella tutte le notifiche</string>
-    <string name="notification_material_dismiss_summary">Sostituisci il pulsante di notifica cancella tutto con un pulsante fluttuante in stile material</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animazione gesto indietro</string>
     <string name="back_gesture_arrow_summary">Mostra una freccia animata per il gesto indietro</string>

@@ -18,6 +18,7 @@ package com.crdroid.settings.fragments;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -159,6 +160,17 @@ public class Buttons extends SettingsPreferenceFragment implements
         final boolean showCameraWake = DeviceUtils.canWakeUsingCameraKey(getActivity());
         final boolean showVolumeWake = DeviceUtils.canWakeUsingVolumeKeys(getActivity());
 
+        // IchthysOS: config_deviceHardwareKeys only describes PHYSICAL keys (it is 64, "volume
+        // only", on a52sxq), which is why the home/recents action lists used to be removed here
+        // and the screen looked empty. The on-screen navigation buttons are a separate thing:
+        // they live in the Launcher taskbar and their long-press / double-tap actions are
+        // consumed by TaskbarNavButtonController, so gate those two lists on the navigation bar
+        // instead. Everything that really does need a physical key (wake-on-key, answer-call)
+        // stays gated on the hardware mask below.
+        final boolean hasNavButtons = hasOnScreenNavButtons(getActivity());
+        final boolean showHomeActions = hasHomeKey || hasNavButtons;
+        final boolean showAppSwitchActions = hasAppSwitchKey || hasNavButtons;
+
         final PreferenceCategory powerCategory = prefScreen.findPreference(CATEGORY_POWER);
         final PreferenceCategory homeCategory = prefScreen.findPreference(CATEGORY_HOME);
         final PreferenceCategory backCategory = prefScreen.findPreference(CATEGORY_BACK);
@@ -169,9 +181,13 @@ public class Buttons extends SettingsPreferenceFragment implements
         final PreferenceCategory cameraCategory = prefScreen.findPreference(CATEGORY_CAMERA);
         final PreferenceCategory extrasCategory = prefScreen.findPreference(CATEGORY_EXTRAS);
 
-        mHardwareKeysDisable = (SwitchPreferenceCompat) extrasCategory.findPreference(HWKEYS_DISABLED);
-        mSwapCapacitiveKeys = extrasCategory.findPreference(KEY_SWAP_CAPACITIVE_KEYS);
-        mAnbi = (SwitchPreferenceCompat) extrasCategory.findPreference(KEY_ANBI);
+        // NOTE: every findPreference() below can legitimately return null - this XML has whole
+        // blocks commented out for hardware this device does not have - and
+        // PreferenceGroup.removePreference(null) throws. Removals therefore all go through
+        // removePref(key), which is a no-op when the preference isn't there.
+        mHardwareKeysDisable = findPreference(HWKEYS_DISABLED);
+        mSwapCapacitiveKeys = findPreference(KEY_SWAP_CAPACITIVE_KEYS);
+        mAnbi = findPreference(KEY_ANBI);
 
         // Power button ends calls.
         mPowerEndCall = findPreference(KEY_POWER_END_CALL);
@@ -183,13 +199,22 @@ public class Buttons extends SettingsPreferenceFragment implements
         // Home button answers calls.
         mHomeAnswerCall = findPreference(KEY_HOME_ANSWER_CALL);
 
-        Action defaultHomeLongPressAction = Action.fromIntSafe(DeviceUtils.getLineageInteger(
-                getActivity(), org.lineageos.platform.internal.R.integer.config_longPressOnHomeBehavior, 3));
+        // IchthysOS: stock would default the on-screen home button's long press to the assistant
+        // (VOICE_SEARCH), but this ROM has no assistant, so TaskbarNavButtonController's
+        // DEFAULT_HOME_LONG_PRESS_ACTION is NOTHING. Keep the two in agreement or the list would
+        // show the wrong thing. (VOICE_SEARCH is also no longer offered in
+        // navbar_keys_action_entries at all.)
+        Action defaultHomeLongPressAction = hasHomeKey
+                ? Action.fromIntSafe(DeviceUtils.getLineageInteger(getActivity(),
+                        org.lineageos.platform.internal.R.integer.config_longPressOnHomeBehavior, 3))
+                : Action.NOTHING;
         Action defaultHomeDoubleTapAction = Action.fromIntSafe(DeviceUtils.getLineageInteger(
                 getActivity(), org.lineageos.platform.internal.R.integer.config_doubleTapOnHomeBehavior, 0));
         Action defaultAppSwitchLongPressAction = Action.fromIntSafe(DeviceUtils.getLineageInteger(
                 getActivity(), org.lineageos.platform.internal.R.integer.config_longPressOnAppSwitchBehavior, 0));
-        Action defaultAssistLongPressAction = Action.VOICE_SEARCH;
+        // IchthysOS: was VOICE_SEARCH upstream; no assistant on this ROM. (Dead on a52sxq anyway
+        // - there is no capacitive assist key, so the whole assist_key category is removed.)
+        Action defaultAssistLongPressAction = Action.NOTHING;
         Action homeLongPressAction = Action.fromSettings(resolver,
                 LineageSettings.System.KEY_HOME_LONG_PRESS_ACTION,
                 defaultHomeLongPressAction);
@@ -201,9 +226,12 @@ public class Buttons extends SettingsPreferenceFragment implements
         Action appSwitchLongPressAction = Action.fromSettings(resolver,
                 LineageSettings.System.KEY_APP_SWITCH_LONG_PRESS_ACTION,
                 defaultAppSwitchLongPressAction);
+        // IchthysOS: default NOTHING, not LAST_APP. TaskbarNavButtonController has to hold a
+        // recents tap back for the double-tap timeout whenever a double-tap action is set, so a
+        // non-NOTHING default would put ~300ms of latency on every recents tap out of the box.
         Action appSwitchDoubleTapAction = Action.fromSettings(resolver,
                 LineageSettings.System.KEY_APP_SWITCH_DOUBLE_TAP_ACTION,
-                Action.LAST_APP);
+                Action.NOTHING);
         Action assistLongPressAction = Action.fromSettings(resolver,
                 LineageSettings.System.KEY_ASSIST_LONG_PRESS_ACTION,
                 defaultAssistLongPressAction);
@@ -211,18 +239,21 @@ public class Buttons extends SettingsPreferenceFragment implements
                 LineageSettings.System.KEY_BACK_LONG_PRESS_ACTION,
                 defaultBackLongPressAction);
 
-        if (isKeyDisablerSupported(getActivity())) {
+        if (isKeyDisablerSupported(getActivity()) && mHardwareKeysDisable != null) {
             mHardwareKeysDisable.setOnPreferenceChangeListener(this);
         } else {
-            extrasCategory.removePreference(mHardwareKeysDisable);
+            removePref(HWKEYS_DISABLED);
+            mHardwareKeysDisable = null;
         }
 
         if (!isKeySwapperSupported(getActivity())) {
-            extrasCategory.removePreference(mSwapCapacitiveKeys);
+            removePref(KEY_SWAP_CAPACITIVE_KEYS);
+            mSwapCapacitiveKeys = null;
         }
 
-        if (!hasHomeKey && !hasBackKey && !hasMenuKey && !hasAssistKey && !hasAppSwitchKey) {
-            extrasCategory.removePreference(mAnbi);
+        if (mAnbi == null
+                || (!hasHomeKey && !hasBackKey && !hasMenuKey && !hasAssistKey && !hasAppSwitchKey)) {
+            removePref(KEY_ANBI);
             mAnbi = null;
         } else if (isKeyDisablerSupported(getActivity())) {
             mAnbi.setEnabled(!(Settings.System.getIntForUser(resolver,
@@ -232,49 +263,57 @@ public class Buttons extends SettingsPreferenceFragment implements
 
         if (hasPowerKey) {
             if (!TelephonyUtils.isVoiceCapable(getActivity())) {
-                powerCategory.removePreference(mPowerEndCall);
+                removePref(KEY_POWER_END_CALL);
                 mPowerEndCall = null;
             }
             if (!DeviceUtils.deviceSupportsFlashLight(getActivity())) {
-                powerCategory.removePreference(mTorchLongPressPowerGesture);
-                powerCategory.removePreference(mTorchLongPressPowerTimeout);
+                removePref(KEY_TORCH_LONG_PRESS_POWER_GESTURE);
+                removePref(KEY_TORCH_LONG_PRESS_POWER_TIMEOUT);
+                mTorchLongPressPowerGesture = null;
+                mTorchLongPressPowerTimeout = null;
             }
         }
-        if (!hasPowerKey || powerCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(powerCategory);
+        if (!hasPowerKey || isEmpty(powerCategory)) {
+            removePref(CATEGORY_POWER);
         }
 
-        if (hasHomeKey) {
-            if (!showHomeWake) {
-                homeCategory.removePreference(findPreference(KEY_HOME_WAKE_SCREEN));
-            }
-
-            if (!TelephonyUtils.isVoiceCapable(getActivity())) {
-                homeCategory.removePreference(mHomeAnswerCall);
-                mHomeAnswerCall = null;
-            }
-
+        // Home. The wake / answer-call toggles need a physical key; the action lists also work
+        // for the on-screen home button (see hasNavButtons above).
+        if (!hasHomeKey || !showHomeWake) {
+            removePref(KEY_HOME_WAKE_SCREEN);
+        }
+        if (!hasHomeKey || !TelephonyUtils.isVoiceCapable(getActivity())) {
+            removePref(KEY_HOME_ANSWER_CALL);
+            mHomeAnswerCall = null;
+        }
+        if (showHomeActions) {
             mHomeLongPressAction = initList(KEY_HOME_LONG_PRESS, homeLongPressAction);
             mHomeDoubleTapAction = initList(KEY_HOME_DOUBLE_TAP, homeDoubleTapAction);
+        } else {
+            removePref(KEY_HOME_LONG_PRESS);
+            removePref(KEY_HOME_DOUBLE_TAP);
         }
-        if (!hasHomeKey || homeCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(homeCategory);
+        if (isEmpty(homeCategory)) {
+            removePref(CATEGORY_HOME);
         }
 
+        // Back. Note that back long-press is intentionally NOT offered for the on-screen back
+        // button: it uses a bespoke touch listener feeding the predictive-back animation, and
+        // binding its long press races that. So this stays gated on a physical back key.
         if (hasBackKey) {
             if (!showBackWake) {
-                backCategory.removePreference(findPreference(KEY_BACK_WAKE_SCREEN));
+                removePref(KEY_BACK_WAKE_SCREEN);
             }
 
             mBackLongPressAction = initList(KEY_BACK_LONG_PRESS, backLongPressAction);
         }
-        if (!hasBackKey || backCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(backCategory);
+        if (!hasBackKey || isEmpty(backCategory)) {
+            removePref(CATEGORY_BACK);
         }
 
         if (hasMenuKey) {
             if (!showMenuWake) {
-                menuCategory.removePreference(findPreference(KEY_MENU_WAKE_SCREEN));
+                removePref(KEY_MENU_WAKE_SCREEN);
             }
 
             Action pressAction = Action.fromSettings(resolver,
@@ -286,13 +325,13 @@ public class Buttons extends SettingsPreferenceFragment implements
                         hasAssistKey ? Action.NOTHING : Action.APP_SWITCH);
             mMenuLongPressAction = initList(KEY_MENU_LONG_PRESS, longPressAction);
         }
-        if (!hasMenuKey || menuCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(menuCategory);
+        if (!hasMenuKey || isEmpty(menuCategory)) {
+            removePref(CATEGORY_MENU);
         }
 
         if (hasAssistKey) {
             if (!showAssistWake) {
-                assistCategory.removePreference(findPreference(KEY_ASSIST_WAKE_SCREEN));
+                removePref(KEY_ASSIST_WAKE_SCREEN);
             }
 
             Action pressAction = Action.fromSettings(resolver,
@@ -301,24 +340,31 @@ public class Buttons extends SettingsPreferenceFragment implements
 
             mAssistLongPressAction = initList(KEY_ASSIST_LONG_PRESS, assistLongPressAction);
         }
-        if (!hasAssistKey || assistCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(assistCategory);
+        if (!hasAssistKey || isEmpty(assistCategory)) {
+            removePref(CATEGORY_ASSIST);
         }
 
+        // Recents / app switch. Same split as home: the wake toggle and the SHORT press need a
+        // physical key, the long-press and double-tap lists also drive the on-screen button.
+        if (!hasAppSwitchKey || !showAppSwitchWake) {
+            removePref(KEY_APP_SWITCH_WAKE_SCREEN);
+        }
         if (hasAppSwitchKey) {
-            if (!showAppSwitchWake) {
-                appSwitchCategory.removePreference(findPreference(KEY_APP_SWITCH_WAKE_SCREEN));
-            }
-
             Action pressAction = Action.fromSettings(resolver,
                     LineageSettings.System.KEY_APP_SWITCH_ACTION, Action.APP_SWITCH);
             mAppSwitchPressAction = initList(KEY_APP_SWITCH_PRESS, pressAction);
-
+        } else {
+            removePref(KEY_APP_SWITCH_PRESS);
+        }
+        if (showAppSwitchActions) {
             mAppSwitchLongPressAction = initList(KEY_APP_SWITCH_LONG_PRESS, appSwitchLongPressAction);
             mAppSwitchDoubleTapAction = initList(KEY_APP_SWITCH_DOUBLE_TAP, appSwitchDoubleTapAction);
+        } else {
+            removePref(KEY_APP_SWITCH_LONG_PRESS);
+            removePref(KEY_APP_SWITCH_DOUBLE_TAP);
         }
-        if (!hasAppSwitchKey || appSwitchCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(appSwitchCategory);
+        if (isEmpty(appSwitchCategory)) {
+            removePref(CATEGORY_APPSWITCH);
         }
 
         if (hasCameraKey) {
@@ -326,24 +372,26 @@ public class Buttons extends SettingsPreferenceFragment implements
             mCameraSleepOnRelease = findPreference(KEY_CAMERA_SLEEP_ON_RELEASE);
 
             if (!showCameraWake) {
-                prefScreen.removePreference(mCameraWakeScreen);
+                removePref(KEY_CAMERA_WAKE_SCREEN);
+                mCameraWakeScreen = null;
             }
             // Only show 'Camera sleep on release' if the device has a focus key
             if (DeviceUtils.getLineageBoolean(getActivity(), org.lineageos.platform.internal.R.bool.config_singleStageCameraKey, false)) {
-                prefScreen.removePreference(mCameraSleepOnRelease);
+                removePref(KEY_CAMERA_SLEEP_ON_RELEASE);
+                mCameraSleepOnRelease = null;
             }
         }
-        if (!hasCameraKey || cameraCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(cameraCategory);
+        if (!hasCameraKey || isEmpty(cameraCategory)) {
+            removePref(CATEGORY_CAMERA);
         }
 
         if (hasVolumeKeys) {
             if (!showVolumeWake) {
-                volumeCategory.removePreference(findPreference(KEY_VOLUME_WAKE_SCREEN));
+                removePref(KEY_VOLUME_WAKE_SCREEN);
             }
 
             if (!TelephonyUtils.isVoiceCapable(getActivity())) {
-                volumeCategory.removePreference(findPreference(KEY_VOLUME_ANSWER_CALL));
+                removePref(KEY_VOLUME_ANSWER_CALL);
             }
 
             int cursorControlAction = Settings.System.getInt(resolver,
@@ -358,16 +406,18 @@ public class Buttons extends SettingsPreferenceFragment implements
                 mSwapVolumeButtons.setChecked(swapVolumeKeys > 0);
             }
         } else {
-            extrasCategory.removePreference(findPreference(KEY_CLICK_PARTIAL_SCREENSHOT));
+            removePref(KEY_CLICK_PARTIAL_SCREENSHOT);
         }
-        if (!hasVolumeKeys || volumeCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(volumeCategory);
+        if (!hasVolumeKeys || isEmpty(volumeCategory)) {
+            removePref(CATEGORY_VOLUME);
         }
 
-        backlight = extrasCategory.findPreference(KEY_BUTTON_BACKLIGHT);
-        if (!DeviceUtils.hasButtonBacklightSupport(getActivity())
-                && !DeviceUtils.hasKeyboardBacklightSupport(getActivity())) {
-            extrasCategory.removePreference(backlight);
+        backlight = extrasCategory == null
+                ? null : extrasCategory.findPreference(KEY_BUTTON_BACKLIGHT);
+        if (backlight == null
+                || (!DeviceUtils.hasButtonBacklightSupport(getActivity())
+                        && !DeviceUtils.hasKeyboardBacklightSupport(getActivity()))) {
+            removePref(KEY_BUTTON_BACKLIGHT);
             backlight = null;
         } else if (isKeyDisablerSupported(getActivity())) {
             backlight.setEnabled(!(Settings.System.getIntForUser(resolver,
@@ -392,9 +442,43 @@ public class Buttons extends SettingsPreferenceFragment implements
             }
         }
 
-        if (extrasCategory.getPreferenceCount() == 0) {
-            prefScreen.removePreference(extrasCategory);
+        if (isEmpty(extrasCategory)) {
+            removePref(CATEGORY_EXTRAS);
         }
+    }
+
+    /**
+     * Removes a preference (or a whole category) by key, anywhere in the tree. A no-op when the
+     * key isn't present, which is the point: crDroidSettings' button XML has entire blocks
+     * commented out for hardware a52sxq does not have, so findPreference() returns null for them
+     * and the old {@code group.removePreference(findPreference(key))} pattern threw an NPE and
+     * took the whole screen down.
+     */
+    private void removePref(String key) {
+        final PreferenceScreen screen = getPreferenceScreen();
+        if (screen != null) {
+            screen.removePreferenceRecursively(key);
+        }
+    }
+
+    /** True if the category is absent or has nothing left in it. */
+    private static boolean isEmpty(PreferenceCategory category) {
+        return category == null || category.getPreferenceCount() == 0;
+    }
+
+    /**
+     * Whether this device has on-screen navigation buttons whose long press / double tap can be
+     * bound. These are drawn by the Launcher taskbar and exist on any handheld regardless of
+     * config_deviceHardwareKeys, which only describes physical keys. Kept deliberately
+     * independent of the current navigation_mode: in gesture navigation there is simply nothing
+     * to long press, and having the preferences vanish and reappear as the user switches modes
+     * is worse than leaving them idle.
+     */
+    private static boolean hasOnScreenNavButtons(Context context) {
+        final PackageManager pm = context.getPackageManager();
+        return !pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_WATCH)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     @Override
@@ -429,7 +513,19 @@ public class Buttons extends SettingsPreferenceFragment implements
     private ListPreference initList(String key, int value) {
         ListPreference list = getPreferenceScreen().findPreference(key);
         if (list == null) return null;
-        list.setValue(Integer.toString(value));
+        String stringValue = Integer.toString(value);
+        if (list.findIndexOfValue(stringValue) < 0) {
+            // The stored action is not one this list offers. That is expected: the on-screen
+            // nav button lists use navbar_keys_action_values, a subset of the full action set,
+            // so a value carried over from a hardware-key config (or from an older build) can
+            // land here. Show the first entry ("nothing") rather than an empty summary and a
+            // dialog with nothing selected.
+            final CharSequence[] entryValues = list.getEntryValues();
+            if (entryValues != null && entryValues.length > 0) {
+                stringValue = entryValues[0].toString();
+            }
+        }
+        list.setValue(stringValue);
         list.setSummary(list.getEntry());
         list.setOnPreferenceChangeListener(this);
         return list;
@@ -439,7 +535,9 @@ public class Buttons extends SettingsPreferenceFragment implements
         String value = (String) newValue;
         int index = pref.findIndexOfValue(value);
         pref.setSummary(pref.getEntries()[index]);
-        LineageSettings.System.putInt(getContentResolver(), setting, Integer.valueOf(value));
+        // USER_CURRENT to match Action.fromSettings(), which reads with USER_CURRENT.
+        LineageSettings.System.putIntForUser(getContentResolver(), setting,
+                Integer.valueOf(value), UserHandle.USER_CURRENT);
     }
 
     private void handleSystemListChange(ListPreference pref, Object newValue, String setting) {
@@ -567,6 +665,21 @@ public class Buttons extends SettingsPreferenceFragment implements
         ContentResolver resolver = mContext.getContentResolver();
         LineageSettings.System.putIntForUser(resolver,
                 LineageSettings.System.CLICK_PARTIAL_SCREENSHOT, 0, UserHandle.USER_CURRENT);
+        // IchthysOS: on-screen navigation button actions (consumed by Launcher3's
+        // TaskbarNavButtonController). Reset to the stock behaviour: assistant on home long
+        // press, nothing else bound.
+        LineageSettings.System.putIntForUser(resolver,
+                LineageSettings.System.KEY_HOME_LONG_PRESS_ACTION,
+                Action.VOICE_SEARCH.ordinal(), UserHandle.USER_CURRENT);
+        LineageSettings.System.putIntForUser(resolver,
+                LineageSettings.System.KEY_HOME_DOUBLE_TAP_ACTION,
+                Action.NOTHING.ordinal(), UserHandle.USER_CURRENT);
+        LineageSettings.System.putIntForUser(resolver,
+                LineageSettings.System.KEY_APP_SWITCH_LONG_PRESS_ACTION,
+                Action.NOTHING.ordinal(), UserHandle.USER_CURRENT);
+        LineageSettings.System.putIntForUser(resolver,
+                LineageSettings.System.KEY_APP_SWITCH_DOUBLE_TAP_ACTION,
+                Action.NOTHING.ordinal(), UserHandle.USER_CURRENT);
         // IchthysOS: torch-on-power is stored in Settings.System so PhoneWindowManager (which has
         // no lineage-sdk dependency) can read it directly.
         Settings.System.putIntForUser(resolver,
@@ -631,9 +744,17 @@ public class Buttons extends SettingsPreferenceFragment implements
                         }
                     }
 
+                    // IchthysOS: keep this in step with onCreate(). The home/recents long-press
+                    // and double-tap actions also drive the ON-SCREEN navigation buttons, so
+                    // they stay searchable on a device with no physical keys; everything that
+                    // genuinely needs a physical key does not.
+                    final boolean hasNavButtons = hasOnScreenNavButtons(context);
+
                     keys.add(KEY_HOME_WAKE_SCREEN);
-                    keys.add(KEY_HOME_LONG_PRESS);
-                    keys.add(KEY_HOME_DOUBLE_TAP);
+                    if (!hasHomeKey && !hasNavButtons) {
+                        keys.add(KEY_HOME_LONG_PRESS);
+                        keys.add(KEY_HOME_DOUBLE_TAP);
+                    }
 
                     if (!DeviceUtils.hasHomeKey(context) || !TelephonyUtils.isVoiceCapable(context)) {
                         keys.add(KEY_HOME_ANSWER_CALL);
@@ -649,8 +770,10 @@ public class Buttons extends SettingsPreferenceFragment implements
                     keys.add(KEY_ASSIST_LONG_PRESS);
                     keys.add(KEY_APP_SWITCH_WAKE_SCREEN);
                     keys.add(KEY_APP_SWITCH_PRESS);
-                    keys.add(KEY_APP_SWITCH_LONG_PRESS);
-                    keys.add(KEY_APP_SWITCH_DOUBLE_TAP);
+                    if (!hasAppSwitchKey && !hasNavButtons) {
+                        keys.add(KEY_APP_SWITCH_LONG_PRESS);
+                        keys.add(KEY_APP_SWITCH_DOUBLE_TAP);
+                    }
                     keys.add(KEY_CAMERA_WAKE_SCREEN);
 
                     if (!DeviceUtils.hasCameraKey(context)) {

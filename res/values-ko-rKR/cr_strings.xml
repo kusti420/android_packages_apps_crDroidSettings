@@ -780,8 +780,6 @@
     <string name="system_black_theme_title">검정 테마 사용</string>
     <string name="system_black_theme_summary">검은색 배경 색상 강제 사용</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">모든 알림 지우기 버튼</string>
-    <string name="notification_material_dismiss_summary">모든 알림 지우기 버튼을 플로팅 버튼으로 교체합니다.</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">뒤로 제스처 애니메이션</string>
     <string name="back_gesture_arrow_summary">뒤로 제스처를 사용했을 때 화살표 애니메이션 표시</string>

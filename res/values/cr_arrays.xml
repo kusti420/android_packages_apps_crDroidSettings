@@ -276,6 +276,22 @@
         <item>2</item>
     </string-array>
 
+    <!-- Quick settings - Battery percent. Same values as the status bar array, plus -1 = leave the
+         QS header alone (percent always shown, position follows the status bar setting). -->
+    <string-array name="qs_show_battery_percent_entries" translatable="false">
+        <item>@string/qs_battery_percent_default</item>
+        <item>@string/status_bar_battery_percent_hidden</item>
+        <item>@string/status_bar_battery_percent_text_inside</item>
+        <item>@string/status_bar_battery_percent_text_next</item>
+    </string-array>
+
+    <string-array name="qs_show_battery_percent_values" translatable="false">
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
     <!-- Status bar - Battery Bar -->
     <string-array name="battery_bar_style_entries" translatable="false">
         <item>@string/battery_bar_style_regular</item>
@@ -396,13 +412,27 @@
         <item>comet</item>
     </string-array>
 
-    <!-- Hardware key rebinding -->
+    <!-- Hardware key rebinding.
+
+         IchthysOS: "Voice search" (DeviceKeysConstants.Action.VOICE_SEARCH, ordinal 4) is
+         commented out of both arrays below rather than deleted, so restoring it is a one-line
+         revert. It is the only assistant/microphone action in this list; "Search" (3) and
+         "In-app search" (5) are kept because on this build both simply inject KEYCODE_SEARCH,
+         which is ordinary text search inside the foreground app and involves no microphone.
+
+         Note the values array is explicit, so removing an entry does NOT renumber the rest: a
+         setting already stored as 4 keeps meaning VOICE_SEARCH. Such a value now degrades to
+         "do nothing" everywhere it is consumed (TaskbarNavButtonController.performKeyAction()
+         returns false for it, PhoneWindowManager's three-finger handler breaks out of the
+         switch), and Action.fromIntSafe() still clamps anything out of range, so nothing
+         crashes and nothing silently invokes an assistant. The ListPreference will show an
+         empty selection for such a value until the user picks something else. -->
     <string-array name="hardware_keys_action_entries" translatable="false">
         <item>@string/hardware_keys_action_nothing</item>
         <item>@string/hardware_keys_action_menu</item>
         <item>@string/hardware_keys_action_app_switch</item>
         <item>@string/hardware_keys_action_search</item>
-        <item>@string/hardware_keys_action_voice_search</item>
+        <!-- <item>@string/hardware_keys_action_voice_search</item> -->
         <item>@string/hardware_keys_action_in_app_search</item>
         <item>@string/hardware_keys_action_launch_camera</item>
         <item>@string/hardware_keys_action_sleep</item>
@@ -425,7 +455,7 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
-        <item>4</item>
+        <!-- <item>4</item> voice search - IchthysOS: assistant removed -->
         <item>5</item>
         <item>6</item>
         <item>7</item>
@@ -441,6 +471,62 @@
         <item>17</item>
         <item>18</item>
         <item>19</item>
+    </string-array>
+
+    <!-- IchthysOS: actions offered for the ON-SCREEN navigation buttons (home / recents long
+         press and double tap). These are consumed by
+         packages/apps/Launcher3/.../taskbar/TaskbarNavButtonController.java, because on this
+         build the 3-button navbar is the Launcher taskbar and its buttons dispatch by direct
+         method call, not by key event - see the block comment in that file.
+
+         The values are the same DeviceKeysConstants.Action ordinals as
+         hardware_keys_action_values, just filtered down to the ones the launcher process can
+         actually perform, so a stored setting stays compatible either way. Deliberately absent:
+           1  menu                    - KEYCODE_MENU is a no-op in practically every modern app
+           9  split screen            - no entry point reachable from the taskbar
+           10 close app               - needs FORCE_STOP_PACKAGES
+           13 partial screenshot      - Android 17 dropped TAKE_SCREENSHOT_SELECTED_REGION
+           16 clear all notifications - needs a connected notification listener
+           19 ringer modes            - needs DND policy access
+         A value from that list still degrades safely to "nothing" if something writes one.
+
+         Also absent, for a different reason:
+           4  voice search            - assistant / microphone; removed from this ROM entirely
+                                        (see the note on hardware_keys_action_entries above).
+                                        performKeyAction() returns false for it, so a stored 4
+                                        behaves like "nothing" rather than invoking anything. -->
+    <string-array name="navbar_keys_action_entries" translatable="false">
+        <item>@string/hardware_keys_action_nothing</item>
+        <item>@string/hardware_keys_action_app_switch</item>
+        <item>@string/hardware_keys_action_search</item>
+        <!-- <item>@string/hardware_keys_action_voice_search</item> IchthysOS: assistant removed -->
+        <item>@string/hardware_keys_action_in_app_search</item>
+        <item>@string/hardware_keys_action_launch_camera</item>
+        <item>@string/hardware_keys_action_sleep</item>
+        <item>@string/hardware_keys_action_last_app</item>
+        <item>@string/hardware_keys_action_play_pause_music</item>
+        <item>@string/hardware_keys_action_screenshot</item>
+        <item>@string/hardware_keys_action_torch</item>
+        <item>@string/hardware_keys_action_volume_panel</item>
+        <item>@string/hardware_keys_action_notifications_panel</item>
+        <item>@string/hardware_keys_action_expand_qs_panel</item>
+    </string-array>
+
+    <string-array name="navbar_keys_action_values" translatable="false">
+        <item>0</item>
+        <item>2</item>
+        <item>3</item>
+        <!-- <item>4</item> voice search - IchthysOS: assistant removed -->
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>15</item>
+        <item>17</item>
+        <item>18</item>
     </string-array>
 
     <!-- Volume key cursor control -->
@@ -1295,11 +1381,23 @@
         <item>@string/recents_type_stock</item>
         <item>@string/recents_type_classic</item>
         <item>@string/recents_type_slim</item>
+        <item>@string/recents_type_grace</item>
+        <item>@string/recents_type_grid</item>
+        <item>@string/recents_type_stack</item>
+        <item>@string/recents_type_list</item>
+        <item>@string/recents_type_slim_list</item>
+        <item>@string/recents_type_grace_ux</item>
     </string-array>
     <string-array name="recents_type_values" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
     </string-array>
 
     <!-- Slim Recents: panel position (Gravity constants) -->
@@ -1345,5 +1443,27 @@
     <string-array name="volume_panel_style_values" translatable="false">
         <item>0</item>
         <item>1</item>
+    </string-array>
+
+    <!-- IchthysOS: charging control modes. Values must match
+         lineageos.health.HealthInterface.MODE_* (1 = AUTO, 2 = MANUAL, 3 = LIMIT).
+         The LIMIT entry is appended at runtime by ChargingControlSettings only when the HAL
+         reports fine-grained control, hence the separate arrays. From LineageParts 23.0. -->
+    <string-array name="charging_control_mode_entries" translatable="false">
+        <item>@string/charging_control_mode_auto_title</item>
+        <item>@string/charging_control_mode_custom_title</item>
+    </string-array>
+
+    <string-array name="charging_control_mode_values" translatable="false">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="charging_control_mode_entries_fine_grained_control" translatable="false">
+        <item>@string/charging_control_mode_limit_title</item>
+    </string-array>
+
+    <string-array name="charging_control_mode_values_fine_grained_control" translatable="false">
+        <item>3</item>
     </string-array>
 </resources>

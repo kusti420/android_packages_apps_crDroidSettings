@@ -782,8 +782,6 @@ Egy kis adomány is segíthet életben tartani és fejleszteni ezt a projektet. 
     <string name="system_black_theme_title">Sötét téma használata</string>
     <string name="system_black_theme_summary">Erőlteti a fekete háttérszíneket</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Minden értesítés törlése gomb</string>
-    <string name="notification_material_dismiss_summary">Lecseréli az összes törlése értesítési szöveget egy új stílusú lebegő gombra</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">A Vissza gesztus animációja</string>
     <string name="back_gesture_arrow_summary">Mutasson egy animált nyilat a \'Vissza\'-mozdulatvezérléshez</string>

@@ -786,8 +786,6 @@
     <string name="system_black_theme_title">שימוש בערכת נושא שחורה</string>
     <string name="system_black_theme_summary">כפיית צבעי רקע שחורים</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">כפתור ניקוי כל ההתראות</string>
-    <string name="notification_material_dismiss_summary">החלפת מלל ניקוי כל ההתראות בכפתור צף בסגנון עיצוב material </string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">הנפשת מחוות חזרה</string>
     <string name="back_gesture_arrow_summary">הצגת חץ מונפש למחוות חזרה</string>

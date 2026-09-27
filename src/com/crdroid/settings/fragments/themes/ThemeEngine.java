@@ -221,7 +221,12 @@ public class ThemeEngine extends SettingsPreferenceFragment {
 
             Settings.Secure.putIntForUser(getContentResolver(),
                     KEY_STYLE_MODE, mode, UserHandle.USER_CURRENT);
-            setPitchBlack(mode == MODE_SUBSTRATUM);
+            // IchthysOS: do NOT force the pure-black switch on when picking the Abyss palette.
+            // The palette is now the default look on its own - tinted near-black surfaces derived
+            // from the accent seed - and "pitch black" is an independent modifier that only drives
+            // the bottom rung of that ladder to true #000 for OLED. Coupling them meant Abyss could
+            // never be had without a pure-black background. The switch is inert on Monet, so
+            // whatever the user had is simply left alone here.
             refreshGrid();
             Toast.makeText(requireContext(), R.string.theme_engine_mode_applied,
                     Toast.LENGTH_SHORT).show();

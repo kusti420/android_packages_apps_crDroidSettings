@@ -782,8 +782,6 @@ Een kleine donatie helpt dit project in leven te houden en te verbeteren. U kunt
     <string name="system_black_theme_title">Gebruik zwart thema</string>
     <string name="system_black_theme_summary">Zwarte achtergrondkleuren forceren</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Alles wissen notificatie knop</string>
-    <string name="notification_material_dismiss_summary">Vervang alles-wissen notificatietekst door zwevende materiaalstijl knop</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Terug-gebaar animatie</string>
     <string name="back_gesture_arrow_summary">Toon een geanimeerde pijl voor terug-gebaar</string>

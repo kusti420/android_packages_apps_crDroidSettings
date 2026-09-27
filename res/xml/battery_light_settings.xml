@@ -18,6 +18,18 @@
         android:key="battery_lights"
         android:title="@string/battery_light_title">
 
+    <!-- IchthysOS (a52sxq): the Galaxy A52s 5G has NO notification/battery LED.
+         /sys/class/leds/{red,green,blue} exist (PM8350 PMIC RGB block) but drive nothing -
+         verified by writing full brightness to all three with no visible output. There is no
+         lights HAL (lshal | grep -i light is empty) and NotificationRecord.mLight is null.
+         Every preference below is therefore dead, so the whole screen is commented out.
+         This also keeps these keys out of the Settings search index, which would otherwise
+         still surface them: lineage-sdk's default config_deviceLightCapabilities is 8
+         (LIGHTS_PULSATING_LED), so LightsCapabilities.blinks() returns true and
+         BatteryLightSettings/NotificationLightSettings do NOT mark them non-indexable.
+         The screen itself is already unreachable - Notifications.java removes the
+         "battery_lights" entry because config_deviceLightCapabilities (8) < 64.
+         Do NOT uncomment unless porting to a device that actually has an LED.
     <lineageos.preference.LineageSystemSettingMainSwitchPreference
         android:key="battery_light_enabled"
         android:title="@string/battery_light_enable_title" />
@@ -80,5 +92,6 @@
             android:dependency="battery_light_enabled" />
 
     </PreferenceCategory>
+    -->
 
 </PreferenceScreen>

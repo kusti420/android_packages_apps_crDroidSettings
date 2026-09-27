@@ -131,6 +131,16 @@
 
     </PreferenceCategory>
 
+    <!-- IchthysOS (a52sxq): the A52s 5G has NO notification/battery LED, so both entries below
+         are dead and their target screens have been emptied (see notification_light_settings.xml
+         and battery_light_settings.xml). This category and both Preference nodes must
+         nevertheless STAY in the XML: Notifications.java does an unconditional
+         findPreference("battery_lights"/"notification_lights"/"light_brightness") and then calls
+         prefScreen.removePreference(...) on the result, so commenting them out here would pass
+         null into removePreference() and crash the Notifications screen. They are already hidden
+         at runtime by exactly that code (config_deviceLightCapabilities = 8 < 64 and
+         config_intrusiveNotificationLed = false), which removes both entries and then this whole
+         category. Removing them properly needs a src/ change, not an XML change. -->
     <PreferenceCategory
         android:key="light_brightness"
         android:title="@string/light_brightness_category">
