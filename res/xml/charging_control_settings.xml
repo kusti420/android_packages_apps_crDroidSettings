@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2023-2025 The LineageOS Project
+     SPDX-FileCopyrightText: 2026 IchthysOS
+     SPDX-License-Identifier: Apache-2.0
+
+     Ported from LineageParts (packages/apps/LineageParts, lineage-23.0):
+     res/xml/charging_control_settings.xml. LineageParts is not built in this ROM, so the
+     charging-control UI lives in crDroidSettings instead. The custom LineageParts widgets
+     were swapped for their crDroidSettings/settingslib equivalents so the screen matches the
+     rest of this ROM's Settings styling.
+
+     Backend: org.lineageos.platform.internal.health.HealthInterfaceService ->
+     vendor.lineage.health.IChargingControl/default ->
+     /sys/class/power_supply/battery/batt_slate_mode (a52sxq).
+-->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+    android:key="charging_control"
+    android:title="@string/charging_control_title">
+
+    <lineageos.preference.LineageSystemSettingMainSwitchPreference
+        android:key="charging_control_enabled"
+        android:title="@string/charging_control_enable_title" />
+
+    <lineageos.preference.LineageSystemSettingListPreference
+        android:key="charging_control_mode"
+        android:icon="@drawable/ic_battery_charging"
+        android:title="@string/charging_control_mode_title"
+        android:entries="@array/charging_control_mode_entries"
+        android:entryValues="@array/charging_control_mode_values"
+        android:dependency="charging_control_enabled" />
+
+    <com.crdroid.settings.fragments.health.StartTimePreference
+        android:key="charging_control_start_time"
+        android:icon="@drawable/ic_alarm"
+        android:title="@string/charging_control_start_time_title"
+        android:persistent="false"
+        android:dependency="charging_control_enabled" />
+
+    <com.crdroid.settings.fragments.health.TargetTimePreference
+        android:key="charging_control_target_time"
+        android:icon="@drawable/ic_battery_charging_full"
+        android:title="@string/charging_control_target_time_title"
+        android:persistent="false"
+        android:dependency="charging_control_enabled" />
+
+    <!-- Value is read/written through HealthInterface, not through a Settings key directly,
+         so this must stay non-persistent. -->
+    <com.crdroid.settings.preferences.CustomSeekBarPreference
+        android:key="charging_control_charging_limit"
+        android:title="@string/charging_control_limit_title"
+        android:max="100"
+        settings:min="50"
+        settings:units="%"
+        android:persistent="false"
+        android:dependency="charging_control_enabled" />
+
+</PreferenceScreen>

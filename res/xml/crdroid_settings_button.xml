@@ -20,6 +20,28 @@
     android:key="button_settings"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
 
+    <!-- IchthysOS (a52sxq): the Galaxy A52s 5G has NO capacitive keys and NO camera key - it is
+         an all-screen phone. "dumpsys input" reports zero devices exposing KEY_HOME /
+         KEY_APPSELECT / KEY_CAMERA, there is no config_deviceHardwareKeys override under
+         device/samsung (so lineage-sdk's default of 64 = KEY_MASK_VOLUME only applies), and
+         there is no device KeyHandler. Anything genuinely bound to that missing hardware stays
+         commented out below.
+
+         The ON-SCREEN navigation buttons are a different story and ARE bound: the home and
+         recents long-press / double-tap actions are live, consumed by
+         packages/apps/Launcher3/.../taskbar/TaskbarNavButtonController.java (on this build the
+         3-button navbar is the Launcher taskbar, and its buttons dispatch by direct method call
+         rather than by key event, so PhoneWindowManager never sees them - see the block comment
+         in that file). Those four preferences use navbar_keys_action_entries/values, which is
+         hardware_keys_action_entries filtered down to what the launcher process can actually do.
+
+         Back long-press is deliberately NOT offered: the back button uses a bespoke touch
+         listener feeding the predictive-back animation, and binding its long press races that.
+
+         Note also that Buttons.java calls findPreference()/removePreference() for many of these
+         keys. It is now null-safe (see removePref() there), so commenting a preference out here
+         no longer risks an NPE - but the empty <PreferenceCategory> shells are still kept for
+         clarity and because Buttons.java removes them by key at runtime. -->
     <PreferenceCategory
         android:key="extras_category"
         android:title="@string/extras_title" >
@@ -45,12 +67,19 @@
                  android:action="org.lineageos.settings.device.ADDITIONAL_BUTTONS_SETTINGS" />
         </lineageos.preference.RemotePreference>
 
+        <!-- No capacitive or camera keys on a52sxq. Despite its generic name this toggle is not a
+             standalone screenshot feature: in crDroid it only changes what a *hardware key
+             long-press* action does (partial vs full screenshot), so it is dead here for the same
+             reason as the rest. It is also the only one of these that Buttons.java leaves visible
+             and searchable on this device (it is only removed / marked non-indexable when the
+             device has no volume keys, and the A52s does have them), so it has to be hidden here.
         <lineageos.preference.LineageSystemSettingSwitchPreference
             android:key="click_partial_screenshot"
             android:icon="@drawable/ic_screenshot"
             android:title="@string/click_partial_screenshot_title"
             android:summary="@string/click_partial_screenshot_summary"
             android:defaultValue="false" />
+        -->
 
         <com.crdroid.settings.fragments.buttons.ButtonBacklightBrightness
             android:key="button_backlight"
@@ -114,6 +143,8 @@
         android:key="home_key"
         android:title="@string/hardware_keys_home_key_title" >
 
+        <!-- Wake-on-home and answer-call-with-home need a physical home key, which a52sxq
+             does not have.
         <lineageos.preference.LineageSystemSettingSwitchPreference
             android:key="home_wake_screen"
             android:icon="@drawable/ic_wake"
@@ -127,14 +158,16 @@
             android:title="@string/home_answer_call_title"
             android:summary="@string/home_answer_call_summary"
             android:persistent="false"/>
+        -->
 
+        <!-- Live: on-screen home button, handled by TaskbarNavButtonController. -->
         <ListPreference
             android:key="hardware_keys_home_long_press"
             android:icon="@drawable/ic_single_tap"
             android:dialogTitle="@string/hardware_keys_long_press_title"
             android:title="@string/hardware_keys_long_press_title"
-            android:entries="@array/hardware_keys_action_entries"
-            android:entryValues="@array/hardware_keys_action_values"
+            android:entries="@array/navbar_keys_action_entries"
+            android:entryValues="@array/navbar_keys_action_values"
             android:persistent="false" />
 
         <ListPreference
@@ -142,8 +175,8 @@
             android:icon="@drawable/ic_double_tap"
             android:dialogTitle="@string/hardware_keys_double_tap_title"
             android:title="@string/hardware_keys_double_tap_title"
-            android:entries="@array/hardware_keys_action_entries"
-            android:entryValues="@array/hardware_keys_action_values"
+            android:entries="@array/navbar_keys_action_entries"
+            android:entryValues="@array/navbar_keys_action_values"
             android:persistent="false" />
     </PreferenceCategory>
 
@@ -151,6 +184,8 @@
         android:key="back_key"
         android:title="@string/hardware_keys_back_key_title" >
 
+        <!-- No capacitive back key on a52sxq (see note at top of file). The empty category
+             shell is kept; Buttons.java removes it by key at runtime.
         <lineageos.preference.LineageSystemSettingSwitchPreference
             android:key="back_wake_screen"
             android:icon="@drawable/ic_wake"
@@ -166,6 +201,7 @@
             android:entries="@array/hardware_keys_action_entries"
             android:entryValues="@array/hardware_keys_action_values"
             android:persistent="false" />
+        -->
 
         <!--<ListPreference
             android:key="hardware_keys_back_double_tap"
@@ -181,6 +217,8 @@
         android:key="menu_key"
         android:title="@string/hardware_keys_menu_key_title" >
 
+        <!-- No capacitive menu key on a52sxq (see note at top of file). The empty category
+             shell is kept; Buttons.java removes it by key at runtime.
         <lineageos.preference.LineageSystemSettingSwitchPreference
             android:key="menu_wake_screen"
             android:icon="@drawable/ic_wake"
@@ -205,12 +243,15 @@
             android:entries="@array/hardware_keys_action_entries"
             android:entryValues="@array/hardware_keys_action_values"
             android:persistent="false" />
+        -->
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="assist_key"
         android:title="@string/hardware_keys_assist_key_title" >
 
+        <!-- No capacitive assist key on a52sxq (see note at top of file). The empty category
+             shell is kept; Buttons.java removes it by key at runtime.
         <lineageos.preference.LineageSystemSettingSwitchPreference
             android:key="assist_wake_screen"
             android:icon="@drawable/ic_wake"
@@ -235,6 +276,7 @@
             android:entries="@array/hardware_keys_action_entries"
             android:entryValues="@array/hardware_keys_action_values"
             android:persistent="false" />
+        -->
 
         <!--<ListPreference
             android:key="hardware_keys_assist_double_tap"
@@ -250,6 +292,9 @@
         android:key="app_switch_key"
         android:title="@string/hardware_keys_appswitch_key_title" >
 
+        <!-- Wake-on-recents needs a physical key. And the recents SHORT press stays hard-wired
+             to "open recents": rebinding it is the one setting that can leave a user with no way
+             back to the task switcher, and nothing else on screen replaces it.
         <lineageos.preference.LineageSystemSettingSwitchPreference
             android:key="app_switch_wake_screen"
             android:icon="@drawable/ic_wake"
@@ -265,14 +310,18 @@
             android:entries="@array/hardware_keys_action_entries"
             android:entryValues="@array/hardware_keys_action_values"
             android:persistent="false" />
+        -->
 
+        <!-- Live: on-screen recents button, handled by TaskbarNavButtonController. The
+             back+recents long-press screen-unpin combo keeps priority over the long-press
+             action while an app is pinned. -->
         <ListPreference
             android:key="hardware_keys_app_switch_long_press"
             android:icon="@drawable/ic_single_tap"
             android:dialogTitle="@string/hardware_keys_long_press_title"
             android:title="@string/hardware_keys_long_press_title"
-            android:entries="@array/hardware_keys_action_entries"
-            android:entryValues="@array/hardware_keys_action_values"
+            android:entries="@array/navbar_keys_action_entries"
+            android:entryValues="@array/navbar_keys_action_values"
             android:persistent="false" />
 
         <ListPreference
@@ -280,8 +329,8 @@
             android:icon="@drawable/ic_double_tap"
             android:dialogTitle="@string/hardware_keys_double_tap_title"
             android:title="@string/hardware_keys_double_tap_title"
-            android:entries="@array/hardware_keys_action_entries"
-            android:entryValues="@array/hardware_keys_action_values"
+            android:entries="@array/navbar_keys_action_entries"
+            android:entryValues="@array/navbar_keys_action_values"
             android:persistent="false" />
     </PreferenceCategory>
 
@@ -289,6 +338,8 @@
         android:key="camera_key"
         android:title="@string/hardware_keys_camera_key_title">
 
+        <!-- No dedicated camera key on a52sxq (see note at top of file). The empty category
+             shell is kept; Buttons.java removes it by key at runtime.
         <lineageos.preference.LineageSystemSettingSwitchPreference
             android:key="camera_wake_screen"
             android:icon="@drawable/ic_wake"
@@ -309,6 +360,7 @@
             android:title="@string/camera_launch_title"
             android:summary="@string/camera_launch_summary"
             android:defaultValue="false" />
+        -->
     </PreferenceCategory>
 
     <PreferenceCategory

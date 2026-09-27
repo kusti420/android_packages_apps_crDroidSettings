@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Copyright (C) 2016-2026 crDroid Android Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!--
+     Every switch key below is a SystemUI status bar icon slot name, taken from
+     frameworks/base/core/res/res/values/config.xml (config_statusBarIcons). Slots that no
+     longer exist in the build are dropped at runtime by StatusBarIcons, and the checked
+     state is not persisted here - it mirrors the Settings.Secure "icon_blacklist" list.
+-->
+<PreferenceScreen
+    android:title="@string/status_bar_icons_title"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
+
+    <PreferenceCategory
+        android:key="status_bar_icons_system_category"
+        android:title="@string/status_bar_icons_system_category">
+
+        <SwitchPreferenceCompat
+            android:key="clock"
+            android:icon="@drawable/ic_clock"
+            android:title="@string/status_bar_icon_clock_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="battery"
+            android:icon="@drawable/ic_battery"
+            android:title="@string/status_bar_icon_battery_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="alarm_clock"
+            android:icon="@drawable/ic_alarm"
+            android:title="@string/status_bar_icon_alarm_clock_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="rotate"
+            android:icon="@drawable/ic_rotation"
+            android:title="@string/status_bar_icon_rotate_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="screen_record"
+            android:icon="@drawable/ic_screenrecord"
+            android:title="@string/status_bar_icon_screen_record_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="connected_display"
+            android:icon="@drawable/ic_television_classic"
+            android:title="@string/status_bar_icon_connected_display_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="managed_profile"
+            android:icon="@drawable/ic_account"
+            android:title="@string/status_bar_icon_managed_profile_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="ime"
+            android:icon="@drawable/ic_keyboard"
+            android:title="@string/status_bar_icon_ime_title"
+            android:persistent="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="status_bar_icons_connectivity_category"
+        android:title="@string/status_bar_icons_connectivity_category">
+
+        <SwitchPreferenceCompat
+            android:key="wifi"
+            android:icon="@drawable/ic_wifi"
+            android:title="@string/status_bar_icon_wifi_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="mobile"
+            android:icon="@drawable/ic_signal"
+            android:title="@string/status_bar_icon_mobile_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="airplane"
+            android:icon="@drawable/ic_airplane_mode"
+            android:title="@string/status_bar_icon_airplane_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="hotspot"
+            android:icon="@drawable/ic_wifi_tethering"
+            android:title="@string/status_bar_icon_hotspot_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="bluetooth"
+            android:icon="@drawable/ic_bluetooth"
+            android:title="@string/status_bar_icon_bluetooth_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="ethernet"
+            android:icon="@drawable/ic_network"
+            android:title="@string/status_bar_icon_ethernet_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="vpn"
+            android:icon="@drawable/ic_vpn_key"
+            android:title="@string/status_bar_icon_vpn_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="data_saver"
+            android:icon="@drawable/ic_data_usage_wifi"
+            android:title="@string/status_bar_icon_data_saver_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="tty"
+            android:icon="@drawable/ic_phone_ring"
+            android:title="@string/status_bar_icon_tty_title"
+            android:persistent="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="status_bar_icons_sound_category"
+        android:title="@string/status_bar_icons_sound_category">
+
+        <SwitchPreferenceCompat
+            android:key="zen"
+            android:icon="@drawable/ic_dnd"
+            android:title="@string/status_bar_icon_zen_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="mute"
+            android:icon="@drawable/ic_bell_ring"
+            android:title="@string/status_bar_icon_mute_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="volume"
+            android:icon="@drawable/ic_vibrate"
+            android:title="@string/status_bar_icon_volume_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="headset"
+            android:icon="@drawable/ic_headphones"
+            android:title="@string/status_bar_icon_headset_title"
+            android:persistent="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="status_bar_icons_privacy_category"
+        android:title="@string/status_bar_icons_privacy_category">
+
+        <SwitchPreferenceCompat
+            android:key="location"
+            android:icon="@drawable/ic_map_marker"
+            android:title="@string/status_bar_icon_location_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="microphone"
+            android:icon="@drawable/ic_mic"
+            android:title="@string/status_bar_icon_microphone_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="camera"
+            android:icon="@drawable/ic_camera"
+            android:title="@string/status_bar_icon_camera_title"
+            android:persistent="false" />
+
+        <SwitchPreferenceCompat
+            android:key="sensors_off"
+            android:icon="@drawable/ic_sign_caution"
+            android:title="@string/status_bar_icon_sensors_off_title"
+            android:persistent="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

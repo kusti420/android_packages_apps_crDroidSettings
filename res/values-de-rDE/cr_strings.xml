@@ -782,8 +782,6 @@ Mit einer kleinen Spende trägst du dazu bei, dass das Projekt am Leben bleibt u
     <string name="system_black_theme_title">Schwarzes Design verwenden</string>
     <string name="system_black_theme_summary">Schwarze Hintergrundfarben erzwingen</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Schaltfläche zum Löschen aller Benachrichtigungen</string>
-    <string name="notification_material_dismiss_summary">Anstelle von Text eine Schaltfläche zum Schließen aller Benachrichtigungen anzeigen</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animation bei Zurück-Geste</string>
     <string name="back_gesture_arrow_summary">Bei Zurück-Geste einen animierten Pfeil zeigen</string>

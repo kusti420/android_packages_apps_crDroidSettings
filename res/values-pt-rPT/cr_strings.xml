@@ -782,8 +782,6 @@ Uma pequena doação ajuda a manter este projeto vivo e a melhorar. Pode descart
     <string name="system_black_theme_title">Usar tema preto</string>
     <string name="system_black_theme_summary">Forçar cor de fundo preta</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Botão de limpar tudo</string>
-    <string name="notification_material_dismiss_summary">Substituir o texto \"limpar tudo\" por um botão flutuante</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animação do gesto de voltar</string>
     <string name="back_gesture_arrow_summary">Mostrar uma seta animada para o gesto de voltar</string>

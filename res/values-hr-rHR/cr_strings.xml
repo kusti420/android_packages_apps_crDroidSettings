@@ -784,8 +784,6 @@ Mala donacija pomaže u održavanju i poboljšanju ovog projekta. Možete odbaci
     <string name="system_black_theme_title">Tamna tema</string>
     <string name="system_black_theme_summary">Forsiranje crne pozadinske boje</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Tipka za brisanje svih obavijesti</string>
-    <string name="notification_material_dismiss_summary">Zamijeni tipku za brisanje svih tekstova obavijesti plutajućom tipkom u stilu materijala</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animacija geste za natrag</string>
     <string name="back_gesture_arrow_summary">Prikaži animiranu strelicu za pokret unatrag</string>

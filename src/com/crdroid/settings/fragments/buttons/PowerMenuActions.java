@@ -100,7 +100,11 @@ public class PowerMenuActions extends SettingsPreferenceFragment {
             }
         }
 
-        if (!TelephonyUtils.isVoiceCapable(getActivity())) {
+        // IchthysOS: this ROM ships without the emergency affordances, so the power menu never
+        // offers an Emergency entry (see GlobalActionsDialogLite). Drop the toggle entirely
+        // rather than leave one that silently does nothing - upstream only hid it on
+        // non-voice-capable devices.
+        if (mEmergencyPref != null) {
             mPowerMenuItemsCategory.removePreference(mEmergencyPref);
             mEmergencyPref = null;
         }

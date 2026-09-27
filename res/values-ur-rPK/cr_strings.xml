@@ -782,8 +782,6 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <string name="system_black_theme_title">کالی تھیم لگائیں</string>
     <string name="system_black_theme_summary">سیاہ پس منظر کے رنگوں کو زبردستی کریں۔</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">سبھی اطلاعات صاف کریں۔</string>
-    <string name="notification_material_dismiss_summary">کلیئر تمام نوٹیفکیشن ٹیکسٹ کو میٹریل اسٹائل فلوٹنگ بٹن سے تبدیل کریں۔</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">پیچھے کے اشارے کی حرکت پذیری۔</string>
     <string name="back_gesture_arrow_summary">پیچھے کے اشارے کے لیے ایک متحرک تیر دکھائیں۔</string>

@@ -782,8 +782,6 @@ Kiçik bir ianə bu layihənin canlı qalmasına və inkişaf etməsinə kömək
     <string name="system_black_theme_title">Qaranlıq temanı istifadə et</string>
     <string name="system_black_theme_summary">Qara fon rənglərini məcbur edin</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Bütün bildirişləri sil düyməsi</string>
-    <string name="notification_material_dismiss_summary">Silinmiş bütün bildiriş mətnini material üslubunda üzən düymə ilə əvəz edin</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Geri jesti animasiyası</string>
     <string name="back_gesture_arrow_summary">Geri jesti üçün animasiyalı oxu göstərin</string>

@@ -8,6 +8,7 @@ package com.crdroid.settings
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -50,7 +51,19 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val root = inflater.inflate(R.layout.crdroid_settings, container, false)
+        // IchthysOS: inflate this layout through a MaterialComponents theme.
+        // com.google.android.material.tabs.TabLayout runs ThemeEnforcement in its constructor and
+        // throws IllegalArgumentException ("requires your app theme to be Theme.AppCompat") unless
+        // the context it is constructed with has an AppCompat-descendant theme. Settings' activity
+        // theme is a platform theme, and the android:theme attribute on the TabLayout in
+        // crdroid_settings.xml is not enough on its own - the host's inflater factory builds the
+        // view without applying it, so the constructor still saw the bare activity theme and the
+        // whole IchthysOS tab crashed on open. Cloning the inflater onto a themed context fixes it
+        // for every view in this layout. The child preference fragments in the pager are created
+        // separately and keep the activity's own theme, so nothing else changes appearance.
+        val themedInflater = inflater.cloneInContext(
+                ContextThemeWrapper(requireContext(), R.style.CrDroidMaterialOverlay))
+        val root = themedInflater.inflate(R.layout.crdroid_settings, container, false)
 
         tabs = root.findViewById(R.id.tabs)
         pager = root.findViewById(R.id.pager)

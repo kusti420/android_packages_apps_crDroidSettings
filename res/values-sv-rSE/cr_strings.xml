@@ -782,8 +782,6 @@ En liten donation hjälper oss att hålla det här projektet vid liv och för at
     <string name="system_black_theme_title">Använd svart tema</string>
     <string name="system_black_theme_summary">Tvinga svarta bakgrundsfärger</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Knapp för att rensa alla aviseringar</string>
-    <string name="notification_material_dismiss_summary">Ersätt rensa all aviseringstext med en flytande knapp i materialstil</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animering för bakåtgest</string>
     <string name="back_gesture_arrow_summary">Visa en animerad pil för bakåtgest</string>

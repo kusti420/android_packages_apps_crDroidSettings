@@ -58,8 +58,15 @@
             android:title="@string/tilt_title"
             android:summary="@string/tilt_summary" />
 
+        <!-- Key is deliberately "doze_pulse_on_pick_up", not "doze_pick_up_gesture" like its
+             siblings. Settings.Secure.DOZE_PICK_UP_GESTURE is the one constant in this group whose
+             NAME and VALUE disagree — AOSP kept the older "doze_pulse_on_pick_up" string. This
+             preference auto-persists to its own android:key, so with the sibling-style key it wrote
+             a setting nothing reads, leaving the real one unset; AmbientDisplayConfiguration then
+             fell back to config_dozePulsePickup (true on sm7325-common), so pickup was permanently
+             on and this switch could not turn it off. -->
         <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="doze_pick_up_gesture"
+            android:key="doze_pulse_on_pick_up"
             android:defaultValue="false"
             android:title="@string/pickup_title"
             android:summary="@string/pickup_summary" />

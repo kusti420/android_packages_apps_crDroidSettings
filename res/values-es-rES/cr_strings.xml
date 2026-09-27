@@ -782,8 +782,6 @@ Una pequeña donación ayuda a mantener este proyecto vivo y en constante mejora
     <string name="system_black_theme_title">Usar tema oscuro</string>
     <string name="system_black_theme_summary">Forzar colores de fondo oscuros</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Botón de borrar todo</string>
-    <string name="notification_material_dismiss_summary">Reemplazar el botón con el texto de borrar notificaciones con un botón flotante</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animación del gesto atrás</string>
     <string name="back_gesture_arrow_summary">Mostrar una flecha animada para el gesto de atrás</string>

@@ -82,6 +82,40 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="ichthys_battery_category"
+        android:title="@string/ichthys_battery_category">
+
+        <!-- Charging control (charge limit / smart charging). Backed by
+             vendor.lineage.health.IChargingControl -> batt_slate_mode. IchthysOS.java removes
+             this entry when HealthInterface reports the feature unsupported. -->
+        <Preference
+            android:key="charging_control"
+            android:icon="@drawable/ic_battery_charging_full"
+            android:title="@string/charging_control_title"
+            android:summary="@string/charging_control_summary"
+            android:fragment="com.crdroid.settings.fragments.health.ChargingControlSettings" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ichthys_privacy_category"
+        android:title="@string/ichthys_privacy_category">
+
+        <!-- Global contacts lockdown. Enforced in two places: PermissionController strips the
+             request before a dialog is ever built (ContactsLockdown) and sweeps apps that already
+             hold the permission (ContactsLockdownReceiver), while ContactsLockdownPolicy in
+             system_server refuses the grant itself so nothing outside can work around it.
+             IchthysOS.java asks for that sweep when this is switched on. -->
+        <com.crdroid.settings.preferences.GlobalSettingSwitchPreference
+            android:key="ichthys_contacts_lockdown"
+            android:icon="@drawable/ic_account_circle"
+            android:title="@string/contacts_lockdown_title"
+            android:summary="@string/contacts_lockdown_summary"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="ichthys_statusbar_category"
         android:title="@string/ichthys_statusbar_category">
 
@@ -94,6 +128,22 @@
             android:entries="@array/status_bar_weather_entries"
             android:entryValues="@array/status_bar_weather_values"
             android:defaultValue="0" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ichthys_security_category"
+        android:title="@string/ichthys_security_category">
+
+        <!-- Duress / emergency wipe credential. Enforcement lives in LockSettingsService;
+             this entry only leads to the screen that sets it. -->
+        <Preference
+            android:key="duress_credential"
+            android:icon="@drawable/ic_lock_alert"
+            android:title="@string/duress_credential_title"
+            android:summary="@string/duress_credential_summary"
+            settings:keywords="@string/duress_credential_keywords"
+            android:fragment="com.crdroid.settings.fragments.security.DuressCredentialSettings" />
 
     </PreferenceCategory>
 

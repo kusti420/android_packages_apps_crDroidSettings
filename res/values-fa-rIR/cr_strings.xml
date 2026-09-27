@@ -782,8 +782,6 @@
     <string name="system_black_theme_title">استفاده از تم مشکی</string>
     <string name="system_black_theme_summary">اجبار رنگ های مشکی پس‌زمینه</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">دکمه پاک کردن تمام اعلان‌ها</string>
-    <string name="notification_material_dismiss_summary">جایگزین متن پاک کردن تمام اعلان با دکمه شناور سبک متریال</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">انیمیشن ژست حرکت عقب</string>
     <string name="back_gesture_arrow_summary">نشان دادن یک پیکان انیمیشنی برای ژست عقب‌گرد</string>

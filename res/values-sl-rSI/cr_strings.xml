@@ -786,8 +786,6 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <string name="system_black_theme_title">Uporabi temno temo</string>
     <string name="system_black_theme_summary">Prisili barve ozadje</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Gumb počisti vsa obvestila</string>
-    <string name="notification_material_dismiss_summary">Zamenjaj počisti celotno besedilo obvestila s plavajočim gumbom v slogu materiala</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animacija Poteze nazaj</string>
     <string name="back_gesture_arrow_summary">Pokaži animirano puščico za Potezo nazaj</string>

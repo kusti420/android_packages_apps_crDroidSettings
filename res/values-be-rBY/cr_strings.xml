@@ -787,8 +787,6 @@
     <string name="system_black_theme_title">Выкарыстоўваць чорную тэму</string>
     <string name="system_black_theme_summary">Прымусовыя чорныя колеры фону</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Кнопка ачысткі ўсіх апавяшчэнняў</string>
-    <string name="notification_material_dismiss_summary">Замяняе тэкст \"Ачысціць усё\" на кнопку</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Анімацыя жэсту назад</string>
     <string name="back_gesture_arrow_summary">Паказаць аніміраваную стрэлку для жэсту \"Назад\"</string>

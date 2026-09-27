@@ -62,7 +62,10 @@ public class DozeSettings extends SettingsPreferenceFragment implements
     private static final String CATEG_DOZE_SENSOR = "doze_sensor";
 
     private static final String KEY_DOZE_TILT_GESTURE = "doze_tilt_gesture";
-    private static final String KEY_DOZE_PICK_UP_GESTURE = "doze_pick_up_gesture";
+    // Must match the android:key in doze_settings.xml, which is "doze_pulse_on_pick_up" — the
+    // value of Settings.Secure.DOZE_PICK_UP_GESTURE. Unlike its siblings, that constant's name
+    // and value differ, so keeping the sibling-style key here would silently break findPreference.
+    private static final String KEY_DOZE_PICK_UP_GESTURE = "doze_pulse_on_pick_up";
     private static final String KEY_DOZE_HANDWAVE_GESTURE = "doze_handwave_gesture";
     private static final String KEY_DOZE_POCKET_GESTURE = "doze_pocket_gesture";
     private static final String KEY_RAISE_TO_WAKE_GESTURE = "raise_to_wake_gesture";

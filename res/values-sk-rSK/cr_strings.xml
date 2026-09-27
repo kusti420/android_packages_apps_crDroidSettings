@@ -787,8 +787,6 @@ Malý dar pomáha udržiavať tento projekt pri živote a zlepšovať sa. Túto 
     <string name="system_black_theme_title">Použiť tmavú tému</string>
     <string name="system_black_theme_summary">Vynútiť čiernu farbu pozadia</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Vymazať všetky upozornenia</string>
-    <string name="notification_material_dismiss_summary">Nahradiť text \"Vymazať všetky upozornenia\" plávajúcim tlačidlom</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animácia gestá Späť</string>
     <string name="back_gesture_arrow_summary">Zobraziť animovanú šípku gesta Späť</string>

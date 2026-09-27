@@ -782,8 +782,6 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <string name="system_black_theme_title">Use black theme</string>
     <string name="system_black_theme_summary">Force black background colors</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Clear all notification button</string>
-    <string name="notification_material_dismiss_summary">Replace clear all notification text with material style floating button</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">ব্যাক জেসচার অ্যানিমেশন</string>
     <string name="back_gesture_arrow_summary">ব্যাক জেস্চার এর জন্য একটি অ্যানিমেটেড তীর চিন দেখান</string>

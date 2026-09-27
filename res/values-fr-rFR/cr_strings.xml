@@ -782,8 +782,6 @@ Un petit don aide à maintenir ce projet en vie et à l\'améliorer. Vous pouvez
     <string name="system_black_theme_title">Utiliser le thème sombre</string>
     <string name="system_black_theme_summary">Forcer l\'utilisation de couleurs d\'arrière-plan sombres</string>
     <!-- Material dismiss all button for notifications -->
-    <string name="notification_material_dismiss_title">Bouton \"Effacer toutes les notifications\"</string>
-    <string name="notification_material_dismiss_summary">Remplacer le texte \"Effacer les notifications\" par un bouton flottant</string>
     <!-- Back gesture animation -->
     <string name="back_gesture_arrow_title">Animation du geste de retour</string>
     <string name="back_gesture_arrow_summary">Afficher une flèche animée pour le geste retour</string>
