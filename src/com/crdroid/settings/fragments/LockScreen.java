@@ -166,6 +166,12 @@ public class LockScreen extends SettingsPreferenceFragment
                 UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver, "ichthys_clock_unlit_dots", 1,
                 UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(resolver, "ichthys_lockscreen_hide_statusbar", 0,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_lockscreen_max_notifs", -1,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_aod_notif_icons", -1,
+                UserHandle.USER_CURRENT);
         PulseSettings.reset(mContext);
         MediaArtSettings.reset(mContext);
         UdfpsAnimation.Companion.reset(mContext);

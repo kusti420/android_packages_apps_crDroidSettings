@@ -73,6 +73,15 @@ public class Navigation extends SettingsPreferenceFragment {
 
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
+        // IchthysOS: gesture pill styling.
+        Settings.System.putIntForUser(resolver, "ichthys_nav_handle_hide", 0,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_nav_handle_width", 100,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_nav_handle_thickness", 100,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_nav_handle_opacity", 100,
+                UserHandle.USER_CURRENT);
         LineageSettings.System.putIntForUser(resolver,
              LineageSettings.System.NAVIGATION_BAR_MENU_ARROW_KEYS, 0, UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver,

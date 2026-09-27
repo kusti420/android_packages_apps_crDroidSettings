@@ -195,6 +195,9 @@ public class StatusBar extends SettingsPreferenceFragment implements
 
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
+        // IchthysOS: notification icon limit back to the device default.
+        Settings.System.putIntForUser(resolver, "ichthys_statusbar_notif_icons", -1,
+                UserHandle.USER_CURRENT);
 
         LineageSettings.System.putIntForUser(resolver,
                 LineageSettings.System.DOUBLE_TAP_SLEEP_GESTURE, 1, UserHandle.USER_CURRENT);

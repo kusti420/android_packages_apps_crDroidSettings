@@ -18,4 +18,122 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+
+    <!-- Gesture pill -->
+    <string name="ichthys_nav_handle_category">Gesture pill</string>
+    <string name="ichthys_nav_handle_hide_title">Hide gesture pill</string>
+    <string name="ichthys_nav_handle_hide_summary">Swipe gestures keep working without the pill</string>
+    <string name="ichthys_nav_handle_width_title">Pill width</string>
+    <string name="ichthys_nav_handle_thickness_title">Pill thickness</string>
+    <string name="ichthys_nav_handle_opacity_title">Pill opacity</string>
+
+    <!-- Animations -->
+    <string name="ichthys_animation_category">Animations</string>
+    <string name="ichthys_screen_reveal_style_title">Screen on/off animation</string>
+    <string name="ichthys_screenshot_preview_timeout_title">Screenshot preview duration</string>
+    <string-array name="ichthys_screen_reveal_style_entries" translatable="false">
+        <item>Default (follows how the screen was woken)</item>
+        <item>Lift</item>
+        <item>Vertical wipe</item>
+        <item>Horizontal wipe</item>
+        <item>Circle from the centre</item>
+        <item>Close from both sides</item>
+    </string-array>
+    <string-array name="ichthys_screen_reveal_style_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="ichthys_screenshot_preview_timeout_entries" translatable="false">
+        <item>Default (6 seconds)</item>
+        <item>3 seconds</item>
+        <item>10 seconds</item>
+        <item>15 seconds</item>
+        <item>30 seconds</item>
+        <item>60 seconds</item>
+    </string-array>
+    <string-array name="ichthys_screenshot_preview_timeout_values" translatable="false">
+        <item>0</item>
+        <item>3</item>
+        <item>10</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+
+    <!-- Status bar -->
+    <string name="ichthys_statusbar_notif_icons_title">Notification icons in the status bar</string>
+    <string-array name="ichthys_notif_icon_limit_entries" translatable="false">
+        <item>Default</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+    </string-array>
+    <string-array name="ichthys_notif_icon_limit_values" translatable="false">
+        <item>-1</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+    </string-array>
+
+    <!-- Lock screen -->
+    <string name="ichthys_lockscreen_hide_statusbar_title">Hide status bar</string>
+    <string name="ichthys_lockscreen_hide_statusbar_summary">No status bar icons or clock on the lock screen</string>
+    <string name="ichthys_lockscreen_max_notifs_title">Notifications on the lock screen</string>
+    <string name="ichthys_aod_notif_icons_title">Notification icons on always-on display</string>
+    <string-array name="ichthys_lockscreen_max_notifs_entries" translatable="false">
+        <item>Default</item>
+        <item>None (shelf only)</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>12</item>
+    </string-array>
+    <string-array name="ichthys_lockscreen_max_notifs_values" translatable="false">
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>12</item>
+    </string-array>
+    <string-array name="ichthys_aod_notif_icons_entries" translatable="false">
+        <item>Default</item>
+        <item>Hidden</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>5</item>
+        <item>8</item>
+        <item>12</item>
+    </string-array>
+    <string-array name="ichthys_aod_notif_icons_values" translatable="false">
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>5</item>
+        <item>8</item>
+        <item>12</item>
+    </string-array>
 </resources>

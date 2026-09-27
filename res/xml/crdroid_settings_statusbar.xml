@@ -125,6 +125,16 @@
 	        android:title="@string/statusbar_notif_count_title"
 	        android:summary="@string/statusbar_notif_count_summary"
 	        android:defaultValue="false" />
+
+        <!-- IchthysOS -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_statusbar_notif_icons"
+            android:icon="@drawable/ic_counter"
+            android:title="@string/ichthys_statusbar_notif_icons_title"
+            android:entries="@array/ichthys_notif_icon_limit_entries"
+            android:entryValues="@array/ichthys_notif_icon_limit_values"
+            android:summary="%s"
+            android:defaultValue="-1" />
     </PreferenceCategory>
 
     <!-- Carrier label -->

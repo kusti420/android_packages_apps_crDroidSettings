@@ -63,4 +63,46 @@
 
     </PreferenceCategory>
 
+    <!-- IchthysOS: gesture pill styling (SystemUI NavigationHandle). -->
+    <PreferenceCategory
+        android:key="ichthys_nav_handle_category"
+        android:title="@string/ichthys_nav_handle_category">
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="ichthys_nav_handle_hide"
+            android:icon="@drawable/ic_navigation"
+            android:disableDependentsState="true"
+            android:title="@string/ichthys_nav_handle_hide_title"
+            android:summary="@string/ichthys_nav_handle_hide_summary"
+            android:defaultValue="false" />
+
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="ichthys_nav_handle_width"
+            android:title="@string/ichthys_nav_handle_width_title"
+            android:defaultValue="100"
+            android:max="150"
+            settings:min="30"
+            settings:units="%"
+            android:dependency="ichthys_nav_handle_hide" />
+
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="ichthys_nav_handle_thickness"
+            android:dependency="ichthys_nav_handle_hide"
+            android:title="@string/ichthys_nav_handle_thickness_title"
+            android:defaultValue="100"
+            android:max="250"
+            settings:min="50"
+            settings:units="%" />
+
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="ichthys_nav_handle_opacity"
+            android:dependency="ichthys_nav_handle_hide"
+            android:title="@string/ichthys_nav_handle_opacity_title"
+            android:defaultValue="100"
+            android:max="100"
+            settings:min="10"
+            settings:units="%" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

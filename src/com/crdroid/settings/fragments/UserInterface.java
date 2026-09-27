@@ -74,6 +74,11 @@ public class UserInterface extends SettingsPreferenceFragment implements
 
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
+        // IchthysOS: screen on/off animation and screenshot preview duration defaults.
+        Settings.System.putIntForUser(resolver, "ichthys_screen_reveal_style", 0,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_screenshot_preview_timeout", 0,
+                UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver,
                 Settings.Secure.PULSE_ON_NEW_TRACKS, 0, UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver,
