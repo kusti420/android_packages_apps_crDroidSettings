@@ -106,10 +106,12 @@
                 android:format12Hour="yyyy"
                 android:format24Hour="yyyy" />
 
+            <!-- IchthysOS: accent2_100 is on_accent (dark) under the Shoal palette and
+                 this clock sits straight on the wallpaper; accent1_100 stays the light accent. -->
             <TextClock
                 android:textSize="11.5sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/system_accent2_100"
+                android:textColor="@android:color/system_accent1_100"
                 android:gravity="center"
                 android:layout_gravity="start|center"
                 android:layout_width="wrap_content"
