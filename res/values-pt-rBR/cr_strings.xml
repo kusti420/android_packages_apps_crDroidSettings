@@ -912,11 +912,6 @@ Uma pequena doação ajuda a manter este projeto vivo e a melhorar. Você pode d
     <string name="show_clipboard_overlay_title">Mostrar sobreposição de texto</string>
     <string name="show_clipboard_overlay_summary">Exibe uma janela no canto inferior esquerdo da tela quando algum texto for copiado para área de transferência</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Bloquear sensor por pacote</string>
-    <string name="sensor_block_summary">Bloquear o acesso de alguns aplicativos a determinados sensores para economizar bateria</string>
-    <string name="sensor_block_app_picker_title">Bloquear sensores para estes aplicativos</string>
-    <string name="add_sensor_block_package_title">Adicionar aplicativos ao bloqueio de sensores</string>
-    <string name="add_sensor_block_package_summary">Sensores significativos de movimento, acelerômetro e aceleração linear serão bloqueados para esses aplicativos</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Patrão de vibração do toque</string>
     <string name="pattern_custom">Personalizado</string>

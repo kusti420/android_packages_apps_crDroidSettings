@@ -914,11 +914,6 @@ O donație mică ajută la menținerea acestui proiect în viață și la îmbun
     <string name="show_clipboard_overlay_title">Afișare suprapunere clipboard</string>
     <string name="show_clipboard_overlay_summary">Arată o suprapunere în colțul din stânga jos al ecranului atunci când ceva este copiat în clipboard</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Blocare senzori</string>
-    <string name="sensor_block_summary">Blocare acces insenzori miscare pentru cateva aplicatii intensive</string>
-    <string name="sensor_block_app_picker_title">Blochează senzorii pentru aceste aplicații</string>
-    <string name="add_sensor_block_package_title">Adăugați aplicații pentru blocare senzor</string>
-    <string name="add_sensor_block_package_summary">Mișcare semnificativă, accelerometru, senzori de accelerare liniară vor fi blocați pentru aceste aplicații</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Model vibrație ton de sonerie</string>
     <string name="pattern_custom">Personalizat</string>

@@ -917,11 +917,6 @@ Malý dar pomáha udržiavať tento projekt pri živote a zlepšovať sa. Túto 
     <string name="show_clipboard_overlay_title">Zobraziť dialóg schránky</string>
     <string name="show_clipboard_overlay_summary">Po skopírovaní niečoho do schránky zobraziť v ľavom dolnom rohu obrazovky dialóg schránky</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Zablokovať senzory</string>
-    <string name="sensor_block_summary">Zablokovať prístup k senzorom pohybu pre niekoľko aplikácií s vysokou spotrebou batérie</string>
-    <string name="sensor_block_app_picker_title">Blokovať senzory v týchto aplikáciách</string>
-    <string name="add_sensor_block_package_title">Pridať aplikácií do Blokovanie senzorov</string>
-    <string name="add_sensor_block_package_summary">Silný pohyb, merač zrýchlenia, senzore lineárneho zrýchlenia budú blokované pre tieto aplikacie</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Vibračný vzor zvonenia</string>
     <string name="pattern_custom">Vlastné</string>

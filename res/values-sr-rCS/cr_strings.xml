@@ -913,11 +913,6 @@
     <string name="show_clipboard_overlay_title">Show clipboard overlay</string>
     <string name="show_clipboard_overlay_summary">Show an overlay in the left bottom corner of the screen when something is copied to the clipboard</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Blokiranje senzora po paketu</string>
-    <string name="sensor_block_summary">Blokiraj pristup određenim senzorima za neke aplikacije kako bi uštedeo bateriju</string>
-    <string name="sensor_block_app_picker_title">Blokiraj senzore za te aplikacije</string>
-    <string name="add_sensor_block_package_title">Dodaj aplikacije za blokiranje senzora</string>
-    <string name="add_sensor_block_package_summary">Akcelerometar, senzor pokreta i senzor linearnog ubrzanja će biti blokirani za te aplikacije</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Šablon vibracije zvona</string>
     <string name="pattern_custom">Prilagođeno</string>

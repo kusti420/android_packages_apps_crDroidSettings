@@ -914,11 +914,6 @@ Mala donacija pomaže u održavanju i poboljšanju ovog projekta. Možete odbaci
     <string name="show_clipboard_overlay_title">Prikaži sloj međuspremnika</string>
     <string name="show_clipboard_overlay_summary">Prikaži sloj u donjem lijevom kutu zaslona kada se nešto kopira u međuspremnik</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Sensor block</string>
-    <string name="sensor_block_summary">Block access to significant motion sensors for few battery intensive apps</string>
-    <string name="sensor_block_app_picker_title">Blokiraj senzore kod ovih aplikacija</string>
-    <string name="add_sensor_block_package_title">Dodavanje aplikacija za blokiranje senzora</string>
-    <string name="add_sensor_block_package_summary">Značajno kretanje, akcelerometar, senzori linearnog ubrzanja bit će blokirani za ove aplikacije</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Uzorak vibracije zvona</string>
     <string name="pattern_custom">Prilagođeno</string>

@@ -911,11 +911,6 @@
     <string name="show_clipboard_overlay_title">Show clipboard overlay</string>
     <string name="show_clipboard_overlay_summary">Show an overlay in the left bottom corner of the screen when something is copied to the clipboard</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">سڕکردنی هەستەوەر بۆ-پاکێج</string>
-    <string name="sensor_block_summary">سڕکردنی گەیشتن بە هەنێ هەستەوەر لەلایەن هەنێ ئەپ بۆ پاراستنی زیاتری ووزە</string>
-    <string name="sensor_block_app_picker_title">سڕکردنی هەستەوەرەکان بۆ ئەم ئەپانە</string>
-    <string name="add_sensor_block_package_title">زیاکردنی ئەپ بۆ سڕکردنی هەستەوەر</string>
-    <string name="add_sensor_block_package_summary">Significant motion, accelerometer, linear acceleration sensors سڕ دەکرێن بۆ ئەم ئەپانە</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Ringtone vibration pattern</string>
     <string name="pattern_custom">دڵخواز</string>

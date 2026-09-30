@@ -912,11 +912,6 @@
     <string name="show_clipboard_overlay_title">显示剪贴板覆盖层</string>
     <string name="show_clipboard_overlay_summary">当有内容复制到剪贴板时，在屏幕的左下角显示一个覆盖层</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Сензор блокиране</string>
-    <string name="sensor_block_summary">Блокирай достъпа на някой сензори за движение за определени приложения изразходващи бетерия</string>
-    <string name="sensor_block_app_picker_title">Блокирайте сензорите за тези приложения</string>
-    <string name="add_sensor_block_package_title">Изберете приложения, за които сензорите са блокирани</string>
-    <string name="add_sensor_block_package_summary">Акселерометър, датчик движение и линейно ускорение ще бъдат блокирани за избраните приложения</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">铃声振动模式</string>
     <string name="pattern_custom">По избор</string>

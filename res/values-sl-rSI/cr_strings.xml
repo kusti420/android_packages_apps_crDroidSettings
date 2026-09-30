@@ -916,11 +916,6 @@ A small donation helps keep this project alive and improving. You can dismiss th
     <string name="show_clipboard_overlay_title">Pokaži prekrivko odložišča</string>
     <string name="show_clipboard_overlay_summary">Prikaži prekrivko v levem spodnjem kotu zaslona, ​​ko je nekaj kopirano v odložišče</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Sensor block</string>
-    <string name="sensor_block_summary">Block access to significant motion sensors for few battery intensive apps</string>
-    <string name="sensor_block_app_picker_title">Blokiraj senzorje za te aplikacije</string>
-    <string name="add_sensor_block_package_title">Dodaj aplikacije za blokiranje senzorjev</string>
-    <string name="add_sensor_block_package_summary">Za te aplikacije bodo blokirani pomembni senzorji gibanja, merilnik pospeška in merilnik linearnega pospeška</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Vzorec vibriranja zvonjenja</string>
     <string name="pattern_custom">Po meri</string>

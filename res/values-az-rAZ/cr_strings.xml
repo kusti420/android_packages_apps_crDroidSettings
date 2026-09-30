@@ -912,11 +912,6 @@ Kiçik bir ianə bu layihənin canlı qalmasına və inkişaf etməsinə kömək
     <string name="show_clipboard_overlay_title">Mübadilə buferini göstər</string>
     <string name="show_clipboard_overlay_summary">Mübadilə buferinə bir şey kopyalandıqda ekranın sol alt küncündə üst-üstə düşməsini göstərin</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Paket başına sensor bloku</string>
-    <string name="sensor_block_summary">Batareyaya qənaət etmək üçün bəzi tətbiqlər üçün müəyyən sensorlara girişi bloklayın</string>
-    <string name="sensor_block_app_picker_title">Bu proqramlar üçün sensorları bloklayın</string>
-    <string name="add_sensor_block_package_title">Sensor bloku üçün proqramlar əlavə edin</string>
-    <string name="add_sensor_block_package_summary">Əhəmiyyətli hərəkət, akselerometr, xətti sürətlənmə sensorları bu tətbiqlər üçün bloklanacaq</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Zəng səsi üçün vibrasiya nümunəsi</string>
     <string name="pattern_custom">Özəl</string>

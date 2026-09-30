@@ -912,11 +912,6 @@ Un petit don aide à maintenir ce projet en vie et à l\'améliorer. Vous pouvez
     <string name="show_clipboard_overlay_title">Afficher un aperçu du presse-papiers</string>
     <string name="show_clipboard_overlay_summary">Afficher un aperçu dans le coin inférieur gauche de l\'écran lorsque quelque chose est copié dans le presse-papiers</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Blocage de capteur par application</string>
-    <string name="sensor_block_summary">Bloquer l’accès à certains capteurs pour les applications énergivores</string>
-    <string name="sensor_block_app_picker_title">Bloquer les capteurs pour ces applications</string>
-    <string name="add_sensor_block_package_title">Ajouter des applications pour le blocage des capteurs</string>
-    <string name="add_sensor_block_package_summary">Mouvements importants, accéléromètre, capteurs d\'accélération linéaire seront bloqués pour ces applications</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Modèle de vibration de la sonnerie</string>
     <string name="pattern_custom">Personnalisée</string>

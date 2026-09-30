@@ -921,11 +921,6 @@
     <string name="show_clipboard_overlay_title">إعدادات CrDroid</string>
     <string name="show_clipboard_overlay_summary">إظهار تراكب في الجزء السفلي الأيسر من الشاشة عندما يتم نسخ شيء ما إلى الحافظة</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">تأمين المستشعر</string>
-    <string name="sensor_block_summary">منع الوصول إلى أجهزة استشعار الحركة الهامة لعدد قليل من التطبيقات لستهلاكها البطارية</string>
-    <string name="sensor_block_app_picker_title">حظر المستشعرات لهذه التطبيقات</string>
-    <string name="add_sensor_block_package_title">إضافة تطبيقات لحظر المستشعرات</string>
-    <string name="add_sensor_block_package_summary">سيتم حظر أجهزة الحركة، التسارع، وأجهزة استشعار التسارع الخطي لهذه التطبيقات</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">نمط اهتزاز النغمة</string>
     <string name="pattern_custom">تخصيص</string>

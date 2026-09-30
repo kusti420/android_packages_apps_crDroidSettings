@@ -917,11 +917,6 @@
     <string name="show_clipboard_overlay_title">Паказваць буфер абмену</string>
     <string name="show_clipboard_overlay_summary">Паказваць змесціва буфера абмену ў левым ніжнім куце экрана, калі нешта капіруецца ў буфер</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Блакаванне датчыкаў</string>
-    <string name="sensor_block_summary">Блакаваць доступ да некаторых датчыкам для эканоміі зарада батарэі</string>
-    <string name="sensor_block_app_picker_title">Блакаванне датчыкаў для гэтых праграм</string>
-    <string name="add_sensor_block_package_title">Дадаць праграмы для блакавання датчыкаў</string>
-    <string name="add_sensor_block_package_summary">Датчыкі руху, акселерометр, лінейны акселерометр будуць заблакаваны для гэтых праграм</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Шаблон вібрацыі пры тэлефанаванні</string>
     <string name="pattern_custom">Карыстацкі</string>

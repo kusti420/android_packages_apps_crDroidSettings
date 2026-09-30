@@ -915,11 +915,6 @@
     <string name="show_clipboard_overlay_title">Zobrazit dialog schránky</string>
     <string name="show_clipboard_overlay_summary">Zobrazit dialog v levém dolním rohu obrazovky, když je něco zkopírováno do schránky</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Blokování senzorů dle aplikací</string>
-    <string name="sensor_block_summary">Blokovat přístup ke snímačům pohybu některým aplikacím s\u00a0vysokou spotřebou energie</string>
-    <string name="sensor_block_app_picker_title">Blokovat senzory v\u00a0těchto aplikacích</string>
-    <string name="add_sensor_block_package_title">Přidat aplikace, ve kterých budou blokovány senzory</string>
-    <string name="add_sensor_block_package_summary">V těchto aplikacích bude zablokováno zaznamenávání významného pohybu a\u00a0senzory akcelerometru a\u00a0lineární akcelerace</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Vzor vibrací vyzvánění</string>
     <string name="pattern_custom">Vlastní</string>

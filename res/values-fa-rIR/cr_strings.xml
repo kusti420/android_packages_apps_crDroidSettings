@@ -912,11 +912,6 @@
     <string name="show_clipboard_overlay_title">نمایش همپوشانی صفحه کلید</string>
     <string name="show_clipboard_overlay_summary">Show an overlay in the left bottom corner of the screen when something is copied to the clipboard</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Sensor block</string>
-    <string name="sensor_block_summary">Block access to significant motion sensors for few battery intensive apps</string>
-    <string name="sensor_block_app_picker_title">سنسور ها را برای این برنامه ها غیر فعال کن</string>
-    <string name="add_sensor_block_package_title">افزودن برنامه برای مسدود کردن سنسور</string>
-    <string name="add_sensor_block_package_summary">حسگرهای حرکت قابل توجه، شتاب‌سنج، شتاب خطی برای این برنامه‌ها مسدود خواهند شد</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">الگوی لرزش در هنگام زنگ خوردن</string>
     <string name="pattern_custom">سفارشی</string>

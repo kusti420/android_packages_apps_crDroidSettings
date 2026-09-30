@@ -916,11 +916,6 @@
     <string name="show_clipboard_overlay_title">הצגת תצוגת-על של הלוח</string>
     <string name="show_clipboard_overlay_summary">הצגת תצוגת-על בפינה השמאלית התחתונה של המסך כאשר מבוצעת העתקה ללוח</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">חסימת חיישנים לפי חבילות</string>
-    <string name="sensor_block_summary">חסימת גישת יישומים מסוימים לחיישנים מוגדרים לשם חיסכון בסוללה</string>
-    <string name="sensor_block_app_picker_title">חסימת החיישנים ליישומים אלה</string>
-    <string name="add_sensor_block_package_title">הוספת יישומים לחסימת גישה שלהם לחיישנים</string>
-    <string name="add_sensor_block_package_summary">הגישה לחיישנים משמעותיים של תנועה, תאוצה ותאוצה לינארית תיחסם עבור יישומים אלה</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">תבנית הרטט בצלצול</string>
     <string name="pattern_custom">מותאם אישית</string>

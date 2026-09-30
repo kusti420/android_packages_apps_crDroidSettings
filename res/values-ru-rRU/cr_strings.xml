@@ -916,11 +916,6 @@
     <string name="show_clipboard_overlay_title">Показывать буфер обмена</string>
     <string name="show_clipboard_overlay_summary">Показывать содержимое буфера обмена в левом нижнем углу экрана, когда что-то копируется в буфер</string>
     <!-- Sensor block per-package -->
-    <string name="sensor_block_title">Блокировка датчиков для приложений</string>
-    <string name="sensor_block_summary">Блокировка доступа к датчикам для выбранных приложений, чтобы экономить заряд батареи</string>
-    <string name="sensor_block_app_picker_title">Датчики для этих приложений заблокированы</string>
-    <string name="add_sensor_block_package_title">Добавить приложения для блокировки</string>
-    <string name="add_sensor_block_package_summary">Датчик движения, линейного ускорения, акселерометр будут заблокированы для этих приложений</string>
     <!-- Vibration patterns -->
     <string name="vibration_pattern_title">Тип вибрации при звонке</string>
     <string name="pattern_custom">Свой выбор</string>

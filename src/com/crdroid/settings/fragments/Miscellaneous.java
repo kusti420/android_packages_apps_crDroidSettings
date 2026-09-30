@@ -36,7 +36,6 @@ import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
-import com.crdroid.settings.fragments.misc.SensorBlock;
 import com.crdroid.settings.fragments.misc.UnrestrictedBackgroundApps;
 
 import java.util.List;
@@ -197,7 +196,6 @@ public class Miscellaneous extends SettingsPreferenceFragment implements
         Settings.Global.putInt(resolver, KEY_UNRESTRICTED_MODE, 0);
         Settings.Global.putInt(resolver, KEY_UNRESTRICTED_PERSIST, 0);
         Settings.Global.putString(resolver, UnrestrictedBackgroundApps.KEY_PACKAGES, null);
-        SensorBlock.reset(mContext);
     }
 
     @Override
