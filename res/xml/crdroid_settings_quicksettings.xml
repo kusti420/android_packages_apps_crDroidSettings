@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2016-2026 crDroid Android Project
+     Copyright (C) 2026 IchthysOS
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,67 +14,125 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- Look > Quick settings: how the panel and its tiles are drawn, what the panel shows
+     (brightness slider, footer buttons, battery estimate) and its haptics. The battery icon in
+     the panel header is on the Battery page (status_bar_battery.xml); the pull-down gestures are in
+     System > Buttons & gestures (crdroid_settings_button.xml).
+
+     This file is the "quickSettings" page for
+     frameworks/base/tools/ichthys-config/gen_crdroid_options.py. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
-    xmlns:lineage="http://schemas.android.com/apk/res-auto">
+    xmlns:lineage="http://schemas.android.com/apk/res-auto"
+    android:title="@string/look_quick_settings_title">
 
+    <!-- Tiles. Panel style, tile shape, labels and animation apply to the Grid tile layout; the
+         Shoal honeycomb (Theme Studio > Quick settings tiles) draws its own circles. -->
     <PreferenceCategory
-         android:title="@string/qs_misc_category">
+        android:key="look_qs_tiles_category"
+        android:title="@string/qs_layout_category_title">
 
-        <!-- QS Header -->
-        <Preference
-            android:key="qs_header_image"
-            android:icon="@drawable/ic_header"
-            android:title="@string/qs_header_image_title"
-            android:summary="@string/qs_header_image_summary"
-            android:fragment="com.crdroid.settings.fragments.quicksettings.QsHeaderImageSettings" />
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_panel_style"
+            android:icon="@drawable/ic_tile_medium"
+            android:title="@string/qs_panel_style_title"
+            android:entries="@array/qs_panel_style_entries"
+            android:entryValues="@array/qs_panel_style_values"
+            android:defaultValue="0" />
 
-        <!-- QS clock
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="show_qs_clock"
-            android:icon="@drawable/ic_clock"
-            android:title="@string/qs_clock_title"
-            android:summary="@string/qs_clock_summary"
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_tile_shape"
+            android:icon="@drawable/ic_shapes"
+            android:title="@string/qs_tile_shape_title"
+            android:entries="@array/qs_tile_shape_entries"
+            android:entryValues="@array/qs_tile_shape_values"
+            android:defaultValue="0" />
+
+        <com.crdroid.settings.preferences.QSTileIconShapePreference
+            android:key="qs_tile_icon_shape"
+            android:icon="@drawable/ic_shapes"
+            android:title="@string/qs_tile_shape_title" />
+
+        <!-- Accent-tinted QS tile icon backgrounds (8.1-style circle behind active tiles).
+             Backend: Settings.Secure "qs_accent_icon_bg", observed by SystemUI CommonTile.kt. -->
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="qs_accent_icon_bg"
+            android:icon="@drawable/ic_sliders"
+            android:title="@string/qs_accent_icon_bg_title"
+            android:summary="@string/qs_accent_icon_bg_summary"
             android:defaultValue="true" />
 
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="qs_tile_label_hide"
+            android:icon="@drawable/ic_text"
+            android:title="@string/qs_tile_label_hide_title"
+            android:summary="@string/qs_tile_label_hide_summary"
+            android:defaultValue="false" />
+
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="qs_header_clock_size"
-            android:icon="@drawable/ic_font"
-            android:title="@string/clock_font_size_title"
-            android:max="27"
+            android:key="qs_tile_label_size"
+            android:icon="@drawable/ic_text"
+            android:title="@string/qs_tile_label_size_title"
+            android:max="15"
             settings:min="10"
             settings:interval="1"
-            android:defaultValue="14"
-            android:dependency="show_qs_clock"
-            settings:units="@string/unit_pixels" /> -->
+            settings:units="sp"
+            android:defaultValue="14" />
 
-        <!-- QS date
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="show_qs_date"
-            android:icon="@drawable/ic_calendar"
-            android:title="@string/qs_date_title"
-            android:summary="@string/qs_date_summary"
-            android:defaultValue="true" /> -->
-
-        <!-- Battery styles. IchthysOS: re-enabled, rendered by SystemUI's QsHeader battery
-             (tracker#37). -->
         <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_battery_style"
-            android:icon="@drawable/ic_battery"
-            android:title="@string/status_bar_battery_style_title"
-            android:entries="@array/qs_battery_style_entries"
-            android:entryValues="@array/qs_battery_style_values"
-            android:defaultValue="-1" />
+            android:key="qs_tile_animation_style"
+            android:icon="@drawable/ic_qs_tile_animation_style"
+            android:title="@string/qs_tile_animation_style_title"
+            android:entries="@array/qs_tile_animation_style_entries"
+            android:entryValues="@array/qs_tile_animation_style_values"
+            android:defaultValue="0" />
 
-        <!-- Battery percent -->
+        <Preference
+            android:key="qs_layout_columns_rows"
+            android:icon="@drawable/ic_qs_tile"
+            android:title="@string/qs_layout_columns_rows_title"
+            android:summary="@string/qs_layout_columns_rows_summary"
+            android:fragment="com.crdroid.settings.fragments.quicksettings.LayoutSettings" />
+
+        <!-- Tile gradient and its colours -->
+        <Preference
+            android:key="gradient_settings"
+            android:icon="@drawable/ic_gradient"
+            android:title="@string/gradient_settings_title"
+            android:summary="@string/gradient_settings_summary"
+            android:fragment="com.crdroid.settings.fragments.ui.GradientSettings" />
+    </PreferenceCategory>
+
+    <!-- Panel -->
+    <PreferenceCategory
+        android:key="look_qs_panel_category"
+        android:title="@string/look_qs_panel_category">
+
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="qs_transparency"
+            android:icon="@drawable/ic_color_bucket"
+            android:title="@string/qs_opacity_title"
+            android:summary="@string/qs_opacity_summary"
+            android:defaultValue="100"
+            settings:interval="1"
+            settings:units="%"
+            android:max="100"
+            android:min="1" />
+
         <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_show_battery_percent"
-            android:icon="@drawable/ic_battery_alert"
-            android:title="@string/status_bar_battery_percent_title"
-            android:entries="@array/qs_show_battery_percent_entries"
-            android:entryValues="@array/qs_show_battery_percent_values"
-            android:defaultValue="-1" />
+            android:key="qs_brightness_slider_shape"
+            android:icon="@drawable/ic_shapes"
+            android:title="@string/qs_brightness_slider_shape_title"
+            android:entries="@array/qs_brightness_slider_shape_entries"
+            android:entryValues="@array/qs_brightness_slider_shape_values"
+            android:defaultValue="0" />
+    </PreferenceCategory>
+
+    <!-- What the panel shows and how it behaves -->
+    <PreferenceCategory
+         android:key="qs_misc_category"
+         android:title="@string/look_qs_content_category">
 
         <!-- Battery estimate -->
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
@@ -91,16 +149,12 @@
             android:summary="@string/lockscreen_quick_settings_summary"
             android:defaultValue="true" />
 
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="qs_transparency"
-            android:icon="@drawable/ic_color_bucket"
-            android:title="@string/qs_opacity_title"
-            android:summary="@string/qs_opacity_summary"
-            android:defaultValue="100"
-            settings:interval="1"
-            settings:units="%"
-            android:max="100"
-            android:min="1" />
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="qs_tile_haptic"
+            android:icon="@drawable/ic_qs_tile"
+            android:title="@string/qs_brightness_slider_haptic_title"
+            android:summary="@string/qs_tile_haptic_summary"
+            android:defaultValue="true" />
 
     </PreferenceCategory>
 
@@ -115,22 +169,6 @@
             android:entries="@array/qs_show_brightness_slider_entries"
             android:entryValues="@array/qs_show_brightness_slider_values"
             android:defaultValue="1" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_show_volume_slider"
-            android:icon="@drawable/ic_sliders"
-            android:title="@string/qs_show_volume_slider_title"
-            android:entries="@array/qs_show_volume_slider_entries"
-            android:entryValues="@array/qs_show_volume_slider_values"
-            android:defaultValue="1" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_brightness_slider_shape"
-            android:icon="@drawable/ic_shapes"
-            android:title="@string/qs_brightness_slider_shape_title"
-            android:entries="@array/qs_brightness_slider_shape_entries"
-            android:entryValues="@array/qs_brightness_slider_shape_values"
-            android:defaultValue="0" />
 
         <lineageos.preference.LineageSecureSettingListPreference
             android:key="qs_brightness_slider_position"
@@ -161,89 +199,11 @@
             android:summary="@string/auto_brightness_min_floor_summary"
             android:defaultValue="false" />
 
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="qs_show_ringer_mode"
-            android:icon="@drawable/ic_speaker_on"
-            android:title="@string/qs_show_ringer_mode_title"
-            android:summary="@string/qs_show_ringer_mode_summary"
-            android:defaultValue="true" />
-
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="qs_layout_category"
-        android:title="@string/qs_layout_category_title">
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_panel_style"
-            android:icon="@drawable/ic_tile_medium"
-            android:title="@string/qs_panel_style_title"
-            android:entries="@array/qs_panel_style_entries"
-            android:entryValues="@array/qs_panel_style_values"
-            android:defaultValue="0" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_tile_shape"
-            android:icon="@drawable/ic_shapes"
-            android:title="@string/qs_tile_shape_title"
-            android:entries="@array/qs_tile_shape_entries"
-            android:entryValues="@array/qs_tile_shape_values"
-            android:defaultValue="0" />
-
-        <com.crdroid.settings.preferences.QSTileIconShapePreference
-            android:key="qs_tile_icon_shape"
-            android:icon="@drawable/ic_shapes"
-            android:title="@string/qs_tile_shape_title" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="qs_tile_label_hide"
-            android:icon="@drawable/ic_text"
-            android:title="@string/qs_tile_label_hide_title"
-            android:summary="@string/qs_tile_label_hide_summary"
-            android:defaultValue="false" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_tile_animation_style"
-            android:icon="@drawable/ic_qs_tile_animation_style"
-            android:title="@string/qs_tile_animation_style_title"
-            android:entries="@array/qs_tile_animation_style_entries"
-            android:entryValues="@array/qs_tile_animation_style_values"
-            android:defaultValue="0" />
-
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="qs_tile_label_size"
-            android:icon="@drawable/ic_text"
-            android:title="@string/qs_tile_label_size_title"
-            android:max="15"
-            settings:min="10"
-            settings:interval="1"
-            settings:units="sp"
-            android:defaultValue="14" />
-
-        <Preference
-            android:key="qs_layout_columns_rows"
-            android:icon="@drawable/ic_qs_tile"
-            android:title="@string/qs_layout_columns_rows_title"
-            android:summary="@string/qs_layout_columns_rows_summary"
-            android:fragment="com.crdroid.settings.fragments.quicksettings.LayoutSettings" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="qs_tile_haptic"
-            android:icon="@drawable/ic_brightness"
-            android:title="@string/qs_brightness_slider_haptic_title"
-            android:summary="@string/qs_tile_haptic_summary"
-            android:defaultValue="true" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory 
+         android:key="qs_footer_category"
          android:title="@string/qs_footer_category">
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="qs_show_data_usage"
-            android:icon="@drawable/ic_swap_vertical"
-            android:title="@string/qs_footer_datausage_title"
-            android:summary="@string/qs_footer_datausage_summary" />
 
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="qs_footer_warnings"
@@ -251,13 +211,6 @@
             android:title="@string/qs_footer_warnings_title"
             android:summary="@string/qs_footer_warnings_summary"
             android:defaultValue="true"/>
-
-        <!--<com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="qs_footer_show_user"
-            android:icon="@drawable/ic_account"
-            android:title="@string/qs_footer_users_icon_title"
-            android:summary="@string/qs_footer_users_icon_summary"
-            android:defaultValue="true" />-->
 
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="qs_footer_show_edit"
@@ -284,4 +237,5 @@
             android:defaultValue="true" />
 
     </PreferenceCategory>
+
 </PreferenceScreen>

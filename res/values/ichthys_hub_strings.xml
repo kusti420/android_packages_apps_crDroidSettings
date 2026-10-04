@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- Strings of the IchthysOS settings entry (ichthys_hub.xml) and the pages it opens. -->
+<resources>
+    <!-- Homepage entry and hub -->
+    <string name="ichthys_hub_summary">Look, privacy, apps and system</string>
+    <string name="ichthys_hub_look_title">Look</string>
+    <string name="ichthys_hub_look_summary">Theme, status bar, quick settings, navigation bar, lock screen and volume</string>
+    <string name="ichthys_hub_privacy_title">Privacy</string>
+    <string name="ichthys_hub_privacy_summary">Guard: firewall, data access, trackers and activity</string>
+    <string name="ichthys_hub_apps_title">Apps</string>
+    <string name="ichthys_hub_apps_summary">Ichthys Apps, background limits and integrity</string>
+    <string name="ichthys_hub_system_title">System</string>
+    <string name="ichthys_hub_system_summary">Buttons and gestures, notifications, sound, charging and about</string>
+
+    <!-- Apps -->
+    <string name="ichthys_apps_store_title">Ichthys Apps</string>
+    <string name="ichthys_apps_store_summary">Install and update apps</string>
+    <string name="ichthys_apps_integrity_category">Integrity</string>
+    <string name="ichthys_apps_install_category">Installing</string>
+
+    <!-- Apps > Background -->
+    <string name="ichthys_background_title">Background</string>
+    <string name="ichthys_background_summary">Unrestricted apps, Backstage, memory and unused apps</string>
+    <string name="ichthys_background_memory_category">Memory</string>
+    <string name="ichthys_background_unused_category">Unused apps</string>
+    <string name="ichthys_backstage_apps_title">Apps in Backstage</string>
+    <string name="ichthys_backstage_apps_none">None</string>
+    <plurals name="ichthys_backstage_apps_count">
+        <item quantity="one">%d app</item>
+        <item quantity="other">%d apps</item>
+    </plurals>
+
+    <!-- System -->
+    <string name="ichthys_buttons_gestures_title">Buttons &amp; gestures</string>
+    <string name="ichthys_buttons_gestures_summary">Power, volume and navigation buttons, back gesture, status bar and lock screen gestures</string>
+    <string name="ichthys_notifications_summary">Heads-up, notification counts and limits, flashlight on calls</string>
+    <string name="ichthys_sound_haptics_title">Sound &amp; haptics</string>
+    <string name="ichthys_sound_haptics_summary">Volume panel and steps, adaptive playback, vibration</string>
+    <string name="ichthys_system_battery_display_category">Battery and display</string>
+    <string name="ichthys_notifications_counts_category">Counts and limits</string>
+    <string name="ichthys_gestures_statusbar_category">Status bar gestures</string>
+    <string name="ichthys_gestures_lockscreen_category">Lock screen gestures</string>
+    <string name="ichthys_gestures_screen_category">Screen gestures</string>
+    <string name="ichthys_haptics_category">Haptics</string>
+
+    <!-- Look -->
+    <string name="look_lock_screen_title">Lock screen and ambient display</string>
+    <string name="look_lock_screen_summary">Weather, media art, music visualizer, ambient display and edge light</string>
+    <string name="look_lock_screen_ambient_category">Ambient display</string>
+    <string name="look_fingerprint_title">Fingerprint</string>
+    <string name="look_fingerprint_summary">Icon, press animation, unlock effects and haptics</string>
+    <string name="look_battery_title">Battery</string>
+    <string name="look_battery_summary">Icon style, percentage, colours, quick settings header and battery bar</string>
+    <string name="look_battery_style_category">Style</string>
+    <string name="look_status_bar_icons_category">Icons</string>
+    <string name="look_status_bar_notif_dot_category">Notification dot</string>
+    <string name="look_status_bar_privacy_category">Indicators</string>
+    <string name="look_status_bar_slot_location_title">Location icon</string>
+    <string name="look_status_bar_slot_microphone_title">Microphone icon</string>
+    <string name="look_status_bar_slot_camera_title">Camera icon</string>
+    <string name="look_status_bar_slot_sensors_off_title">Sensors off icon</string>
+    <string name="look_qs_content_category">Panel content</string>
+    <string name="look_recents_slim_title">Slim recents options</string>
+    <string name="look_recents_slim_summary">Panel side, size, memory bar and colours of the Slim style</string>
+    <string name="look_fp_pack_icon_title">Icon from the icon pack</string>
+    <string name="look_fp_pack_animation_title">Animation from the animation pack</string>
+    <string name="navbar_style_stock">Stock (plain buttons)</string>
+
+    <!-- Colour pickers whose unset value follows the theme accent -->
+    <string name="color_default_accent">Accent (default)</string>
+</resources>

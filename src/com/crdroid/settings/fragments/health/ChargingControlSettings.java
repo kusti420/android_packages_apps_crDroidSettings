@@ -51,7 +51,7 @@ import java.util.stream.Stream;
  * The service only publishes its binder when the org.lineageos.health feature XML is installed
  * (device/samsung/a52sxq/lineage_a52sxq.mk) AND the internal health sources are compiled into
  * org.lineageos.platform (lineage-sdk/Android.bp). Both were missing before this change; if
- * either regresses, isChargingControlSupported() goes false and the IchthysOS tab hides the
+ * either regresses, isChargingControlSupported() goes false and the System page hides the
  * entry rather than showing a dead screen.
  */
 @SearchIndexable
@@ -83,7 +83,7 @@ public class ChargingControlSettings extends SettingsPreferenceFragment
         // HealthInterface.getInstance() throws when the org.lineageos.health feature is declared
         // but the binder never published. The static form swallows that, so probe with it first
         // and bail out before inflating anything. This also covers deep links from search or a
-        // stale shortcut, which bypass the IchthysOS tab's own guard.
+        // stale shortcut, which bypass the System page's own guard.
         if (!HealthInterface.isChargingControlSupported(getContext())) {
             setPreferenceScreen(getPreferenceManager().createPreferenceScreen(getContext()));
             if (getActivity() != null) {

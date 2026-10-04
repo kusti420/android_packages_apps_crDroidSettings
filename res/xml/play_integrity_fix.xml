@@ -47,11 +47,13 @@
         android:key="pif_settings_category"
         android:title="@string/pif_settings">
 
+        <!-- Off by default: on this ROM (microG, no Google Photos) it does nothing useful. The
+             reader, PropImitationHooks in frameworks/base, has to default to off as well. -->
         <com.crdroid.settings.preferences.SecureSettingSwitchPreference
             android:key="spoof_pif_photos"
             android:title="@string/pif_spoof_photos"
             android:summary="@string/pif_spoof_photos_summary"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

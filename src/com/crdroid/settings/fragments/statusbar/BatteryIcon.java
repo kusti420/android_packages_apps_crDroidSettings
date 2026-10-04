@@ -26,14 +26,18 @@ import androidx.preference.Preference;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.android.settings.search.BaseSearchIndexProvider;
+import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.preferences.SystemSettingListPreference;
 
 /**
- * IchthysOS: status bar battery icon options (kusti420/ichthysos-tracker#37). SystemUI observes
- * every key, so changes apply immediately. The style and percent position stay on the status bar
- * page (crDroid's LineageSettings keys).
+ * Look &gt; Status bar &gt; Battery: the one page for how the battery is shown. Icon style and
+ * percentage (crDroid's LineageSettings keys), the IchthysOS icon options
+ * (kusti420/ichthysos-tracker#37; SystemUI observes every key, so changes apply immediately), the
+ * quick settings header icon, and the battery bar.
  */
+@SearchIndexable
 public class BatteryIcon extends SettingsPreferenceFragment
         implements Preference.OnPreferenceChangeListener {
 
@@ -56,7 +60,7 @@ public class BatteryIcon extends SettingsPreferenceFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.battery_icon);
+        addPreferencesFromResource(R.xml.status_bar_battery);
 
         mFillMode = (SystemSettingListPreference) findPreference(KEY_FILL_MODE);
         mFillMode.setOnPreferenceChangeListener(this);
@@ -110,10 +114,47 @@ public class BatteryIcon extends SettingsPreferenceFragment
         for (String key : keys) {
             Settings.System.putStringForUser(resolver, key, null, UserHandle.USER_CURRENT);
         }
+        Settings.System.putIntForUser(resolver,
+                "status_bar_battery_text_charging", 1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "qs_battery_style", -1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                "qs_show_battery_percent", -1, UserHandle.USER_CURRENT);
+        resetBatteryBar(resolver);
+    }
+
+    private static void resetBatteryBar(ContentResolver resolver) {
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR, 0, UserHandle.USER_CURRENT);
+        // No stored colour: SystemUI then draws the bar in the theme accent.
+        Settings.System.putStringForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_COLOR, null, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_THICKNESS, 2, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_STYLE, 0, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_ANIMATE, 1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_CHARGING_COLOR, 0xffffc90f,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_BATTERY_LOW_COLOR, 0xfff90028,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_ENABLE_CHARGING_COLOR, 1,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_BLEND_COLOR, 1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_BLEND_COLOR_REVERSE, 0,
+                UserHandle.USER_CURRENT);
     }
 
     @Override
     public int getMetricsCategory() {
         return MetricsProto.MetricsEvent.VIEW_UNKNOWN;
     }
+
+    public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
+            new BaseSearchIndexProvider(R.xml.status_bar_battery);
 }

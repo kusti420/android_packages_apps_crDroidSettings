@@ -42,9 +42,11 @@ import java.util.Set;
  * Lets the user pick which system icons the status bar draws. SystemUI keeps the hidden slots
  * in the "icon_blacklist" secure setting and watches it through TunerService, so all this
  * screen has to do is maintain that comma separated slot list.
+ *
+ * <p>The privacy slots (location, microphone, camera, sensors_off) are on the status bar page
+ * itself, in its Indicators section; both pages go through {@link SlotSwitches}.
  */
-public class StatusBarIcons extends SettingsPreferenceFragment
-            implements Preference.OnPreferenceChangeListener {
+public class StatusBarIcons extends SettingsPreferenceFragment {
 
     private static final String TAG = "StatusBarIcons";
 
@@ -63,7 +65,7 @@ public class StatusBarIcons extends SettingsPreferenceFragment
     private static final String SLOT_CLOCK = "clock";
     private static final String SLOT_MOBILE = "mobile";
 
-    private final Set<String> mHiddenSlots = new LinkedHashSet<>();
+    private SlotSwitches mSlots;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,64 +73,121 @@ public class StatusBarIcons extends SettingsPreferenceFragment
 
         addPreferencesFromResource(R.xml.status_bar_icons);
 
-        final Context context = getActivity().getApplicationContext();
-
-        loadHiddenSlots();
-
-        // Slot names as SystemUI knows them in this build, so a switch can never survive a
-        // slot being renamed or dropped from the framework.
-        final List<String> validSlots = new ArrayList<>(Arrays.asList(getResources()
-                .getStringArray(com.android.internal.R.array.config_statusBarIcons)));
-        validSlots.add(SLOT_CLOCK);
-
-        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            validSlots.remove(SLOT_MOBILE);
-        }
-
-        updateIconPreferences(getPreferenceScreen(), validSlots);
+        mSlots = new SlotSwitches(getActivity().getApplicationContext());
+        bindGroup(getPreferenceScreen());
     }
 
-    private void updateIconPreferences(PreferenceGroup group, List<String> validSlots) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSlots.refresh();
+    }
+
+    private void bindGroup(PreferenceGroup group) {
         for (int i = group.getPreferenceCount() - 1; i >= 0; i--) {
             final Preference preference = group.getPreference(i);
 
             if (preference instanceof PreferenceGroup) {
-                updateIconPreferences((PreferenceGroup) preference, validSlots);
+                bindGroup((PreferenceGroup) preference);
                 if (((PreferenceGroup) preference).getPreferenceCount() == 0) {
                     group.removePreference(preference);
                 }
                 continue;
             }
 
-            if (!(preference instanceof SwitchPreferenceCompat)) {
-                continue;
-            }
-
-            if (!validSlots.contains(preference.getKey())) {
+            if (preference instanceof SwitchPreferenceCompat
+                    && !mSlots.bind((SwitchPreferenceCompat) preference)) {
                 group.removePreference(preference);
-                continue;
             }
-
-            // Checked means shown, so invert the hide list.
-            ((SwitchPreferenceCompat) preference).setChecked(
-                    !mHiddenSlots.contains(preference.getKey()));
-            preference.setOnPreferenceChangeListener(this);
         }
     }
 
-    private void loadHiddenSlots() {
-        mHiddenSlots.clear();
+    /**
+     * Keeps switches whose key is a status bar icon slot in step with the hide list. Checked
+     * means shown. The list is re-read on every change, because two pages edit it.
+     */
+    public static final class SlotSwitches implements Preference.OnPreferenceChangeListener {
 
+        private final Context mContext;
+        private final List<String> mValidSlots;
+        private final List<SwitchPreferenceCompat> mSwitches = new ArrayList<>();
+
+        public SlotSwitches(Context context) {
+            mContext = context;
+            mValidSlots = validSlots(context);
+        }
+
+        /**
+         * Binds {@code preference} to the slot named by its key. Returns false when the slot
+         * does not exist in this build, in which case the caller should remove the switch.
+         */
+        public boolean bind(SwitchPreferenceCompat preference) {
+            if (preference == null || !mValidSlots.contains(preference.getKey())) {
+                return false;
+            }
+            preference.setChecked(!hiddenSlots(mContext).contains(preference.getKey()));
+            preference.setOnPreferenceChangeListener(this);
+            mSwitches.add(preference);
+            return true;
+        }
+
+        /** Re-reads the hide list into the bound switches. */
+        public void refresh() {
+            final Set<String> hidden = hiddenSlots(mContext);
+            for (SwitchPreferenceCompat preference : mSwitches) {
+                preference.setChecked(!hidden.contains(preference.getKey()));
+            }
+        }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            final String slot = preference.getKey();
+            if (TextUtils.isEmpty(slot)) {
+                return false;
+            }
+
+            final Set<String> hidden = hiddenSlots(mContext);
+            if ((Boolean) newValue) {
+                hidden.remove(slot);
+            } else {
+                hidden.add(slot);
+            }
+
+            // An empty string is deliberate: it keeps the setting written so SystemUI does not
+            // fall back to its default hide list once the user has shown every icon.
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    ICON_HIDE_LIST, TextUtils.join(",", hidden), UserHandle.USER_CURRENT);
+            return true;
+        }
+    }
+
+    /**
+     * Slot names as SystemUI knows them in this build, so a switch can never survive a slot
+     * being renamed or dropped from the framework.
+     */
+    public static List<String> validSlots(Context context) {
+        final List<String> validSlots = new ArrayList<>(Arrays.asList(context.getResources()
+                .getStringArray(com.android.internal.R.array.config_statusBarIcons)));
+        validSlots.add(SLOT_CLOCK);
+        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            validSlots.remove(SLOT_MOBILE);
+        }
+        return validSlots;
+    }
+
+    private static Set<String> hiddenSlots(Context context) {
+        final Set<String> hidden = new LinkedHashSet<>();
         final String hideList = Settings.Secure.getStringForUser(
-                getActivity().getContentResolver(), ICON_HIDE_LIST, UserHandle.USER_CURRENT);
+                context.getContentResolver(), ICON_HIDE_LIST, UserHandle.USER_CURRENT);
         final String[] slots = hideList == null
-                ? getDefaultHiddenSlots() : hideList.split(",");
+                ? getDefaultHiddenSlots(context) : hideList.split(",");
 
         for (String slot : slots) {
             if (!TextUtils.isEmpty(slot)) {
-                mHiddenSlots.add(slot);
+                hidden.add(slot);
             }
         }
+        return hidden;
     }
 
     /**
@@ -136,9 +195,9 @@ public class StatusBarIcons extends SettingsPreferenceFragment
      * config_statusBarIconsToExclude array, so read the same array to keep the switches in
      * sync with what is actually drawn.
      */
-    private String[] getDefaultHiddenSlots() {
+    private static String[] getDefaultHiddenSlots(Context context) {
         try {
-            final Resources res = getActivity().getPackageManager()
+            final Resources res = context.getPackageManager()
                     .getResourcesForApplication(SYSTEMUI_PACKAGE);
             final int resId = res.getIdentifier(
                     DEFAULT_HIDE_LIST_ARRAY, "array", SYSTEMUI_PACKAGE);
@@ -149,26 +208,6 @@ public class StatusBarIcons extends SettingsPreferenceFragment
             // Fall through to the built in list.
         }
         return FALLBACK_HIDE_LIST;
-    }
-
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-        final String slot = preference.getKey();
-        if (TextUtils.isEmpty(slot)) {
-            return false;
-        }
-
-        if ((Boolean) newValue) {
-            mHiddenSlots.remove(slot);
-        } else {
-            mHiddenSlots.add(slot);
-        }
-
-        // An empty string is deliberate: it keeps the setting written so SystemUI does not
-        // fall back to its default hide list once the user has shown every icon.
-        Settings.Secure.putStringForUser(getActivity().getContentResolver(),
-                ICON_HIDE_LIST, TextUtils.join(",", mHiddenSlots), UserHandle.USER_CURRENT);
-        return true;
     }
 
     public static void reset(Context mContext) {

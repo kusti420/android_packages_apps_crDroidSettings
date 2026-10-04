@@ -15,50 +15,41 @@
  */
 package com.crdroid.settings.fragments;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.provider.SearchIndexableResource;
 import android.provider.Settings;
-import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
-import com.crdroid.settings.preferences.SystemSettingListPreference;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
-import com.crdroid.settings.fragments.statusbar.BatteryBar;
 import com.crdroid.settings.fragments.statusbar.BatteryIcon;
 import com.crdroid.settings.fragments.statusbar.Clock;
-import com.crdroid.settings.fragments.statusbar.DynamicBar;
 import com.crdroid.settings.fragments.statusbar.NetworkTrafficSettings;
 import com.crdroid.settings.fragments.statusbar.StatusBarIcons;
-import com.crdroid.settings.preferences.SystemSettingSeekBarPreference;
 import com.crdroid.settings.utils.DeviceUtils;
 
-import lineageos.preference.LineageSystemSettingListPreference;
 import lineageos.providers.LineageSettings;
 
 import java.util.List;
 
+/**
+ * Look &gt; Status bar: the status bar's look and content (clock, battery, logo, icons,
+ * notification dot, privacy indicators, weather, spacing).
+ *
+ * <p>{@link #reset} is the status bar part of "reset all": it also restores the status bar
+ * gestures and the notification count, whose rows are in System &gt; Buttons &amp; gestures
+ * ({@link Buttons}) and System &gt; Notifications ({@link Notifications}).
+ */
 @SearchIndexable
 public class StatusBar extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
@@ -66,21 +57,24 @@ public class StatusBar extends SettingsPreferenceFragment implements
     public static final String TAG = "StatusBar";
 
     private static final String STATUS_BAR_CLOCK_STYLE = "status_bar_clock";
-    private static final String QUICK_PULLDOWN = "qs_quick_pulldown";
-    private static final String STATUS_BAR_CARRIER_KEY = "status_bar_carrier_key";
-    private static final String CARRIER_NAME = "lockscreen_show_carrier";
-    private static final String CUSTOM_CARRIER_LABEL = "lockscreen_show_custom_carrier_text";
+    // IchthysOS: notification dot and privacy indicator (Settings.System, read by SystemUI).
+    private static final String NOTIF_DOT_ENABLED = "ichthys_notif_dot_enabled";
+    private static final String NOTIF_DOT_AOD = "ichthys_notif_dot_aod";
+    private static final String NOTIF_DOT_COLOR = "ichthys_notif_dot_color";
+    private static final String NOTIF_DOT_REPLACE_ICONS = "ichthys_notif_dot_replace_icons";
+    private static final String PRIVACY_INDICATOR_STYLE = "ichthys_privacy_indicator_style";
+    private static final String PRIVACY_INDICATOR_COLOR_BY_TYPE =
+            "ichthys_privacy_indicator_color_by_type";
+    private static final String PRIVACY_INDICATOR_RING_WIDTH =
+            "ichthys_privacy_indicator_ring_width";
+    private static final int PRIVACY_INDICATOR_STYLE_RING = 0;
 
-    private static final int PULLDOWN_DIR_NONE = 0;
-    private static final int PULLDOWN_DIR_RIGHT = 1;
-    private static final int PULLDOWN_DIR_LEFT = 2;
-    private static final int PULLDOWN_DIR_ALWAYS = 3;
+    /** Status bar icon slots shown as switches in the Indicators section. */
+    private static final String[] PRIVACY_SLOTS = {
+        "location", "microphone", "camera", "sensors_off",
+    };
 
-    private LineageSystemSettingListPreference mStatusBarClock;
-    private LineageSystemSettingListPreference mQuickPulldown;
-
-    private Preference mCustomCarrierTextPref;
-    private String mCustomCarrierText;
+    private StatusBarIcons.SlotSwitches mPrivacySlots;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,115 +82,91 @@ public class StatusBar extends SettingsPreferenceFragment implements
 
         addPreferencesFromResource(R.xml.crdroid_settings_statusbar);
 
-        ContentResolver resolver = getActivity().getContentResolver();
-        Context mContext = getActivity().getApplicationContext();
+        final Context context = getActivity().getApplicationContext();
 
-        final PreferenceScreen prefScreen = getPreferenceScreen();
-
-        mStatusBarClock =
-                (LineageSystemSettingListPreference) findPreference(STATUS_BAR_CLOCK_STYLE);
-
-        // Adjust status bar preferences for RTL
-        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-            if (DeviceUtils.hasCenteredCutout(mContext)) {
-                mStatusBarClock.setEntries(R.array.status_bar_clock_position_entries_notch_rtl);
-                mStatusBarClock.setEntryValues(R.array.status_bar_clock_position_values_notch_rtl);
-            } else {
-                mStatusBarClock.setEntries(R.array.status_bar_clock_position_entries_rtl);
-                mStatusBarClock.setEntryValues(R.array.status_bar_clock_position_values_rtl);
+        // Adjust the clock position choices for RTL and a centered cutout.
+        final ListPreference statusBarClock = findPreference(STATUS_BAR_CLOCK_STYLE);
+        if (statusBarClock != null) {
+            if (getResources().getConfiguration().getLayoutDirection()
+                    == View.LAYOUT_DIRECTION_RTL) {
+                if (DeviceUtils.hasCenteredCutout(context)) {
+                    statusBarClock.setEntries(
+                            R.array.status_bar_clock_position_entries_notch_rtl);
+                    statusBarClock.setEntryValues(
+                            R.array.status_bar_clock_position_values_notch_rtl);
+                } else {
+                    statusBarClock.setEntries(R.array.status_bar_clock_position_entries_rtl);
+                    statusBarClock.setEntryValues(R.array.status_bar_clock_position_values_rtl);
+                }
+            } else if (DeviceUtils.hasCenteredCutout(context)) {
+                statusBarClock.setEntries(R.array.status_bar_clock_position_entries_notch);
+                statusBarClock.setEntryValues(R.array.status_bar_clock_position_values_notch);
             }
-        } else if (DeviceUtils.hasCenteredCutout(mContext)) {
-            mStatusBarClock.setEntries(R.array.status_bar_clock_position_entries_notch);
-            mStatusBarClock.setEntryValues(R.array.status_bar_clock_position_values_notch);
         }
 
-        mQuickPulldown =
-                (LineageSystemSettingListPreference) findPreference(QUICK_PULLDOWN);
-        mQuickPulldown.setOnPreferenceChangeListener(this);
-        updateQuickPulldownSummary(mQuickPulldown.getIntValue(0));
-
-        // Adjust status bar preferences for RTL
-        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-            mQuickPulldown.setEntries(R.array.status_bar_quick_qs_pulldown_entries_rtl);
-            mQuickPulldown.setEntryValues(R.array.status_bar_quick_qs_pulldown_values_rtl);
+        // IchthysOS: the ring's colour and width only apply to the ring style.
+        final Preference privacyStyle = findPreference(PRIVACY_INDICATOR_STYLE);
+        if (privacyStyle != null) {
+            privacyStyle.setOnPreferenceChangeListener(this);
+            updatePrivacyRingPreferences(Settings.System.getIntForUser(
+                    context.getContentResolver(), PRIVACY_INDICATOR_STYLE,
+                    PRIVACY_INDICATOR_STYLE_RING, UserHandle.USER_CURRENT));
         }
 
-        // IchthysOS: the lock screen carrier label options (lockscreen_show_carrier and the
-        // custom carrier text) have no consumer in the A17 SystemUI port, so the category is
-        // always removed rather than offering switches that do nothing.
-        Preference carrierCategory = findPreference(STATUS_BAR_CARRIER_KEY);
-        if (carrierCategory != null) {
-            prefScreen.removePreference(carrierCategory);
+        // The privacy icon slots mirror the status bar hide list, like the System icons page.
+        mPrivacySlots = new StatusBarIcons.SlotSwitches(context);
+        for (String slot : PRIVACY_SLOTS) {
+            final SwitchPreferenceCompat preference = findPreference(slot);
+            if (preference != null && !mPrivacySlots.bind(preference)
+                    && preference.getParent() != null) {
+                preference.getParent().removePreference(preference);
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPrivacySlots.refresh();
+    }
+
+    private void updatePrivacyRingPreferences(int style) {
+        final boolean ring = style == PRIVACY_INDICATOR_STYLE_RING;
+        final Preference colorByType = findPreference(PRIVACY_INDICATOR_COLOR_BY_TYPE);
+        if (colorByType != null) {
+            colorByType.setEnabled(ring);
+        }
+        final Preference ringWidth = findPreference(PRIVACY_INDICATOR_RING_WIDTH);
+        if (ringWidth != null) {
+            ringWidth.setEnabled(ring);
         }
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        if (preference == mQuickPulldown) {
-            int value = Integer.parseInt((String) newValue);
-            updateQuickPulldownSummary(value);
+        if (PRIVACY_INDICATOR_STYLE.equals(preference.getKey())) {
+            updatePrivacyRingPreferences(Integer.parseInt((String) newValue));
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean onPreferenceTreeClick(Preference preference) {
-        if (CUSTOM_CARRIER_LABEL.equals(preference.getKey())) {
-            final ContentResolver resolver = getActivity().getContentResolver();
-
-            AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-            alert.setTitle(R.string.custom_carrier_label_title);
-            alert.setMessage(R.string.custom_carrier_label_dialog_message);
-
-            LinearLayout container = new LinearLayout(getActivity());
-            container.setOrientation(LinearLayout.VERTICAL);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(55, 20, 55, 20);
-
-            final EditText input = new EditText(getActivity());
-            input.setText(TextUtils.isEmpty(mCustomCarrierText) ? "" : mCustomCarrierText);
-            input.setSelection(input.getText().length());
-            input.setLayoutParams(lp);
-            input.setGravity(Gravity.START | Gravity.TOP);
-            container.addView(input);
-            alert.setView(container);
-
-            alert.setPositiveButton(getString(android.R.string.ok),
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String value = input.getText().toString();
-                            Settings.System.putStringForUser(resolver,
-                                    CUSTOM_CARRIER_LABEL, value, UserHandle.USER_CURRENT);
-                            updateCustomCarrierTextSummary();
-                        }
-                    });
-            alert.setNegativeButton(getString(android.R.string.cancel), null);
-            alert.show();
-            return true;
-        }
-        return super.onPreferenceTreeClick(preference);
-    }
-
-    private void updateCustomCarrierTextSummary() {
-        if (mCustomCarrierTextPref == null) return;
-        mCustomCarrierText = Settings.System.getStringForUser(
-                getActivity().getContentResolver(),
-                CUSTOM_CARRIER_LABEL, UserHandle.USER_CURRENT);
-        if (TextUtils.isEmpty(mCustomCarrierText)) {
-            mCustomCarrierTextPref.setSummary(R.string.custom_carrier_label_summary);
-        } else {
-            mCustomCarrierTextPref.setSummary(mCustomCarrierText);
-        }
     }
 
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
         // IchthysOS: notification icon limit back to the device default.
         Settings.System.putIntForUser(resolver, "ichthys_statusbar_notif_icons", -1,
+                UserHandle.USER_CURRENT);
+        // IchthysOS: notification dot and privacy indicator back to their defaults.
+        Settings.System.putIntForUser(resolver, NOTIF_DOT_ENABLED, 1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, NOTIF_DOT_AOD, 1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, NOTIF_DOT_COLOR, 0, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, NOTIF_DOT_REPLACE_ICONS, 0,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, PRIVACY_INDICATOR_STYLE,
+                PRIVACY_INDICATOR_STYLE_RING, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, PRIVACY_INDICATOR_COLOR_BY_TYPE, 0,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, PRIVACY_INDICATOR_RING_WIDTH, 2,
                 UserHandle.USER_CURRENT);
 
         LineageSettings.System.putIntForUser(resolver,
@@ -241,40 +211,16 @@ public class StatusBar extends SettingsPreferenceFragment implements
                 Settings.System.DATA_DISABLED_ICON, 1, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
                 Settings.System.WIFI_STANDARD_ICON, 0, UserHandle.USER_CURRENT);
-        Settings.System.putIntForUser(resolver,
-                Settings.System.LOCKSCREEN_SHOW_CARRIER, 1, UserHandle.USER_CURRENT);
-        Settings.System.putStringForUser(resolver,
-                Settings.System.LOCKSCREEN_SHOW_CUSTOM_CARRIER_TEXT, "", UserHandle.USER_CURRENT);
+        // IchthysOS: status bar weather.
+        Settings.System.putIntForUser(resolver, "status_bar_weather", 0,
+                UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_statusbar_weather_anchor_cutout", 1,
+                UserHandle.USER_CURRENT);
 
-        BatteryBar.reset(mContext);
         BatteryIcon.reset(mContext);
         Clock.reset(mContext);
-        DynamicBar.Companion.reset(mContext);
         NetworkTrafficSettings.reset(mContext);
         StatusBarIcons.reset(mContext);
-    }
-
-    private void updateQuickPulldownSummary(int value) {
-        String summary="";
-        switch (value) {
-            case PULLDOWN_DIR_NONE:
-                summary = getResources().getString(
-                    R.string.status_bar_quick_qs_pulldown_off);
-                break;
-            case PULLDOWN_DIR_ALWAYS:
-                summary = getResources().getString(
-                    R.string.status_bar_quick_qs_pulldown_always);
-                break;
-            case PULLDOWN_DIR_LEFT:
-            case PULLDOWN_DIR_RIGHT:
-                summary = getResources().getString(
-                    R.string.status_bar_quick_qs_pulldown_summary,
-                    getResources().getString(value == PULLDOWN_DIR_LEFT
-                        ? R.string.status_bar_quick_qs_pulldown_summary_left
-                        : R.string.status_bar_quick_qs_pulldown_summary_right));
-                break;
-        }
-        mQuickPulldown.setSummary(summary);
     }
 
     @Override
@@ -291,10 +237,13 @@ public class StatusBar extends SettingsPreferenceFragment implements
                 @Override
                 public List<String> getNonIndexableKeys(Context context) {
                     List<String> keys = super.getNonIndexableKeys(context);
-
-                    // IchthysOS: carrier label options are always removed (no consumer).
-                    keys.add(CARRIER_NAME);
-                    keys.add(CUSTOM_CARRIER_LABEL);
+                    // Keep in step with onCreate(): slots this build does not have.
+                    final List<String> validSlots = StatusBarIcons.validSlots(context);
+                    for (String slot : PRIVACY_SLOTS) {
+                        if (!validSlots.contains(slot)) {
+                            keys.add(slot);
+                        }
+                    }
                     return keys;
                 }
             };

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- IchthysOS > System: how the phone behaves (as opposed to how it looks, which is Look).
+
+     ichthys_screenshot_preview_timeout was on the old User interface tab; its ichthys.nix option
+     keeps its path (system.ui.screenshotPreviewTimeout, set in
+     frameworks/base/tools/ichthys-config/gen_crdroid_options.py). -->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+    android:title="@string/ichthys_hub_system_title">
+
+    <Preference
+        android:key="ichthys_buttons_gestures"
+        android:icon="@drawable/ic_buttons"
+        android:title="@string/ichthys_buttons_gestures_title"
+        android:summary="@string/ichthys_buttons_gestures_summary"
+        android:fragment="com.crdroid.settings.fragments.Buttons" />
+
+    <Preference
+        android:key="ichthys_notifications"
+        android:icon="@drawable/ic_notifications"
+        android:title="@string/notifications_title"
+        android:summary="@string/ichthys_notifications_summary"
+        android:fragment="com.crdroid.settings.fragments.Notifications" />
+
+    <Preference
+        android:key="ichthys_sound_haptics"
+        android:icon="@drawable/ic_settings_sound"
+        android:title="@string/ichthys_sound_haptics_title"
+        android:summary="@string/ichthys_sound_haptics_summary"
+        android:fragment="com.crdroid.settings.fragments.Sound" />
+
+    <PreferenceCategory
+        android:key="ichthys_system_battery_display_category"
+        android:title="@string/ichthys_system_battery_display_category">
+
+        <!-- Charging control (charge limit / smart charging). Backed by
+             vendor.lineage.health.IChargingControl -> batt_slate_mode. IchthysSystem.java removes
+             this entry when HealthInterface reports the feature unsupported. -->
+        <Preference
+            android:key="charging_control"
+            android:icon="@drawable/ic_battery_charging_full"
+            android:title="@string/charging_control_title"
+            android:summary="@string/charging_control_summary"
+            android:fragment="com.crdroid.settings.fragments.health.ChargingControlSettings" />
+
+        <!-- Smart Pixels -->
+        <Preference
+            android:key="smart_pixels"
+            android:icon="@drawable/ic_smart_pixels"
+            android:title="@string/smart_pixels_title"
+            android:summary="@string/smart_pixels_summary"
+            android:fragment="com.crdroid.settings.fragments.ui.SmartPixels" />
+
+        <!-- How long the screenshot preview stays. -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_screenshot_preview_timeout"
+            android:icon="@drawable/ic_timelapse_cr"
+            android:title="@string/ichthys_screenshot_preview_timeout_title"
+            android:entries="@array/ichthys_screenshot_preview_timeout_entries"
+            android:entryValues="@array/ichthys_screenshot_preview_timeout_values"
+            android:summary="%s"
+            android:defaultValue="0" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ichthys_security_category"
+        android:title="@string/ichthys_security_category">
+
+        <!-- Duress / emergency wipe credential. Enforcement lives in LockSettingsService;
+             this entry only leads to the screen that sets it. -->
+        <Preference
+            android:key="duress_credential"
+            android:icon="@drawable/ic_lock_alert"
+            android:title="@string/duress_credential_title"
+            android:summary="@string/duress_credential_summary"
+            settings:keywords="@string/duress_credential_keywords"
+            android:fragment="com.crdroid.settings.fragments.security.DuressCredentialSettings" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ichthys_about_category"
+        android:title="@string/about_crdroid">
+
+        <!-- Changelog -->
+        <Preference
+            android:key="crdroid_changelog"
+            android:icon="@drawable/ic_changelog"
+            android:title="@string/changelog_crdroid_title"
+            android:summary="@string/changelog_crdroid_summary">
+            <intent android:action="android.intent.action.MAIN"
+                 android:targetPackage="com.android.settings"
+                 android:targetClass="com.crdroid.settings.fragments.about.ChangelogActivity"/>
+        </Preference>
+
+        <!-- IchthysOS GitHub -->
+        <Preference
+            android:key="crdroid_source"
+            android:icon="@drawable/ic_source"
+            android:title="@string/crdroid_source_title"
+            android:summary="@string/crdroid_source_summary" />
+
+        <!-- IchthysOS Telegram Community -->
+        <Preference
+            android:key="crdroid_telegram"
+            android:icon="@drawable/ic_telegram"
+            android:title="@string/crdroid_telegram_title"
+            android:summary="@string/crdroid_telegram_summary" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

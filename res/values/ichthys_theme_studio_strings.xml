@@ -17,17 +17,28 @@
 <resources>
     <!-- IchthysOS Theme Studio (ichthys.nix front end, tracker#50) -->
     <string name="theme_studio_title">Theme Studio</string>
-    <string name="theme_studio_summary">Presets, shapes, fonts and layouts. Import, export and roll back the whole OS config</string>
-    <string name="theme_studio_look_category">Look</string>
+    <string name="theme_studio_summary">Colours, shapes, fonts and icons, and the look of the status bar, quick settings, navigation bar, lock screen and volume panel. Import, export and roll back the whole OS config</string>
+    <!-- Sections of the Theme Studio page -->
+    <string name="theme_studio_colours_category">Colours</string>
+    <string name="theme_studio_surfaces_category">Surfaces and shape</string>
+    <string name="theme_studio_type_category">Type</string>
+    <string name="theme_studio_icons_category">Icons</string>
+    <string name="theme_studio_statusbar_category">Status bar</string>
+    <string name="theme_studio_qs_category">Quick settings</string>
+    <string name="theme_studio_navbar_category">Navigation bar</string>
+    <string name="theme_studio_lockscreen_category">Lock screen</string>
+    <string name="theme_studio_system_category">Volume and system</string>
     <string name="theme_studio_preset_title">Preset</string>
     <string name="theme_studio_preset_none">None</string>
-    <string name="theme_studio_accent_title">Accent and palette</string>
+    <string name="theme_studio_accent_title">Accent colour</string>
+    <string name="theme_studio_accent_summary">Premade or custom accent, Monet or Abyss surfaces, pitch black</string>
+    <string name="theme_studio_palette_title">Palette style and colour source</string>
+    <string name="theme_studio_palette_summary">How the palette is derived from the accent, and whether the accent comes from the wallpaper</string>
     <string name="theme_studio_radius_title">Corner radius</string>
-    <string name="theme_studio_radius_default">System default</string>
+    <string name="theme_studio_radius_default">Default (22 dp)</string>
     <string name="theme_studio_shape_title">Corner style</string>
     <string name="theme_studio_font_title">System font</string>
     <string name="theme_studio_font_default">Default</string>
-    <string name="theme_studio_layout_category">Layout</string>
     <string name="theme_studio_statusbar_title">Status bar icons</string>
     <string name="theme_studio_qs_title">Quick settings tiles</string>
     <string name="theme_studio_config_category">ichthys.nix</string>
@@ -50,6 +61,17 @@
     <string name="theme_studio_rollback_title">Roll back to generation %1$d?</string>
     <string name="theme_studio_rollback">Roll back</string>
     <string name="theme_studio_restart_hint">Some changes show after SystemUI restarts</string>
+
+    <!-- Pages linked from Theme Studio that hold the look of one part of the system -->
+    <string name="look_status_bar_title">Status bar look</string>
+    <string name="look_status_bar_summary">Clock, battery, logo, icons, notification dot, privacy indicators, weather and padding</string>
+    <string name="look_status_bar_indicators_category">Icons and indicators</string>
+    <string name="look_status_bar_weather_category">Weather</string>
+    <string name="look_quick_settings_title">Quick settings look</string>
+    <string name="look_quick_settings_summary">Panel style, tile shape and labels, columns and rows, gradient, opacity, brightness slider and footer</string>
+    <string name="look_qs_panel_category">Panel</string>
+    <string name="look_qs_battery_category">Battery icon in the header</string>
+    <string name="look_navigation_handle_summary">Hide the gesture pill, or change its width, thickness and opacity</string>
 
     <string-array name="theme_studio_radius_entries" translatable="false">
         <item>@string/theme_studio_radius_default</item>

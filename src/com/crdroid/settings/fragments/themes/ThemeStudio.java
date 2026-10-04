@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
+import com.crdroid.settings.utils.DeviceUtils;
 import com.crdroid.settings.utils.SystemUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -61,9 +63,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * IchthysOS Theme Studio: the Settings front end of the declarative OS config (ichthys.nix,
- * IchthysConfigService). Rows apply one-option configs in merge mode, so each change is a
- * generation that can be rolled back; Import/Export move whole configs as files.
+ * IchthysOS Theme Studio: the one place for look and feel, and the Settings front end of the
+ * declarative OS config (ichthys.nix, IchthysConfigService).
+ *
+ * <p>The {@code theme_studio_*} rows apply one-option configs in merge mode, so each change is a
+ * generation that can be rolled back; Import/Export move whole configs as files. The other rows
+ * link to the pages that hold the rest of each section (accent and palette, status bar, quick
+ * settings, navigation bar, lock screen), or are plain self-persisting settings (volume and
+ * system). Nothing about the system's look lives outside this page and the pages it links to.
+ * It is the "Look" row of the IchthysOS settings entry.
  */
 @SearchIndexable
 public class ThemeStudio extends SettingsPreferenceFragment
@@ -83,6 +91,13 @@ public class ThemeStudio extends SettingsPreferenceFragment
     private static final String KEY_IMPORT = "theme_studio_import";
     private static final String KEY_EXPORT = "theme_studio_export";
     private static final String KEY_GENERATIONS = "theme_studio_generations";
+
+    // Lock screen link that depends on the hardware.
+    private static final String KEY_FP_EFFECTS = "ichthys_fingerprint_effects";
+    // Recents style, and the options page of its Slim style.
+    private static final String KEY_RECENTS_TYPE = "recents_type";
+    private static final String KEY_SLIM_RECENTS = "slim_recents";
+    private static final int RECENTS_TYPE_SLIM = 2;
 
     private static final String FONT_CATEGORY = "android.theme.customization.font";
     private static final String NULL = "null";
@@ -110,6 +125,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
         }
         setupPresets();
         setupFonts();
+        setupLinkedRows();
         findPreference(KEY_IMPORT).setOnPreferenceClickListener(p -> {
             final Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT)
                     .addCategory(Intent.CATEGORY_OPENABLE)
@@ -152,6 +168,58 @@ public class ThemeStudio extends SettingsPreferenceFragment
 
     // ---------------------------------------------------------------------------------------------
     // Rows
+
+    /** Rows that aren't ichthys.nix options: hardware-dependent links and plain settings. */
+    private void setupLinkedRows() {
+        final Context context = getContext();
+        for (String key : unavailableLockScreenKeys(context)) {
+            final Preference p = findPreference(key);
+            if (p != null && p.getParent() != null) {
+                p.getParent().removePreference(p);
+            }
+        }
+        // The Slim recents options only apply to the Slim style.
+        final Preference recentsType = findPreference(KEY_RECENTS_TYPE);
+        if (recentsType != null) {
+            recentsType.setOnPreferenceChangeListener((pref, val) -> {
+                updateSlimRecents(Integer.parseInt((String) val));
+                return true;
+            });
+        }
+        updateSlimRecents(Settings.System.getIntForUser(context.getContentResolver(),
+                KEY_RECENTS_TYPE, 0, UserHandle.USER_CURRENT));
+    }
+
+    private void updateSlimRecents(int recentsType) {
+        final Preference slim = findPreference(KEY_SLIM_RECENTS);
+        if (slim != null) {
+            slim.setEnabled(recentsType == RECENTS_TYPE_SLIM);
+        }
+    }
+
+    /** Lock screen links to hide: no fingerprint sensor. */
+    private static List<String> unavailableLockScreenKeys(Context context) {
+        final List<String> keys = new ArrayList<>();
+        if (!DeviceUtils.hasFingerprint(context)) {
+            keys.add(KEY_FP_EFFECTS);
+        }
+        return keys;
+    }
+
+    /**
+     * The look part of "reset all": the self-persisting rows of this page and of Accent colour.
+     * The ichthys.nix rows (theme_studio_*) are left alone; they are rolled back with
+     * generations.
+     */
+    public static void reset(Context context) {
+        final android.content.ContentResolver resolver = context.getContentResolver();
+        Settings.System.putIntForUser(resolver, KEY_RECENTS_TYPE, 0, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, "ichthys_screen_reveal_style", 0,
+                UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(resolver, "custom_pitch_black", 0, UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(resolver, "custom_volume_horizontal", 0,
+                UserHandle.USER_CURRENT);
+    }
 
     private void setupPresets() {
         final ListPreference pref = findPreference(KEY_PRESET);
@@ -238,10 +306,10 @@ public class ThemeStudio extends SettingsPreferenceFragment
                     badges.setChecked(!Boolean.FALSE.equals(live.get("theme.iconBadges")));
                 }
                 setValue(KEY_RADIUS, live.get("theme.shape.radius"), NULL);
-                setValue(KEY_SHAPE, live.get("theme.shape.style"), "rounded");
+                setValue(KEY_SHAPE, live.get("theme.shape.style"), "pill");
                 setValue(KEY_FONT, live.get("theme.font.body"), NULL);
-                setValue(KEY_STATUSBAR, live.get("statusBar.layout"), "single");
-                setValue(KEY_QS, live.get("quickSettings.style"), "grid");
+                setValue(KEY_STATUSBAR, live.get("statusBar.layout"), "zigzag");
+                setValue(KEY_QS, live.get("quickSettings.style"), "shoal");
                 if (genSummary != null) {
                     findPreference(KEY_GENERATIONS).setSummary(genSummary);
                 }
@@ -490,5 +558,12 @@ public class ThemeStudio extends SettingsPreferenceFragment
     }
 
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
-            new BaseSearchIndexProvider(R.xml.theme_studio);
+            new BaseSearchIndexProvider(R.xml.theme_studio) {
+                @Override
+                public List<String> getNonIndexableKeys(Context context) {
+                    final List<String> keys = super.getNonIndexableKeys(context);
+                    keys.addAll(unavailableLockScreenKeys(context));
+                    return keys;
+                }
+            };
 }

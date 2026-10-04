@@ -72,6 +72,14 @@ public class ColorPickerPreference extends Preference implements
     private boolean mDividerBelow;
     private boolean mAutoSummary = true;
     private EditText mEditText;
+    /**
+     * accentDefault: the setting has no default colour. While it is unset its reader draws the
+     * theme accent, so this preference shows the accent, stores nothing until the user picks a
+     * colour, and its reset button deletes the stored colour instead of writing one.
+     */
+    private boolean mAccentDefault;
+    /** With {@link #mAccentDefault}: nothing is stored, the accent is showing. */
+    private boolean mUnset;
 
     public ColorPickerPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
@@ -103,6 +111,14 @@ public class ColorPickerPreference extends Preference implements
         // when using PreferenceDataStore, restorePersistedValue is always true (see Preference class for reference)
         // so we load the persistent value with getPersistedInt if available in the data store, 
         // and use defaultValue as fallback (onGetDefaultValue has been already called and it loaded the android:defaultValue attr from our xml).
+        if (mAccentDefault) {
+            // Never persist on first open: that would pin a colour where the reader would
+            // otherwise keep following the accent.
+            mUnset = !hasStoredValue();
+            mCurrentValue = mUnset ? accentColor() : getPersistedInt(accentColor());
+            showCurrentValue();
+            return;
+        }
         if (defaultValue == null) {
             // if we forgot to add android:defaultValue, default to black color
             defaultValue = Color.BLACK;
@@ -122,6 +138,66 @@ public class ColorPickerPreference extends Preference implements
             mShowPreview = attrs.getAttributeBooleanValue(SETTINGS_NS, "showPreview", true);
             mDividerAbove = attrs.getAttributeBooleanValue(SETTINGS_NS, "dividerAbove", false);
             mDividerBelow = attrs.getAttributeBooleanValue(SETTINGS_NS, "dividerBelow", false);
+            // Through the styleable, so it is found whichever namespace URI the XML uses.
+            final TypedArray a = context.obtainStyledAttributes(attrs,
+                    R.styleable.ColorPickerPreference);
+            mAccentDefault = a.getBoolean(R.styleable.ColorPickerPreference_accentDefault, false);
+            a.recycle();
+        }
+    }
+
+    /** The theme accent, which the setting's reader uses while no colour is stored. */
+    private int accentColor() {
+        final TypedArray a = getContext().obtainStyledAttributes(
+                new int[] {android.R.attr.colorAccent});
+        try {
+            return a.getColor(0, Color.WHITE) | 0xFF000000;
+        } finally {
+            a.recycle();
+        }
+    }
+
+    /**
+     * Whether a colour is stored. A picked colour is always opaque, so a stored 0 is not one: it
+     * is what the old reset code wrote. It is deleted here, so that every reader (some treat 0
+     * as unset, some do not) falls back to the accent.
+     */
+    private boolean hasStoredValue() {
+        final androidx.preference.PreferenceDataStore store = getPreferenceDataStore();
+        if (store == null) {
+            return getSharedPreferences() != null && getSharedPreferences().contains(getKey());
+        }
+        final String raw = store.getString(getKey(), null);
+        if ("0".equals(raw)) {
+            store.putString(getKey(), null);
+            return false;
+        }
+        return raw != null && !raw.isEmpty();
+    }
+
+    /** Shows {@link #mCurrentValue} in the summary and the preview without storing it. */
+    private void showCurrentValue() {
+        mCurrentHexValue = convertToARGB(mCurrentValue);
+        if (mAutoSummary) {
+            setSummary(mAccentDefault && mUnset
+                    ? getContext().getString(R.string.color_default_accent) : mCurrentHexValue);
+        }
+        setPreviewColor();
+    }
+
+    /** accentDefault: forget the stored colour, so the reader follows the accent again. */
+    private void resetToAccent() {
+        final androidx.preference.PreferenceDataStore store = getPreferenceDataStore();
+        if (store != null) {
+            store.putString(getKey(), null);
+        } else if (getSharedPreferences() != null) {
+            getSharedPreferences().edit().remove(getKey()).apply();
+        }
+        mUnset = true;
+        mCurrentValue = accentColor();
+        showCurrentValue();
+        if (getOnPreferenceChangeListener() != null) {
+            getOnPreferenceChangeListener().onPreferenceChange(this, mCurrentValue);
         }
     }
 
@@ -185,7 +261,11 @@ public class ColorPickerPreference extends Preference implements
         defView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onColorChanged(mDefaultValue);
+                if (mAccentDefault) {
+                    resetToAccent();
+                } else {
+                    onColorChanged(mDefaultValue);
+                }
             }
         });
         // sorcery for a linear layout ugh
@@ -220,6 +300,7 @@ public class ColorPickerPreference extends Preference implements
 
     @Override
     public void onColorChanged(int color) {
+        mUnset = false;
         mCurrentValue = color;
         mCurrentHexValue = convertToARGB(color);
         if (mAutoSummary) setSummary(mCurrentHexValue);

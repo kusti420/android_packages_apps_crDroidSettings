@@ -28,10 +28,11 @@ import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
 /**
- * Slim Recents (frameworks/opt/slimrecent) tuning. Only relevant when
- * Recents style = Slim (recents_type = 2). All preferences write to
- * Settings.System keys that RecentController observes at runtime, so they
- * apply the next time the panel is opened.
+ * Look &gt; Volume and system &gt; Slim recents options: tuning of Slim Recents
+ * (frameworks/opt/slimrecent, compiled into Launcher3). Only relevant when Recents style = Slim
+ * (recents_type = 2), which is when Theme Studio enables the row. All preferences write to
+ * Settings.System keys that RecentController observes at runtime, so they apply the next time the
+ * panel is opened.
  */
 @SearchIndexable
 public class SlimRecents extends SettingsPreferenceFragment {
@@ -79,11 +80,5 @@ public class SlimRecents extends SettingsPreferenceFragment {
     }
 
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
-            new BaseSearchIndexProvider(R.xml.slim_recents_settings) {
-                // IchthysOS: no longer linked (its keys have no consumer); keep it out of search.
-                @Override
-                protected boolean isPageSearchEnabled(android.content.Context context) {
-                    return false;
-                }
-            };
+            new BaseSearchIndexProvider(R.xml.slim_recents_settings);
 }

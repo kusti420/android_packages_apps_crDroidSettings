@@ -15,60 +15,37 @@
  */
 package com.crdroid.settings.fragments;
 
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
-
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 
-import androidx.preference.ListPreference;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.Preference.OnPreferenceChangeListener;
-import androidx.preference.SwitchPreferenceCompat;
-
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.android.settings.search.BaseSearchIndexProvider;
+import com.android.settingslib.search.SearchIndexable;
 
-import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.util.crdroid.Utils;
+import com.crdroid.settings.fragments.ui.NavbarStyles;
 
 import lineageos.providers.LineageSettings;
 
-
+/**
+ * Look &gt; Navigation bar &gt; Gesture pill: width, thickness and opacity of the gesture handle.
+ *
+ * <p>{@link #reset} is the navigation part of "reset all": it also restores the navigation
+ * behaviour settings, whose rows are in System &gt; Buttons &amp; gestures ({@link Buttons}).
+ */
+@SearchIndexable
 public class Navigation extends SettingsPreferenceFragment {
 
     public static final String TAG = "Navigation";
-
-    private static final String KEY_BUTTONS_CATEGORY = "navigation_buttons_category";
-    private static final String KEY_GESTURE_CATEGORY = "navigation_gesture_category";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.crdroid_settings_navigation);
-
-        final boolean gesturalMode = getResources().getInteger(
-                com.android.internal.R.integer.config_navBarInteractionMode)
-                        == NAV_BAR_MODE_GESTURAL;
-
-        // Hide the categories that do not apply to the active navigation mode.
-        final PreferenceCategory buttonsCategory = findPreference(KEY_BUTTONS_CATEGORY);
-        final PreferenceCategory gestureCategory = findPreference(KEY_GESTURE_CATEGORY);
-        if (gesturalMode) {
-            if (buttonsCategory != null) {
-                getPreferenceScreen().removePreference(buttonsCategory);
-            }
-        } else {
-            if (gestureCategory != null) {
-                getPreferenceScreen().removePreference(gestureCategory);
-            }
-        }
     }
 
     public static void reset(Context mContext) {
@@ -85,7 +62,7 @@ public class Navigation extends SettingsPreferenceFragment {
         LineageSettings.System.putIntForUser(resolver,
              LineageSettings.System.NAVIGATION_BAR_MENU_ARROW_KEYS, 0, UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver,
-                Settings.Secure.NAVIGATIONBAR_KEY_ORDER, 0, UserHandle.USER_CURRENT);
+                Settings.Secure.NAVIGATIONBAR_KEY_ORDER, 1, UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver,
                 Settings.Secure.NAVBAR_LAYOUT_MODE, 0, UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver,
@@ -98,10 +75,14 @@ public class Navigation extends SettingsPreferenceFragment {
                 Settings.System.GESTURE_NAVBAR_LENGTH_MODE, 1, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
                 Settings.System.GESTURE_NAVBAR_HEIGHT_MODE, 3, UserHandle.USER_CURRENT);
+        NavbarStyles.reset(mContext);
     }
 
     @Override
     public int getMetricsCategory() {
         return MetricsProto.MetricsEvent.VIEW_UNKNOWN;
     }
+
+    public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
+            new BaseSearchIndexProvider(R.xml.crdroid_settings_navigation);
 }

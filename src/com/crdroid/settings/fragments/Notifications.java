@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.View;
 
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -34,6 +35,7 @@ import androidx.preference.SwitchPreferenceCompat;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.android.settings.ichthys.ShoalStyle;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
@@ -44,23 +46,22 @@ import com.crdroid.settings.utils.DeviceUtils;
 
 import java.util.List;
 
+/**
+ * IchthysOS &gt; System &gt; Notifications. The "Counts and limits" rows came from the old Status
+ * bar and Lock screen tabs; their defaults are still restored by {@link StatusBar#reset} and
+ * {@link LockScreen#reset}.
+ */
 @SearchIndexable
 public class Notifications extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
     public static final String TAG = "Notifications";
 
-    private static final String LIGHT_BRIGHTNESS_CATEGORY = "light_brightness";
-    private static final String BATTERY_LIGHTS_PREF = "battery_lights";
-    private static final String NOTIFICATION_LIGHTS_PREF = "notification_lights";
     private static final String FLASHLIGHT_CATEGORY = "flashlight_category";
     private static final String FLASHLIGHT_CALL_PREF = "flashlight_on_call";
     private static final String FLASHLIGHT_DND_PREF = "flashlight_on_call_ignore_dnd";
     private static final String FLASHLIGHT_RATE_PREF = "flashlight_on_call_rate";
     private static final String HEADS_UP_TIMEOUT_PREF = "heads_up_timeout";
-
-    private Preference mBatLights;
-    private Preference mNotLights;
 
     private ListPreference mFlashOnCall;
     private SwitchPreferenceCompat mFlashOnCallIgnoreDND;
@@ -81,24 +82,6 @@ public class Notifications extends SettingsPreferenceFragment implements
         mHeadsUpTimeOut = (CustomSeekBarPreference)
                             prefScreen.findPreference(HEADS_UP_TIMEOUT_PREF);
         mHeadsUpTimeOut.setDefaultValue(getDefaultDecay(mContext));
-
-        mBatLights = (Preference) prefScreen.findPreference(BATTERY_LIGHTS_PREF);
-        boolean mBatLightsSupported = DeviceUtils.getLineageInteger(mContext,
-                org.lineageos.platform.internal.R.integer.config_deviceLightCapabilities, 8) >= 64;
-        if (!mBatLightsSupported)
-            prefScreen.removePreference(mBatLights);
-
-        mNotLights = (Preference) prefScreen.findPreference(NOTIFICATION_LIGHTS_PREF);
-        boolean mNotLightsSupported = res.getBoolean(
-                com.android.internal.R.bool.config_intrusiveNotificationLed);
-        if (!mNotLightsSupported)
-            prefScreen.removePreference(mNotLights);
-
-        if (!mBatLightsSupported && !mNotLightsSupported) {
-            final PreferenceCategory lightsCategory =
-                    (PreferenceCategory) prefScreen.findPreference(LIGHT_BRIGHTNESS_CATEGORY);
-            prefScreen.removePreference(lightsCategory);
-        }
 
         if (!Utils.deviceHasFlashlight(mContext)) {
             final PreferenceCategory flashlightCategory =
@@ -145,6 +128,13 @@ public class Notifications extends SettingsPreferenceFragment implements
         return defaultHeadsUpTimeOut;
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // IchthysOS Shoal: the row icons become outlined badges in the accent.
+        ShoalStyle.badgeAll(getPreferenceScreen(), ShoalStyle.accent(view.getContext()));
+    }
+
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
         Settings.Global.putInt(resolver,
@@ -185,17 +175,6 @@ public class Notifications extends SettingsPreferenceFragment implements
                 @Override
                 public List<String> getNonIndexableKeys(Context context) {
                     List<String> keys = super.getNonIndexableKeys(context);
-                    final Resources res = context.getResources();
-
-                    boolean mBatLightsSupported = DeviceUtils.getLineageInteger(context,
-                            org.lineageos.platform.internal.R.integer.config_deviceLightCapabilities, 8) >= 64;
-                    if (!mBatLightsSupported)
-                        keys.add(BATTERY_LIGHTS_PREF);
-
-                    boolean mNotLightsSupported = res.getBoolean(
-                            com.android.internal.R.bool.config_intrusiveNotificationLed);
-                    if (!mNotLightsSupported)
-                        keys.add(NOTIFICATION_LIGHTS_PREF);
 
                     if (!Utils.deviceHasFlashlight(context)) {
                         keys.add(FLASHLIGHT_CALL_PREF);

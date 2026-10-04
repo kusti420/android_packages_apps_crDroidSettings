@@ -28,7 +28,7 @@
          Grace UX's geometry could not be verified from any legitimate source, so a Samsung-specific
          cascade is deferred until it can be measured on a real 7.1.1 device. Values 4-7 are named
          after Home Up's Task changer layouts, which is what they recreate. -->
-    <string name="recents_type_grace">Cascade (Android 7.1.1)</string>
+    <string name="recents_type_cascade">Cascade (Android 7.1.1)</string>
     <string name="recents_type_grid">Grid (three-column cards)</string>
     <string name="recents_type_stack">Tilt stack (One UI)</string>
     <string name="recents_type_list">Vertical list (One UI)</string>
@@ -81,7 +81,6 @@
     <string name="clipboard_lockdown_summary">Apps can copy, but can only read the clipboard right after you tap Paste or press a key in them. Your keyboard can always paste. Copied items are cleared after 5 minutes</string>
     <string name="sensor_protection_title">Sensor fingerprinting protection</string>
     <string name="sensor_protection_summary">Apps you installed see generic sensor names, no uncalibrated sensors, motion sensors at up to 50 Hz and slightly rounded readings, so they can\'t identify this phone by its sensors. Preinstalled apps get the real sensors</string>
-    <string name="ichthys_statusbar_category">Status bar</string>
     <string name="status_bar_weather_title">Status bar weather</string>
     <string name="status_bar_weather_summary">Show the current temperature in the status bar (requires a configured weather service)</string>
     <string name="status_bar_weather_disabled">Disabled</string>
@@ -338,22 +337,8 @@
 
     <!-- UI settings -->
     <string name="monet_title">Monet settings</string>
-    <string name="monet_summary">Customize Monet theme engine</string>
 
     <!-- Monet Engine -->
-    <string name="monet_engine_custom_color_title">Accent color</string>
-    <string name="monet_engine_custom_color_summary">Choose custom color for accent</string>
-    <string name="monet_engine_custom_bgcolor_title">Background color</string>
-    <string name="monet_engine_custom_bgcolor_summary">Choose custom color for background</string>
-    <string name="monet_engine_color_override_title">Custom color</string>
-    <string name="monet_engine_luminance_factor_title">Luminance</string>
-    <string name="monet_engine_luminance_factor_summary">Higher values produce brighter colors</string>
-    <string name="monet_engine_chroma_factor_title">Chroma factor</string>
-    <string name="monet_engine_chroma_factor_summary">Higher values produce stronger colors</string>
-    <string name="monet_engine_whole_palette_title">Whole palette</string>
-    <string name="monet_engine_whole_palette_summary">Make Luminance and Chroma selection affect secondary colors as well</string>
-    <string name="monet_engine_tint_background_title">Tint background</string>
-    <string name="monet_engine_tint_background_summary">Make luminance and chroma selection affect background colors as well</string>
     <string name="monet_engine_style_title">Theme style</string>
     <string name="monet_engine_style_tonal_spot">Tonal Spot (Default)</string>
     <string name="monet_engine_style_vibrant">Vibrant</string>
@@ -456,20 +441,10 @@
     <string name="lockscreen_doubletap_sleep_summary">Double-tap on the lock screen to put device asleep</string>
 
     <!-- Font style / Icon pack -->
-    <string name="theme_customization_font_title">Font style</string>
-    <string name="theme_customization_font_summary">Set system font style</string>
-    <string name="theme_customization_icon_pack_title">Icon pack</string>
-    <string name="theme_customization_icon_pack_summary">Set custom icon pack style</string>
     <string name="theme_customization_icon_shape_title">Icon shape</string>
     <string name="theme_customization_icon_shape_summary">Set system icon shape style</string>
-    <string name="theme_customization_signal_icon_title">Signal icon style</string>
-    <string name="theme_customization_signal_icon_summary">Set custom signal icon style</string>
-    <string name="theme_customization_wifi_icon_title">WiFi icon style</string>
-    <string name="theme_customization_wifi_icon_summary">Set custom wifi icon style</string>
     <string name="theme_customization_navbar_title">Navbar style</string>
     <string name="theme_customization_navbar_summary">Set custom navigation bar style</string>
-    <string name="theme_customization_lock_clock_title">Clock font style</string>
-    <string name="theme_customization_lock_clock_summary">Set lockscreen clock font style</string>
     <string name="theme_customization_brightness_slider_title">Brightness slider style</string>
     <string name="theme_customization_brightness_slider_summary">Set custom brightness slider style</string>
 
@@ -592,11 +567,8 @@
 
     <!-- QS clock -->
     <string name="qs_clock_title">Clock</string>
-    <string name="qs_clock_summary">Display clock in quick status bar header</string>
 
     <!-- QS date -->
-    <string name="qs_date_title">Date</string>
-    <string name="qs_date_summary">Display date in quick status bar header</string>
 
     <!-- QS battery -->
     <string name="qs_use_status_bar_battery_style">Follow status bar style</string>
@@ -714,8 +686,6 @@
     <string name="background_processes_settings_title">Background processes</string>
 
     <!-- QS footer icons -->
-    <string name="qs_footer_users_icon_title">User account icon</string>
-    <string name="qs_footer_users_icon_summary">Display multiuser accessibility icon when available</string>
     <string name="qs_footer_edit_icon_title">Edit tiles icon</string>
     <string name="qs_footer_show_power_menu_title">Power menu shortcut</string>
     <string name="qs_footer_services_icon_title">Running services shortcut</string>
@@ -889,8 +859,6 @@
     <string name="fp_error_vibrate_summary">Vibrate when fingerprint authentication fails</string>
 
     <!-- Charging animation -->
-    <string name="charging_animation_title">Charging animation</string>
-    <string name="charging_animation_summary">Display an animation when the device is plugged in</string>
 
     <!-- One shot automatic brightness -->
     <string name="auto_brightness_one_shot_title">One shot auto-brightness</string>
@@ -1096,8 +1064,6 @@
     <string name="qs_opacity_summary">Set opacity level for QS background</string>
 
     <!-- Data usage info in QS footer -->
-    <string name="qs_footer_datausage_title">Data usage</string>
-    <string name="qs_footer_datausage_summary">Display data usage summary in quick settings footer</string>
 
     <!-- QS Tiles animation  -->
     <string name="qs_tile_animation_style_title">QS tiles animation</string>
@@ -1129,13 +1095,11 @@
     <string name="qs_tile_label_hide_summary">Only show icon in tile</string>
     <string name="qs_layout_columns_rows_title">Columns &amp; rows</string>
     <string name="qs_layout_columns_rows_summary">Customize QS columns and rows</string>
-    <string name="qs_layout_columns_rows_footer_text">QS rows should be equal or greater than QQS rows. Use higher number of columns for circle / square (A11) QS tile style.</string>
     <string name="qs_columns_portrait_title">Columns (portrait)</string>
     <string name="qs_columns_landscape_title">Columns (landscape)</string>
     <string name="qs_rows_portrait_title">Rows (portrait)</string>
     <string name="qs_rows_landscape_title">Rows (landscape)</string>
     <string name="qqs_rows_portrait_title">Quick QS Rows (portrait)</string>
-    <string name="qqs_rows_landscape_title">Quick QS Rows (landscape)</string>
 
     <!-- Statusbar Clock background chip -->
     <string name="statusbar_clock_chip_title">Clock background chip</string>
@@ -1159,7 +1123,7 @@
     <string name="lockscreen_weather_category">Weather</string>
     <string name="lockscreen_weather_title">Weather update</string>
     <string name="lockscreen_weather_summary">Display current weather update</string>
-    <string name="lockscreen_weather_enabled_info">Requires custom weather service configured and smartspace disabled</string>
+    <string name="lockscreen_weather_enabled_info">Requires the weather service to be set up</string>
     <string name="lockscreen_weather_location_title">Current location</string>
     <string name="lockscreen_weather_location_summary">Display current weather location</string>
     <string name="lockscreen_weather_text_title">Current condition</string>
@@ -1286,24 +1250,6 @@
     <string name="radio_info_title">Radio info</string>
 
     <!-- QS Header -->
-    <string name="qs_header_image_title">Header image</string>
-    <string name="qs_header_image_summary">Select QS background header image</string>
-    <string name="qs_header_daylight_pack_title">Header image collection</string>
-    <string name="qs_header_shadow_title">Header image shadow</string>
-    <string name="qs_header_shadow_summary">For better visibility on bright images</string>
-    <string name="qs_header_static_provider_title">Static image</string>
-    <string name="qs_header_daylight_provider_title">Image collection</string>
-    <string name="qs_header_file_provider_title">Custom image</string>
-    <string name="qs_header_provider_title">Header provider</string>
-    <string name="qs_header_browse_title">Browse installed headers</string>
-    <string name="qs_header_browse_summary">Browse all available header collections</string>
-    <string name="qs_header_pick_title">Select header image</string>
-    <string name="qs_header_pick_summary">Select an image to use for static mode</string>
-    <string name="qs_header_file_select_title">Select image</string>
-    <string name="qs_header_file_select_summary">Select custom image</string>
-    <string name="qs_header_needs_gallery">You must install a gallery app!</string>
-    <string name="qs_header_offset_title">Header image offset</string>
-    <string name="qs_header_offset_summary">Adjust the image header size</string>
 
     <!-- Label for a numbered SIM card.  [CHAR LIMIT=40] -->
     <string name="sim_card_number_title" translatable="false">SIM <xliff:g id="card_number">%1$d</xliff:g></string>
@@ -1321,14 +1267,6 @@
     <string name="qs_bt_show_dialog_summary">Show bluetooth dialog or toggle bluetooth state on tapping bluetooth tile</string>
 
     <!-- Carrier name on lockscreen/statusbar -->
-    <string name="status_bar_carrier_category_title">Carrier label</string>
-    <string name="lockscreen_show_carrier_title">Show carrier label</string>
-    <string name="carrier_show_lockscreen_only">Lockscreen only</string>
-    <string name="carrier_show_statusbar_only">Status bar only</string>
-    <string name="carrier_show_both">Lockscreen &amp; status bar</string>
-    <string name="custom_carrier_label_title">Custom carrier label</string>
-    <string name="custom_carrier_label_summary">Tap to set a custom carrier label</string>
-    <string name="custom_carrier_label_dialog_message">Replace the carrier label with custom text. Leave empty to use the real carrier label.</string>
 
     <!-- Statusbar Padding -->
     <string name="statusbar_extra_padding_category">Extra padding</string>
@@ -1399,13 +1337,6 @@
      <string name="systemui_restart_process">Restarting SystemUI to apply changes...</string>
 
     <!-- Notification / Power Menu Styles -->
-    <string name="notification_style_title">Notification style</string>
-    <string name="powermenu_style_title">Power menu style</string>
-    <string name="custom_style_cyberpunk">Cyberpunk</string>
-    <string name="custom_style_duoline">Duoline</string>
-    <string name="custom_style_fluid">Fluid (Transparent)</string>
-    <string name="custom_style_ios">IOS</string>
-    <string name="custom_style_layers">Layers</string>
 
     <!-- QS Tiles Style -->
     <string name="qs_tile_shape_title">QS tiles shape</string>
@@ -1595,74 +1526,11 @@
     <string name="shape_squaremedo">Squaremedo</string>
 
     <!-- Dynamic Bar -->
-    <string name="dynamic_bar">Dynamic Bar</string>
-    <string name="dynamic_bar_summary">Smart status bar chip for active events like recording, media, timers, and more</string>
-    <string name="dynamic_bar_enable">Enable Dynamic Bar</string>
     <string name="dynamic_bar_enable_summary">Show a dynamic chip on the status bar for live events</string>
-    <string name="dynamic_bar_keyguard_enable">Dynamic bar on lock screen</string>
-    <string name="dynamic_bar_keyguard_enable_summary">Replace keyguard indication with dynamic bar chip on the lock screen with controls and quick actions</string>
-    <string name="dynamic_bar_keyguard_battery_chip">Battery info on lock screen</string>
-    <string name="dynamic_bar_keyguard_battery_chip_disabled">Never show</string>
-    <string name="dynamic_bar_keyguard_battery_chip_charging">Only when charging</string>
-    <string name="dynamic_bar_keyguard_battery_chip_always">Always show</string>
     <string name="dynamic_bar_keyguard_compact_chip">Compact lock screen chip</string>
     <string name="dynamic_bar_keyguard_compact_chip_summary">Always use the compact chip style on the lockscreen. When disabled, compact mode is used only when space is limited.</string>
-    <string name="dynamic_bar_events">Events</string>
-    <string name="dynamic_bar_event_audio_recording">Audio recording</string>
-    <string name="dynamic_bar_event_audio_recording_summary">Voice recorder and audio capture</string>
-    <string name="dynamic_bar_event_call">Ongoing call</string>
-    <string name="dynamic_bar_event_call_summary">Incoming and active calls</string>
-    <string name="dynamic_bar_event_media">Media playback</string>
-    <string name="dynamic_bar_event_media_summary">Now playing music and audio controls</string>
-    <string name="dynamic_bar_event_notification">Notifications</string>
-    <string name="dynamic_bar_event_notification_summary">Incoming notification alerts</string>
-    <string name="dynamic_bar_compact_notifications">Compact notifications</string>
-    <string name="dynamic_bar_compact_notifications_summary">Show notifications as a small chip first, tap to expand</string>
-    <string name="dynamic_bar_event_timer">Timer</string>
-    <string name="dynamic_bar_event_timer_summary">Countdown timer from clock app</string>
-    <string name="dynamic_bar_event_stopwatch">Stopwatch</string>
-    <string name="dynamic_bar_event_stopwatch_summary">Running stopwatch from clock app</string>
-    <string name="dynamic_bar_event_alarm">Alarm</string>
-    <string name="dynamic_bar_event_alarm_summary">Ringing and upcoming alarms</string>
-    <string name="dynamic_bar_event_charging">Charging started</string>
-    <string name="dynamic_bar_event_charging_summary">Battery level when plugged in</string>
-    <string name="dynamic_bar_event_bluetooth">Bluetooth</string>
-    <string name="dynamic_bar_event_bluetooth_summary">Device connection status</string>
-    <string name="dynamic_bar_event_hotspot">Hotspot</string>
-    <string name="dynamic_bar_event_hotspot_summary">Mobile hotspot active indicator</string>
-    <string name="dynamic_bar_event_ringer">Ringer Mode</string>
-    <string name="dynamic_bar_event_ringer_summary">Silent, vibrate, and ring mode changes</string>
-    <string name="dynamic_bar_event_vpn">VPN</string>
-    <string name="dynamic_bar_event_vpn_summary">Active VPN connection indicator</string>
-    <string name="dynamic_bar_event_clipboard">Clipboard</string>
-    <string name="dynamic_bar_event_clipboard_summary">Copied text and image preview</string>
-    <string name="dynamic_bar_event_torch">Flashlight</string>
-    <string name="dynamic_bar_event_torch_summary">Flashlight toggle and brightness</string>
-    <string name="dynamic_bar_event_ongoing">Ongoing activities</string>
-    <string name="dynamic_bar_event_ongoing_summary">Navigation, deliveries, and other live activities</string>
-    <string name="dynamic_bar_event_sports">Sports</string>
-    <string name="dynamic_bar_event_sports_summary">Live scores and game updates</string>
-    <string name="dynamic_bar_event_app_switch">Recent app switch</string>
-    <string name="dynamic_bar_event_app_switch_summary">Show chip when switching between recent apps</string>
-    <string name="dynamic_bar_event_biometric">Biometric unlock</string>
-    <string name="dynamic_bar_event_biometric_summary">Show chip on fingerprint or face unlock</string>
-    <string name="dynamic_bar_guide_title">How to use Dynamic Bar</string>
-    <string name="dynamic_bar_guide_chip">Events appear in the status bar showing active events like recording, media playback, and timers</string>
-    <string name="dynamic_bar_guide_swipe">When multiple events are active, swipe left or right on the chip to cycle through them</string>
-    <string name="dynamic_bar_guide_expand">Tap a chip to expand it into a detailed card with controls and additional information</string>
-    <string name="dynamic_bar_guide_dismiss">Swipe the expanded card away to dismiss it. The event continues in the background</string>
-    <string name="dynamic_bar_guide_keyguard">Dynamic bar chip also appears at the bottom of the lock screen with playback controls and quick actions</string>
-    <string name="dynamic_bar_guide_chip_title">Chip appearance</string>
-    <string name="dynamic_bar_guide_swipe_title">Swipe between chips</string>
-    <string name="dynamic_bar_guide_expand_title">Tap to expand</string>
-    <string name="dynamic_bar_guide_dismiss_title">Swipe to dismiss</string>
-    <string name="dynamic_bar_guide_keyguard_title">Lock screen chip</string>
-    <string name="dynamic_bar_footer_title">About Dynamic Bar</string>
-    <string name="dynamic_bar_footer_body">Dynamic Bar transforms your status bar into an interactive hub. Status chips appear and animate based on system events, giving you at-a-glance information without interrupting your workflow.\n\nEach event type has its own accent color and expanded card with quick actions.</string>
 
     <!-- Themes -->
-    <string name="custom_system_theme_title">Themes</string>
-    <string name="custom_system_theme_summary">Customize system appearance with themes and icon packs</string>
 
     <!-- Misc preference entries -->
     <string name="play_integrity_fix_title">Play Integrity Fix</string>
@@ -1769,29 +1637,8 @@
     <string name="build_maintainer_donate_url" translatable="false">https://crdroid.net/donate</string>
 
     <!-- Settings UI -->
-    <string name="settings_icon_title">Settings style</string>
-    <string name="settings_icon_summary">Customize Settings app UI style</string>
-    <string name="settings_icon_style_title">Settings icon style</string>
-    <string name="settings_icon_style_expressive">Material expressive</string>
-    <string name="settings_icon_style_colored_bg">Colored background and white icon</string>
-    <string name="settings_icon_style_gradient_bg">Gradient background and white icon</string>
-    <string name="settings_icon_style_accent_outline">Accent outline and icon</string>
-    <string name="settings_icon_style_colored_outline">Colored outline and icon</string>
-    <string name="settings_icon_style_colored_icon">Colored icon only</string>
-    <string name="settings_icon_style_accent_icon">Accent icon only</string>
-    <string name="settings_icon_corner_style_title">Settings icons corner style</string>
-    <string name="settings_icon_corner_style_circle">Circle</string>
-    <string name="settings_icon_corner_style_rounded_square">Rounded square</string>
-    <string name="settings_icon_random_colors_title">Random colors</string>
-    <string name="settings_icon_random_colors_summary">Use random colors for each icon</string>
 
     <!-- Volume slider -->
-    <string name="qs_show_volume_slider_title">Slider mode</string>
-    <string name="qs_show_volume_slider_hide">Only brightness slider</string>
-    <string name="qs_show_volume_slider_both">Both brightness and volume sliders</string>
-    <string name="qs_show_volume_slider_only">Only volume slider</string>
-    <string name="qs_show_ringer_mode_title">Ringer mode</string>
-    <string name="qs_show_ringer_mode_summary">Show ringer mode icon with the volume slider</string>
 
     <!-- App list fragment -->
     <string name="app_list_search">Search</string>
@@ -1814,22 +1661,14 @@
     <string name="display_engine_default">Default</string>
     <string name="display_engine_mode_footer_text">Inspired by Sony\'s Bravia/X-Reality engine, the Display Engine features Vivid mode for enhanced brightness and color saturation, X-Reality mode for improved detail and color accuracy, and Triluminous mode for a wider color range.</string>
 
-    <!-- Themes hub -->
-    <string name="theme_global_title">Global theme</string>
-    <string name="theme_global_summary">System-wide appearance: pitch black and more</string>
-    <string name="theme_quicksettings_title">Quick Settings</string>
-    <string name="theme_quicksettings_summary">Tile look, accent-tinted icon backgrounds</string>
-    <string name="theme_volume_panel_title">Volume panel</string>
-    <string name="theme_volume_panel_summary">Premade volume slider looks</string>
-
-    <!-- Themes > Quick Settings: accent-tinted QS icon backgrounds -->
+    <!-- Theme Studio > Quick settings: accent-tinted QS icon backgrounds -->
     <string name="qs_accent_icon_bg_title">Accent icon backgrounds</string>
     <string name="qs_accent_icon_bg_summary">Tint the circle behind active Quick Settings tile icons with the accent color. When off, active tiles use a neutral icon background.</string>
 
-    <!-- Themes > Volume panel: slider style -->
+    <!-- Theme Studio > Volume and system: slider style -->
     <string name="volume_panel_style_title">Volume slider style</string>
 
-    <!-- Themes > Global theme: IchthysOS theme engine -->
+    <!-- Theme Studio > Accent colour: IchthysOS theme engine -->
     <string name="theme_engine_title">Theme engine</string>
     <string name="theme_engine_summary">Accent color — premade palette or a custom color</string>
     <string name="theme_engine_custom">Custom</string>
@@ -1896,4 +1735,10 @@
     <string name="duress_error_autoconfirm_length">PIN auto-confirm is on, so the emergency PIN must have exactly the same number of digits as your real PIN — otherwise it could never be typed at the lock screen</string>
     <string name="duress_error_generic">Could not set the emergency wipe code</string>
     <string name="duress_unsupported_type">Emergency wipe codes are only supported when your lock screen uses a PIN or a password</string>
+
+    <!-- Navbar style picker: IchthysOS code-drawn styles (navBar.style) -->
+    <string name="navbar_style_shoal">Shoal (outlined circles, accent home)</string>
+    <string name="navbar_style_lattice">Lattice (small discs)</string>
+    <string name="navbar_style_mono">Mono (text labels)</string>
+    <string name="navbar_style_gestures">Gestures (accent handle)</string>
 </resources>

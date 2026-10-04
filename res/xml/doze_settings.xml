@@ -14,26 +14,31 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- Look > Lock screen > Ambient display: the crDroid additions to ambient display. Ambient
+     display itself, always-on display and lift to check are stock switches (Settings > Display >
+     Lock screen), so they are not repeated here.
+
+     This file is the "lockscreen.ambient" page for
+     frameworks/base/tools/ichthys-config/gen_crdroid_options.py. doze_always_on_wallpaper_enabled
+     came from the old User interface tab and keeps the option path it had there
+     (system.ui.alwaysOnWallpaperEnabled) through the generator's crdroid_paths.lock. -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
     android:title="@string/doze_display_title">
 
-    <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-        android:key="doze_enabled"
-        android:title="@string/doze_title"
-        android:summary="@string/doze_summary" />
-
-    <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-        android:key="doze_always_on"
-        android:title="@string/doze_always_on_title"
-        android:summary="@string/doze_always_on_summary" />
-
+    <!-- Enabled by DozeSettings.java while always-on display is on. -->
     <Preference
         android:key="always_on_display_schedule"
         android:title="@string/always_on_display_schedule_title"
         android:summary="@string/always_on_display_schedule_summary"
-        android:fragment="com.crdroid.settings.fragments.ui.doze.AODSchedule"
-        android:dependency="doze_always_on" />
+        android:fragment="com.crdroid.settings.fragments.ui.doze.AODSchedule" />
+
+    <!-- Ambient Wallpaper -->
+    <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+        android:key="doze_always_on_wallpaper_enabled"
+        android:title="@string/doze_always_on_wallpaper_title"
+        android:summary="@string/doze_always_on_wallpaper_summary"
+        android:defaultValue="@*android:bool/config_dozeSupportsAodWallpaper" />
 
     <com.crdroid.settings.preferences.SecureSettingSwitchPreference
         android:key="doze_on_charge"
@@ -57,19 +62,6 @@
             android:defaultValue="false"
             android:title="@string/tilt_title"
             android:summary="@string/tilt_summary" />
-
-        <!-- Key is deliberately "doze_pulse_on_pick_up", not "doze_pick_up_gesture" like its
-             siblings. Settings.Secure.DOZE_PICK_UP_GESTURE is the one constant in this group whose
-             NAME and VALUE disagree — AOSP kept the older "doze_pulse_on_pick_up" string. This
-             preference auto-persists to its own android:key, so with the sibling-style key it wrote
-             a setting nothing reads, leaving the real one unset; AmbientDisplayConfiguration then
-             fell back to config_dozePulsePickup (true on sm7325-common), so pickup was permanently
-             on and this switch could not turn it off. -->
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="doze_pulse_on_pick_up"
-            android:defaultValue="false"
-            android:title="@string/pickup_title"
-            android:summary="@string/pickup_summary" />
 
         <com.crdroid.settings.preferences.SecureSettingSwitchPreference
             android:key="doze_handwave_gesture"

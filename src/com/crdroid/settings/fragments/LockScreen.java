@@ -19,98 +19,49 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.provider.SearchIndexableResource;
 import android.provider.Settings;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
-import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.crdroid.OmniJawsClient;
-import com.android.internal.util.crdroid.Utils;
 
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
-import com.crdroid.settings.fragments.lockscreen.PulseSettings;
-import com.crdroid.settings.fragments.lockscreen.MediaArtSettings;
 import com.crdroid.settings.fragments.lockscreen.FingerprintEffects;
-import com.crdroid.settings.fragments.lockscreen.UdfpsAnimation;
-import com.crdroid.settings.fragments.lockscreen.UdfpsIconPicker;
-import com.crdroid.settings.utils.DeviceUtils;
+import com.crdroid.settings.fragments.lockscreen.MediaArtSettings;
+import com.crdroid.settings.fragments.lockscreen.PulseSettings;
 import com.crdroid.settings.utils.SystemUtils;
 
-import java.util.List;
-
+/**
+ * Look &gt; Lock screen &gt; Lock screen and ambient display: what the lock screen shows (music
+ * visualizer, media art, charging info, weather) and the links to ambient display and edge
+ * light.
+ *
+ * <p>{@link #reset} is the lock screen part of "reset all": it also restores the lock screen
+ * gesture, the notification limits and the fingerprint settings, whose rows are in System &gt;
+ * Buttons &amp; gestures ({@link Buttons}), System &gt; Notifications ({@link Notifications})
+ * and on the fingerprint page ({@link FingerprintEffects}).
+ */
 @SearchIndexable
 public class LockScreen extends SettingsPreferenceFragment
             implements Preference.OnPreferenceChangeListener  {
 
     public static final String TAG = "LockScreen";
 
-    private static final String LOCKSCREEN_GESTURES_CATEGORY = "lockscreen_gestures_category";
-    private static final String LOCKSCREEN_INTERFACE_CATEGORY = "lockscreen_interface_category";
-    private static final String KEY_RIPPLE_EFFECT = "enable_ripple_effect";
-    private static final String KEY_SMARTSPACE = "lockscreen_smartspace_enabled";
     private static final String KEY_WEATHER = "lockscreen_weather_enabled";
-    private static final String KEY_UDFPS_ANIMATIONS = "udfps_recognizing_animation_preview";
-    private static final String KEY_UDFPS_ICONS = "udfps_icon_picker";
-    private static final String KEY_FP_EFFECTS = "ichthys_fingerprint_effects";
 
-    private static final String KEY_FP_SUCCESS = "fp_success_vibrate";
-    private static final String KEY_FP_ERROR = "fp_error_vibrate";
-
-    private Preference mUdfpsAnimations;
-    private Preference mUdfpsIcons;
-    private Preference mRippleEffect;
-
-    private SwitchPreferenceCompat mSmartspace;
     private SwitchPreferenceCompat mWeather;
-    private SwitchPreferenceCompat mFpSuccessVib;
-    private SwitchPreferenceCompat mFpErrorVib;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.crdroid_settings_lockscreen);
-        final Context context = getContext();
-
-        PreferenceCategory gestCategory = (PreferenceCategory) findPreference(LOCKSCREEN_GESTURES_CATEGORY);
-
-        mUdfpsAnimations = (Preference) findPreference(KEY_UDFPS_ANIMATIONS);
-        mUdfpsIcons = (Preference) findPreference(KEY_UDFPS_ICONS);
-        mFpSuccessVib = findPreference(KEY_FP_SUCCESS);
-        mFpErrorVib = findPreference(KEY_FP_ERROR);
-        mRippleEffect = (Preference) findPreference(KEY_RIPPLE_EFFECT);
-
-        boolean hasFingerprint = DeviceUtils.hasFingerprint(context);
-        if (!hasFingerprint) {
-            gestCategory.removePreference(findPreference(KEY_FP_EFFECTS));
-            gestCategory.removePreference(mUdfpsAnimations);
-            gestCategory.removePreference(mUdfpsIcons);
-            gestCategory.removePreference(mRippleEffect);
-        } else {
-            if (!Utils.isPackageInstalled(context, "com.crdroid.udfps.animations")) {
-                gestCategory.removePreference(mUdfpsAnimations);
-            }
-            if (!Utils.isPackageInstalled(context, "com.crdroid.udfps.icons")) {
-                gestCategory.removePreference(mUdfpsIcons);
-            }
-        }
-
-        boolean hapticAvailable = DeviceUtils.hasVibrator(context);
-        if (!hasFingerprint || !hapticAvailable) {
-            gestCategory.removePreference(mFpSuccessVib);
-            gestCategory.removePreference(mFpErrorVib);
-        }
-
-        mSmartspace = (SwitchPreferenceCompat) findPreference(KEY_SMARTSPACE);
-        mSmartspace.setOnPreferenceChangeListener(this);
 
         mWeather = (SwitchPreferenceCompat) findPreference(KEY_WEATHER);
         mWeather.setOnPreferenceChangeListener(this);
@@ -118,13 +69,9 @@ public class LockScreen extends SettingsPreferenceFragment
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        if (preference == mSmartspace) {
-            mSmartspace.setChecked((Boolean)newValue);
-            updateWeatherSettings();
-            SystemUtils.showSystemUiRestartDialog(getContext());
-            return true;
-        } else if (preference == mWeather) {
-            mWeather.setChecked((Boolean)newValue);
+        if (preference == mWeather) {
+            // The lock screen weather view is only created when SystemUI starts.
+            mWeather.setChecked((Boolean) newValue);
             SystemUtils.showSystemUiRestartDialog(getContext());
             return true;
         }
@@ -135,6 +82,8 @@ public class LockScreen extends SettingsPreferenceFragment
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
         FingerprintEffects.reset(mContext);
+        // No row any more (removed with the dead smartspace switch); this only clears a value
+        // an older build may have left behind.
         Settings.Secure.putIntForUser(resolver,
                 Settings.Secure.LOCKSCREEN_SMARTSPACE_ENABLED, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
@@ -174,16 +123,14 @@ public class LockScreen extends SettingsPreferenceFragment
                 UserHandle.USER_CURRENT);
         PulseSettings.reset(mContext);
         MediaArtSettings.reset(mContext);
-        UdfpsAnimation.Companion.reset(mContext);
-        UdfpsIconPicker.Companion.reset(mContext);
     }
 
     private void updateWeatherSettings() {
-        if (mWeather == null || mSmartspace == null) return;
+        if (mWeather == null) return;
 
         boolean weatherEnabled = OmniJawsClient.get().isOmniJawsEnabled(getContext());
-        mWeather.setEnabled(!mSmartspace.isChecked() && weatherEnabled);
-        mWeather.setSummary(!mSmartspace.isChecked() && weatherEnabled ? R.string.lockscreen_weather_summary :
+        mWeather.setEnabled(weatherEnabled);
+        mWeather.setSummary(weatherEnabled ? R.string.lockscreen_weather_summary :
             R.string.lockscreen_weather_enabled_info);
     }
 
@@ -202,32 +149,5 @@ public class LockScreen extends SettingsPreferenceFragment
      * For search
      */
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
-            new BaseSearchIndexProvider(R.xml.crdroid_settings_lockscreen) {
-
-                @Override
-                public List<String> getNonIndexableKeys(Context context) {
-                    List<String> keys = super.getNonIndexableKeys(context);
-
-                    boolean hasFingerprint = DeviceUtils.hasFingerprint(context);
-                    if (!hasFingerprint) {
-                        keys.add(KEY_FP_EFFECTS);
-                        keys.add(KEY_UDFPS_ANIMATIONS);
-                        keys.add(KEY_UDFPS_ICONS);
-                        keys.add(KEY_RIPPLE_EFFECT);
-                    } else {
-                        if (!Utils.isPackageInstalled(context, "com.crdroid.udfps.animations")) {
-                            keys.add(KEY_UDFPS_ANIMATIONS);
-                        }
-                        if (!Utils.isPackageInstalled(context, "com.crdroid.udfps.icons")) {
-                            keys.add(KEY_UDFPS_ICONS);
-                        }
-                    }
-                    boolean hapticAvailable = DeviceUtils.hasVibrator(context);
-                    if (!hasFingerprint || !hapticAvailable) {
-                        keys.add(KEY_FP_SUCCESS);
-                        keys.add(KEY_FP_ERROR);
-                    }
-                    return keys;
-                }
-            };
+            new BaseSearchIndexProvider(R.xml.crdroid_settings_lockscreen);
 }

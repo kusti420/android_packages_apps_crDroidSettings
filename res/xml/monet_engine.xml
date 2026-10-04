@@ -39,56 +39,9 @@
         android:entryValues="@array/monet_engine_color_source_values"
         android:defaultValue="0" />
 
-    <com.crdroid.settings.preferences.colorpicker.ColorPickerPreference
-        android:key="accent_color"
-        android:title="@string/monet_engine_custom_color_title"
-        android:summary="@string/monet_engine_custom_color_summary"
-        android:defaultValue="0xFF1b6ef3" />
-
-    <SwitchPreferenceCompat
-        android:key="accent_background"
-        android:title="@string/monet_engine_custom_bgcolor_title"
-        android:summary="@string/monet_engine_custom_bgcolor_summary"
-        android:defaultValue="false" />
-
-    <com.crdroid.settings.preferences.colorpicker.ColorPickerPreference
-        android:key="bg_color"
-        android:title="@string/monet_engine_color_override_title"
-        android:dependency="accent_background"
-        android:defaultValue="0xFF1b6ef3" />
-
-    <com.crdroid.settings.preferences.CustomSeekBarPreference
-        android:key="luminance_factor"
-        android:title="@string/monet_engine_luminance_factor_title"
-        android:summary="@string/monet_engine_luminance_factor_summary"
-        android:defaultValue="0"
-        android:max="100"
-        settings:min="-95"
-        settings:interval="5"
-        settings:units="%"
-        settings:showSign="true" />
-
-    <com.crdroid.settings.preferences.CustomSeekBarPreference
-        android:key="chroma_factor"
-        android:title="@string/monet_engine_chroma_factor_title"
-        android:summary="@string/monet_engine_chroma_factor_summary"
-        android:defaultValue="0"
-        android:max="100"
-        settings:min="-95"
-        settings:interval="5"
-        settings:units="%"
-        settings:showSign="true" />
-
-    <SwitchPreferenceCompat
-        android:key="whole_palette"
-        android:title="@string/monet_engine_whole_palette_title"
-        android:summary="@string/monet_engine_whole_palette_summary"
-        android:defaultValue="false" />
-
-    <SwitchPreferenceCompat
-        android:key="tint_background"
-        android:title="@string/monet_engine_tint_background_title"
-        android:summary="@string/monet_engine_tint_background_summary"
-        android:defaultValue="false" />
+    <!-- IchthysOS: the accent colour itself is picked in Theme Studio > Accent colour (ThemeEngine);
+         with the "preset" colour source this page keeps whatever is set there. The crDroid extras
+         (background colour, luminance / chroma factors, whole palette, tint background) were
+         removed: SystemUI's ThemeOverlayController in this tree reads none of them. -->
 
 </PreferenceScreen>

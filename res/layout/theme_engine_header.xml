@@ -54,7 +54,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorSecondary" />
 
-    <!-- Pitch black theme toggle (moved here from theme_global.xml) -->
+    <!-- Pitch black theme toggle (Theme Studio > Accent colour) -->
     <LinearLayout
         android:id="@+id/theme_engine_pitch_black_row"
         android:layout_width="match_parent"

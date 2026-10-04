@@ -43,7 +43,7 @@ public class NetworkTrafficSettings extends SettingsPreferenceFragment {
         Settings.System.putIntForUser(resolver,
                 Settings.System.NETWORK_TRAFFIC_MODE, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
-                Settings.System.NETWORK_TRAFFIC_AUTOHIDE, 1, UserHandle.USER_CURRENT);
+                Settings.System.NETWORK_TRAFFIC_AUTOHIDE, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
                 Settings.System.NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,

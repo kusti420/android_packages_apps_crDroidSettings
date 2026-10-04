@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- IchthysOS > Apps > Background: everything that decides what apps may do while they are not on
+     screen. These used to be spread over the Miscellaneous tab, the IchthysOS tab, the Backstage
+     page and the unrestricted-apps picker. The two app lists stay pickers of their own
+     (UnrestrictedBackgroundApps, Backstage); every control is here.
+
+     Options in ichthys.nix: the unrestricted-background keys and the Backstage time limit are the
+     hand-written background.* options (IchthysOptions.java), which the generator
+     (frameworks/base/tools/ichthys-config/gen_crdroid_options.py) leaves alone;
+     screen_on_memory_reclaim was on the old Miscellaneous tab and keeps the path it had there
+     (system.misc.screenOnMemoryReclaim) through the generator's crdroid_paths.lock. -->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/ichthys_background_title">
+
+    <!-- Unrestricted background (tracker#39). Mode list + app picker + keep-after-reboot, all
+         Settings.Global, applied live by UnrestrictedBackgroundController. The mode and persist
+         rows sit on the red danger card; the picker and persist rows are enabled in
+         Background.java only while a mode is on. -->
+    <PreferenceCategory
+        android:key="background_unrestricted_category"
+        android:title="@string/unrestricted_background_title">
+
+        <com.crdroid.settings.preferences.DangerGlobalListPreference
+            android:key="ichthys_unrestricted_bg_mode"
+            android:icon="@drawable/ic_battery_alert"
+            android:title="@string/unrestricted_background_title"
+            android:entries="@array/unrestricted_background_mode_entries"
+            android:entryValues="@array/unrestricted_background_mode_values"
+            android:defaultValue="0" />
+
+        <Preference
+            android:key="ichthys_unrestricted_bg_apps"
+            android:icon="@drawable/ic_apps"
+            android:title="@string/unrestricted_background_apps_title"
+            android:fragment="com.crdroid.settings.fragments.misc.UnrestrictedBackgroundApps" />
+
+        <com.crdroid.settings.preferences.DangerGlobalSwitchPreference
+            android:key="ichthys_unrestricted_bg_persist"
+            android:icon="@drawable/ic_restart"
+            android:title="@string/unrestricted_background_persist_title"
+            android:summary="@string/unrestricted_background_persist_summary"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <!-- Backstage: apps kept "in the foreground" on a hidden display (IchthysBackstageService,
+         kusti420/ichthysos-tracker#38). -->
+    <PreferenceCategory
+        android:key="background_backstage_category"
+        android:title="@string/backstage_title">
+
+        <Preference
+            android:key="ichthys_backstage"
+            android:icon="@drawable/ic_screensaver"
+            android:title="@string/ichthys_backstage_apps_title"
+            android:fragment="com.crdroid.settings.fragments.backstage.Backstage" />
+
+        <com.crdroid.settings.preferences.SecureSettingListPreference
+            android:key="ichthys_backstage_max_hours"
+            android:icon="@drawable/ic_timer_outline"
+            android:title="@string/backstage_max_hours_title"
+            android:summary="%s"
+            android:entries="@array/backstage_max_hours_entries"
+            android:entryValues="@array/backstage_max_hours_values"
+            android:defaultValue="0" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="background_memory_category"
+        android:title="@string/ichthys_background_memory_category">
+
+        <!-- Screen-on memory reclaim -->
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="screen_on_memory_reclaim"
+            android:icon="@drawable/ic_memory"
+            android:title="@string/screen_on_memory_reclaim_title"
+            android:summary="@string/screen_on_memory_reclaim_summary"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="background_unused_category"
+        android:title="@string/ichthys_background_unused_category">
+
+        <!-- Global "Manage apps if unused" (app hibernation / auto-archive) master switch.
+             DeviceConfig app_hibernation/app_hibernation_enabled (default on). Off stops every
+             app from being hibernated or archived automatically. -->
+        <com.crdroid.settings.preferences.DeviceConfigSwitchPreference
+            android:key="app_hibernation/app_hibernation_enabled"
+            android:icon="@drawable/ic_apps"
+            android:title="@string/app_hibernation_title"
+            android:summary="@string/app_hibernation_summary"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

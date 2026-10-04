@@ -995,17 +995,7 @@
     </string-array>
 
     <!-- QS Header -->
-    <string-array name="qs_header_provider_entries" translatable="false">
-        <item>@string/qs_header_daylight_provider_title</item>
-        <item>@string/qs_header_static_provider_title</item>
-        <item>@string/qs_header_file_provider_title</item>
-    </string-array>
 
-    <string-array name="qs_header_provider_values" translatable="false">
-        <item>daylight</item>
-        <item>static</item>
-        <item>file</item>
-    </string-array>
 
     <!-- Wi-Fi MAC address randomization -->
     <string-array name="wifi_privacy_entries_ext">
@@ -1062,23 +1052,7 @@
     </string-array>
 
     <!-- Notification styles  -->
-    <string-array name="custom_style_entries">
-        <item>@string/default_value</item>
-        <item>@string/custom_style_cyberpunk</item>
-        <item>@string/custom_style_duoline</item>
-        <item>@string/custom_style_fluid</item>
-        <item>@string/custom_style_ios</item>
-        <item>@string/custom_style_layers</item>
-    </string-array>
 
-    <string-array name="custom_style_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-    </string-array>
 
     <!-- QS Tiles Shape -->
     <string-array name="qs_tile_shape_entries" translatable="false">
@@ -1326,76 +1300,18 @@
     </string-array>
 
     <!-- Dynamic bar -->
-    <string-array name="dynamic_bar_keyguard_battery_chip_entries" translatable="false">
-        <item>@string/dynamic_bar_keyguard_battery_chip_disabled</item>
-        <item>@string/dynamic_bar_keyguard_battery_chip_charging</item>
-        <item>@string/dynamic_bar_keyguard_battery_chip_always</item>
-    </string-array>
 
-    <string-array name="dynamic_bar_keyguard_battery_chip_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
 
     <!-- Settings icon -->
-    <string-array name="settings_icon_style_entries">
-        <item>@string/settings_icon_style_expressive</item>
-        <item>@string/settings_icon_style_colored_bg</item>
-        <item>@string/settings_icon_style_gradient_bg</item>
-        <item>@string/settings_icon_style_accent_outline</item>
-        <item>@string/settings_icon_style_colored_outline</item>
-        <item>@string/settings_icon_style_colored_icon</item>
-        <item>@string/settings_icon_style_accent_icon</item>
-     </string-array>
  
-     <string-array name="settings_icon_style_values">
-         <item>0</item>
-         <item>1</item>
-         <item>2</item>
-         <item>3</item>
-         <item>4</item>
-         <item>5</item>
-         <item>6</item>
-     </string-array>
  
-     <string-array name="settings_corner_style_entries">
-        <item>@string/settings_icon_corner_style_circle</item>
-        <item>@string/settings_icon_corner_style_rounded_square</item>
-     </string-array>
  
-     <string-array name="settings_corner_style_values">
-         <item>0</item>
-         <item>1</item>
-     </string-array>
 
     <!-- Carrier name on lockscreen/statusbar -->
-    <string-array name="status_bar_carrier_display_entries">
-        <item>@string/never</item>
-        <item>@string/carrier_show_lockscreen_only</item>
-        <item>@string/carrier_show_statusbar_only</item>
-        <item>@string/carrier_show_both</item>
-    </string-array>
  
-    <string-array name="status_bar_carrier_display_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
 
     <!-- Brightness / Volume slider -->
-    <string-array name="qs_show_volume_slider_entries">
-        <item>@string/qs_show_volume_slider_hide</item>
-        <item>@string/qs_show_volume_slider_both</item>
-        <item>@string/qs_show_volume_slider_only</item>
-    </string-array>
  
-    <string-array name="qs_show_volume_slider_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
 
     <!-- Reality Display Engine -->
     <string-array name="display_engine_mode_entries">
@@ -1423,7 +1339,7 @@
         <item>@string/recents_type_stock</item>
         <item>@string/recents_type_classic</item>
         <item>@string/recents_type_slim</item>
-        <item>@string/recents_type_grace</item>
+        <item>@string/recents_type_cascade</item>
         <item>@string/recents_type_grid</item>
         <item>@string/recents_type_stack</item>
         <item>@string/recents_type_list</item>
@@ -1476,7 +1392,7 @@
         <item>2</item>
     </string-array>
 
-    <!-- Themes > Volume panel: premade slider styles -->
+    <!-- Theme Studio > Volume and system: premade slider styles -->
     <string-array name="volume_panel_style_entries" translatable="false">
         <item>Default</item>
         <item>One UI</item>

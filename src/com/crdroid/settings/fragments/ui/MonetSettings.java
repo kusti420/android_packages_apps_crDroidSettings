@@ -26,8 +26,6 @@ import android.provider.Settings;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.dashboard.DashboardFragment;
@@ -36,16 +34,23 @@ import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.preferences.colorpicker.ColorPickerPreference;
-import com.crdroid.settings.preferences.CustomSeekBarPreference;
 
 import java.lang.CharSequence;
-import java.util.List;
 
 import lineageos.providers.LineageSettings;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Theme Studio &gt; Palette: the Monet style and the colour source (wallpaper or preset colour),
+ * stored in the theme customization JSON that SystemUI's ThemeOverlayController reads.
+ *
+ * <p>The accent colour itself is picked in Theme Studio &gt; Accent colour
+ * ({@link com.crdroid.settings.fragments.themes.ThemeEngine}); with the "preset" source this page
+ * keeps whatever is set there. crDroid's other extras (background colour, luminance and chroma
+ * factors, whole palette, tint background) were removed, because nothing in this tree reads them.
+ */
 @SearchIndexable
 public class MonetSettings extends DashboardFragment implements
         OnPreferenceChangeListener {
@@ -57,49 +62,31 @@ public class MonetSettings extends DashboardFragment implements
             "android.theme.customization.system_palette";
     private static final String OVERLAY_CATEGORY_THEME_STYLE =
             "android.theme.customization.theme_style";
-    private static final String OVERLAY_CATEGORY_BG_COLOR =
-            "android.theme.customization.bg_color";
     private static final String OVERLAY_COLOR_SOURCE =
             "android.theme.customization.color_source";
     private static final String OVERLAY_COLOR_BOTH =
             "android.theme.customization.color_both";
-    private static final String OVERLAY_LUMINANCE_FACTOR =
-            "android.theme.customization.luminance_factor";
-    private static final String OVERLAY_CHROMA_FACTOR =
-            "android.theme.customization.chroma_factor";
-    private static final String OVERLAY_WHOLE_PALETTE =
-            "android.theme.customization.whole_palette";
-    private static final String OVERLAY_TINT_BACKGROUND =
-            "android.theme.customization.tint_background";
+    /** Fields the removed crDroid extras used to write; dropped whenever this page writes. */
+    private static final String[] REMOVED_KEYS = {
+            "android.theme.customization.bg_color",
+            "android.theme.customization.luminance_factor",
+            "android.theme.customization.chroma_factor",
+            "android.theme.customization.whole_palette",
+            "android.theme.customization.tint_background",
+    };
     private static final String COLOR_SOURCE_PRESET = "preset";
     private static final String COLOR_SOURCE_HOME = "home_wallpaper";
-    private static final String COLOR_SOURCE_LOCK = "lock_wallpaper";
     private static final String TIMESTAMP_FIELD = "_applied_timestamp";
 
     private static final String PREF_THEME_STYLE = "theme_style";
     private static final String PREF_COLOR_SOURCE = "color_source";
+    /** SharedPreferences key the removed accent picker used; still the fallback preset colour. */
     private static final String PREF_ACCENT_COLOR = "accent_color";
-    private static final String PREF_ACCENT_BACKGROUND = "accent_background";
-    private static final String PREF_BG_COLOR = "bg_color";
-    private static final String PREF_LUMINANCE_FACTOR = "luminance_factor";
-    private static final String PREF_CHROMA_FACTOR = "chroma_factor";
-    private static final String PREF_WHOLE_PALETTE = "whole_palette";
-    private static final String PREF_TINT_BACKGROUND = "tint_background";
-
-    private static final int DEFAULT_COLOR = 0xFF1b6ef3;
 
     private ListPreference mThemeStylePref;
     private ListPreference mColorSourcePref;
-    private ColorPickerPreference mAccentColorPref;
-    private SwitchPreferenceCompat mAccentBackgroundPref;
-    private ColorPickerPreference mBgColorPref;
-    private CustomSeekBarPreference mLuminancePref;
-    private CustomSeekBarPreference mChromaPref;
-    private SwitchPreferenceCompat mWholePalettePref;
-    private SwitchPreferenceCompat mTintBackgroundPref;
 
     private int mAccentColorValue;
-    private int mBgColorValue;
 
     private SharedPreferences mSharedPreferences;
 
@@ -114,37 +101,22 @@ public class MonetSettings extends DashboardFragment implements
 
         mThemeStylePref = findPreference(PREF_THEME_STYLE);
         mColorSourcePref = findPreference(PREF_COLOR_SOURCE);
-        mAccentColorPref = findPreference(PREF_ACCENT_COLOR);
-        mAccentBackgroundPref = findPreference(PREF_ACCENT_BACKGROUND);
-        mBgColorPref = findPreference(PREF_BG_COLOR);
-        mLuminancePref = findPreference(PREF_LUMINANCE_FACTOR);
-        mChromaPref = findPreference(PREF_CHROMA_FACTOR);
-        mWholePalettePref = findPreference(PREF_WHOLE_PALETTE);
-        mTintBackgroundPref = findPreference(PREF_TINT_BACKGROUND);
         mSharedPreferences = getActivity().getSharedPreferences(TAG, Context.MODE_PRIVATE);
+        mAccentColorValue = mSharedPreferences.getInt(PREF_ACCENT_COLOR, currentAccent());
 
         updatePreferences();
 
         mThemeStylePref.setOnPreferenceChangeListener(this);
         mColorSourcePref.setOnPreferenceChangeListener(this);
-        mAccentColorPref.setOnPreferenceChangeListener(this);
-        mAccentBackgroundPref.setOnPreferenceChangeListener(this);
-        mBgColorPref.setOnPreferenceChangeListener(this);
-        mLuminancePref.setOnPreferenceChangeListener(this);
-        mChromaPref.setOnPreferenceChangeListener(this);
-        mWholePalettePref.setOnPreferenceChangeListener(this);
-        mTintBackgroundPref.setOnPreferenceChangeListener(this);
+    }
 
-        // IchthysOS: SystemUI's ThemeOverlayController in this tree only understands the AOSP
-        // style / color source / accent fields. The crDroid extras below are written into the
-        // overlay JSON but nothing reads them, so they are hidden rather than offered. They stay
-        // attached to their fields, so the rest of this fragment works unchanged.
-        for (Preference dead : new Preference[] {mAccentBackgroundPref, mBgColorPref,
-                mLuminancePref, mChromaPref, mWholePalettePref, mTintBackgroundPref}) {
-            if (dead != null && dead.getParent() != null) {
-                dead.getParent().removePreference(dead);
-            }
-        }
+    /**
+     * The fallback preset colour when neither the theme JSON nor an earlier pick has one: the
+     * accent the system is showing right now (the theme token), not a hard-coded colour.
+     */
+    private int currentAccent() {
+        return com.android.settingslib.Utils.getColorAttrDefaultColor(getContext(),
+                android.R.attr.colorAccent) | 0xFF000000;
     }
 
     public static void reset(Context mContext) {
@@ -169,20 +141,11 @@ public class MonetSettings extends DashboardFragment implements
                 final JSONObject object = new JSONObject(overlayPackageJson);
                 final String style = object.optString(OVERLAY_CATEGORY_THEME_STYLE, "TONAL_SPOT");
                 final String source = object.optString(OVERLAY_COLOR_SOURCE, COLOR_SOURCE_HOME);
-                String color;
                 if (object.has(OVERLAY_CATEGORY_SYSTEM_PALETTE)) {
-                    color = object.optString(OVERLAY_CATEGORY_SYSTEM_PALETTE);
-                    mAccentColorValue = ColorPickerPreference.convertToColorInt(color);
+                    mAccentColorValue = ColorPickerPreference.convertToColorInt(
+                            object.optString(OVERLAY_CATEGORY_SYSTEM_PALETTE));
                 } else {
-                    mAccentColorValue = mSharedPreferences.getInt(PREF_ACCENT_COLOR, DEFAULT_COLOR);
-                    color = ColorPickerPreference.convertToRGB(mAccentColorValue).replace("#", "");
-                }
-                boolean hasBGColor = object.has(OVERLAY_CATEGORY_BG_COLOR);
-                mAccentBackgroundPref.setChecked(mSharedPreferences.getBoolean(PREF_ACCENT_BACKGROUND, hasBGColor));
-                if (hasBGColor) {
-                    mBgColorValue = object.optInt(OVERLAY_CATEGORY_BG_COLOR);
-                } else {
-                    mBgColorValue = mSharedPreferences.getInt(PREF_BG_COLOR, DEFAULT_COLOR);
+                    mAccentColorValue = mSharedPreferences.getInt(PREF_ACCENT_COLOR, currentAccent());
                 }
                 boolean both;
                 if (object.has(OVERLAY_COLOR_BOTH)) {
@@ -190,10 +153,6 @@ public class MonetSettings extends DashboardFragment implements
                 } else {
                     both = false;
                 }
-                final boolean wholePalette = object.optInt(OVERLAY_WHOLE_PALETTE, 0) == 1;
-                final boolean tintBG = object.optInt(OVERLAY_TINT_BACKGROUND, 0) == 1;
-                final float lumin = (float) object.optDouble(OVERLAY_LUMINANCE_FACTOR, 1d);
-                final float chroma = (float) object.optDouble(OVERLAY_CHROMA_FACTOR, 1d);
                 // style handling
                 boolean styleUpdated = false;
                 if (style != null && !style.isEmpty()) {
@@ -215,30 +174,13 @@ public class MonetSettings extends DashboardFragment implements
                 final String sourceVal = (source == null || source.isEmpty() ||
                         (source.equals(COLOR_SOURCE_HOME) && both)) ? "both" : source;
                 updateListByValue(mColorSourcePref, sourceVal);
-                updateAccentEnablement(sourceVal);
-                // Set preview color irrespective it is enabled
-                if (color != null && !color.isEmpty()) {
-                    mAccentColorPref.setNewPreviewColor(mAccentColorValue);
-                }
-                mBgColorPref.setNewPreviewColor(mBgColorValue);
-                // etc
-                int luminV = 0;
-                if (lumin > 1d) luminV = Math.round((lumin - 1f) * 100f);
-                else if (lumin < 1d) luminV = -1 * Math.round((1f - lumin) * 100f);
-                mLuminancePref.setValue(luminV);
-                int chromaV = 0;
-                if (chroma > 1d) chromaV = Math.round((chroma - 1f) * 100f);
-                else if (chroma < 1d) chromaV = -1 * Math.round((1f - chroma) * 100f);
-                mChromaPref.setValue(chromaV);
-                mWholePalettePref.setChecked(wholePalette);
-                mTintBackgroundPref.setChecked(tintBG);
+                setColorValue();
             } catch (JSONException | IllegalArgumentException ignored) {}
         }
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        final ContentResolver resolver = getActivity().getContentResolver();
         if (preference == mThemeStylePref) {
             String value = (String) newValue;
             setStyleValue(value);
@@ -248,39 +190,7 @@ public class MonetSettings extends DashboardFragment implements
             String value = (String) newValue;
             setSourceValue(value);
             updateListByValue(mColorSourcePref, value, false);
-            updateAccentEnablement(value);
-            return true;
-        } else if (preference == mAccentColorPref) {
-            mAccentColorValue = (Integer) newValue;
-            mSharedPreferences.edit().putInt(PREF_ACCENT_COLOR, mAccentColorValue).apply();
-            setColorValue();
-            return true;
-        } else if (preference == mAccentBackgroundPref) {
-            boolean value = (Boolean) newValue;
-            mAccentBackgroundPref.setChecked(value);
-            mSharedPreferences.edit().putBoolean(PREF_ACCENT_BACKGROUND, value).apply();
-            setBgColorValue();
-            return true;
-        } else if (preference == mBgColorPref) {
-            mBgColorValue = (Integer) newValue;
-            mSharedPreferences.edit().putInt(PREF_BG_COLOR, mBgColorValue).apply();
-            setBgColorValue();
-            return true;
-        } else if (preference == mLuminancePref) {
-            int value = (Integer) newValue;
-            setLuminanceValue(value);
-            return true;
-        } else if (preference == mChromaPref) {
-            int value = (Integer) newValue;
-            setChromaValue(value);
-            return true;
-        } else if (preference == mWholePalettePref) {
-            boolean value = (Boolean) newValue;
-            setWholePaletteValue(value);
-            return true;
-        } else if (preference == mTintBackgroundPref) {
-            boolean value = (Boolean) newValue;
-            setTintBackgroundValue(value);
+            setColorValue(value);
             return true;
         }
         return false;
@@ -293,15 +203,9 @@ public class MonetSettings extends DashboardFragment implements
     private void updateListByValue(ListPreference pref, String value, boolean set) {
         if (set) pref.setValue(value);
         final int index = pref.findIndexOfValue(value);
-        pref.setSummary(pref.getEntries()[index]);
-    }
-
-    private void updateAccentEnablement(String source) {
-        final boolean shouldEnable = source != null && source.equals(COLOR_SOURCE_PRESET);
-        mAccentColorPref.setEnabled(shouldEnable);
-        mAccentBackgroundPref.setEnabled(shouldEnable);
-        setColorValue();
-        setBgColorValue();
+        if (index >= 0) {
+            pref.setSummary(pref.getEntries()[index]);
+        }
     }
 
     private JSONObject getSettingsJson() throws JSONException {
@@ -309,13 +213,22 @@ public class MonetSettings extends DashboardFragment implements
                 getActivity().getContentResolver(),
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 UserHandle.USER_CURRENT);
-        JSONObject object;
         if (overlayPackageJson == null || overlayPackageJson.isEmpty())
             return new JSONObject();
         return new JSONObject(overlayPackageJson);
     }
 
     private void putSettingsJson(JSONObject object) {
+        for (String key : REMOVED_KEYS) {
+            object.remove(key);
+        }
+        final String current = Settings.Secure.getStringForUser(
+                getActivity().getContentResolver(),
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                UserHandle.USER_CURRENT);
+        if (object.toString().equals(current)) {
+            return; // nothing changed: don't make SystemUI re-evaluate the theme
+        }
         Settings.Secure.putStringForUser(
                 getActivity().getContentResolver(),
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
@@ -350,10 +263,15 @@ public class MonetSettings extends DashboardFragment implements
     }
 
     private void setColorValue() {
+        setColorValue(mColorSourcePref.getValue());
+    }
+
+    /** Keeps the preset accent in the JSON while the source is "preset", and out of it otherwise. */
+    private void setColorValue(String source) {
         try {
             JSONObject object = getSettingsJson();
 
-            if (mColorSourcePref.getValue().equals(COLOR_SOURCE_PRESET)) {
+            if (COLOR_SOURCE_PRESET.equals(source)) {
                 final String rgbColor = ColorPickerPreference.convertToRGB(mAccentColorValue).replace("#", "");
                 object.putOpt(OVERLAY_CATEGORY_ACCENT_COLOR, rgbColor);
                 object.putOpt(OVERLAY_CATEGORY_SYSTEM_PALETTE, rgbColor);
@@ -361,58 +279,6 @@ public class MonetSettings extends DashboardFragment implements
                 object.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
                 object.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
             }
-            putSettingsJson(object);
-        } catch (JSONException | IllegalArgumentException ignored) {}
-    }
-
-    private void setBgColorValue() {
-        try {
-            JSONObject object = getSettingsJson();
-            if (mColorSourcePref.getValue().equals(COLOR_SOURCE_PRESET) && mAccentBackgroundPref.isChecked()) {
-                object.putOpt(OVERLAY_CATEGORY_BG_COLOR, mBgColorValue);
-            } else {
-                object.remove(OVERLAY_CATEGORY_BG_COLOR);
-            }
-            putSettingsJson(object);
-        } catch (JSONException | IllegalArgumentException ignored) {}
-    }
-
-    private void setLuminanceValue(int lumin) {
-        try {
-            JSONObject object = getSettingsJson();
-            if (lumin == 0)
-                object.remove(OVERLAY_LUMINANCE_FACTOR);
-            else
-                object.putOpt(OVERLAY_LUMINANCE_FACTOR, 1d + ((double) lumin / 100d));
-            putSettingsJson(object);
-        } catch (JSONException | IllegalArgumentException ignored) {}
-    }
-
-    private void setChromaValue(int chroma) {
-        try {
-            JSONObject object = getSettingsJson();
-            if (chroma == 0)
-                object.remove(OVERLAY_CHROMA_FACTOR);
-            else
-                object.putOpt(OVERLAY_CHROMA_FACTOR, 1d + ((double) chroma / 100d));
-            putSettingsJson(object);
-        } catch (JSONException | IllegalArgumentException ignored) {}
-    }
-
-    private void setWholePaletteValue(boolean whole) {
-        try {
-            JSONObject object = getSettingsJson();
-            if (!whole) object.remove(OVERLAY_WHOLE_PALETTE);
-            else object.putOpt(OVERLAY_WHOLE_PALETTE, 1);
-            putSettingsJson(object);
-        } catch (JSONException | IllegalArgumentException ignored) {}
-    }
-
-    private void setTintBackgroundValue(boolean tint) {
-        try {
-            JSONObject object = getSettingsJson();
-            if (!tint) object.remove(OVERLAY_TINT_BACKGROUND);
-            else object.putOpt(OVERLAY_TINT_BACKGROUND, 1);
             putSettingsJson(object);
         } catch (JSONException | IllegalArgumentException ignored) {}
     }
@@ -428,18 +294,5 @@ public class MonetSettings extends DashboardFragment implements
     }
 
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
-            new BaseSearchIndexProvider(R.xml.monet_engine) {
-                @Override
-                public List<String> getNonIndexableKeys(Context context) {
-                    List<String> keys = super.getNonIndexableKeys(context);
-                    // IchthysOS: hidden in onCreate (no consumer), so keep them out of search.
-                    keys.add(PREF_ACCENT_BACKGROUND);
-                    keys.add(PREF_BG_COLOR);
-                    keys.add(PREF_LUMINANCE_FACTOR);
-                    keys.add(PREF_CHROMA_FACTOR);
-                    keys.add(PREF_WHOLE_PALETTE);
-                    keys.add(PREF_TINT_BACKGROUND);
-                    return keys;
-                }
-            };
+            new BaseSearchIndexProvider(R.xml.monet_engine);
 }

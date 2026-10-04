@@ -6,7 +6,6 @@
 package com.crdroid.settings.fragments.ui
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.os.UserHandle
 import android.provider.Settings
@@ -32,8 +31,9 @@ class EdgeLightSettings : SettingsPreferenceFragment() {
                     Settings.System.EDGE_LIGHT_ENABLED, 0, UserHandle.USER_CURRENT)
             Settings.System.putStringForUser(resolver,
                     Settings.System.EDGE_LIGHT_COLOR_MODE, "accent", UserHandle.USER_CURRENT)
-            Settings.System.putIntForUser(resolver,
-                    Settings.System.EDGE_LIGHT_CUSTOM_COLOR, Color.WHITE, UserHandle.USER_CURRENT)
+            // No stored colour: SystemUI then uses the theme accent.
+            Settings.System.putStringForUser(resolver,
+                    Settings.System.EDGE_LIGHT_CUSTOM_COLOR, null, UserHandle.USER_CURRENT)
             Settings.System.putIntForUser(resolver,
                     Settings.System.EDGE_LIGHT_PULSE_COUNT, 1, UserHandle.USER_CURRENT)
             Settings.System.putIntForUser(resolver,

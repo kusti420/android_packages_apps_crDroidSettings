@@ -41,7 +41,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * IchthysOS Backstage page: pick apps to keep running "in the foreground" on a hidden display.
+ * IchthysOS &gt; Apps &gt; Background &gt; Apps in Backstage: pick apps to keep running "in the
+ * foreground" on a hidden display. The time limit is on the Background page.
  * Only edits Settings.Secure ichthys_backstage_pkgs; IchthysBackstageService in system_server does
  * the work and removes apps from the list when they leave Backstage (brought back via the
  * notification, finished, or stopped). (kusti420/ichthysos-tracker#38)
@@ -117,9 +118,10 @@ public class Backstage extends SettingsPreferenceFragment {
         }
     }
 
-    private List<String> readPackages() {
-        final String value = Settings.Secure.getStringForUser(getContentResolver(), KEY_PACKAGES,
-                UserHandle.USER_CURRENT);
+    /** The apps currently in Backstage. */
+    public static List<String> readPackages(Context context) {
+        final String value = Settings.Secure.getStringForUser(context.getContentResolver(),
+                KEY_PACKAGES, UserHandle.USER_CURRENT);
         final List<String> pkgs = new ArrayList<>();
         if (!TextUtils.isEmpty(value)) {
             for (String p : value.split(",")) {
@@ -130,7 +132,7 @@ public class Backstage extends SettingsPreferenceFragment {
     }
 
     private void setInBackstage(String pkg, boolean on) {
-        final List<String> pkgs = readPackages();
+        final List<String> pkgs = readPackages(getPrefContext());
         if (on && !pkgs.contains(pkg) && pkgs.size() < MAX_APPS) {
             pkgs.add(pkg);
         } else if (!on) {
@@ -144,7 +146,7 @@ public class Backstage extends SettingsPreferenceFragment {
     /** Mirrors the list (which the service also edits) and disables new picks when full. */
     private void refreshStates() {
         if (mApps == null) return;
-        final List<String> pkgs = readPackages();
+        final List<String> pkgs = readPackages(getPrefContext());
         final boolean full = pkgs.size() >= MAX_APPS;
         for (int i = 0; i < mApps.getPreferenceCount(); i++) {
             final SwitchPreferenceCompat pref = (SwitchPreferenceCompat) mApps.getPreference(i);

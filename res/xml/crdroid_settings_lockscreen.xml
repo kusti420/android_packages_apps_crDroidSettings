@@ -14,23 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- Look > Lock screen > Lock screen and ambient display: what the lock screen and the ambient
+     display show. The clock face and the fingerprint page are next to this page in Theme Studio;
+     the lock screen gesture is in System > Buttons & gestures (crdroid_settings_button.xml), the
+     lock screen / always-on notification limits in System > Notifications
+     (crdroid_settings_notifications.xml), and the fingerprint vibration and ripple switches on
+     the fingerprint page (fingerprint_effects.xml).
+
+     This file is the "lockscreen" page for
+     frameworks/base/tools/ichthys-config/gen_crdroid_options.py. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
-    xmlns:lineage="http://schemas.android.com/apk/res-auto">
-
-    <PreferenceCategory
-        android:key="lockscreen_clock_category"
-        android:title="@string/qs_clock_title">
-
-        <!-- Custom clock style -->
-        <Preference
-            android:key="lockscreen_custom_clock_style"
-            android:icon="@drawable/ic_font"
-            android:title="@string/lockscreen_custom_clock_style_title"
-            android:summary="@string/lockscreen_custom_clock_style_summary"
-            android:fragment="com.crdroid.settings.fragments.lockscreen.CustomClockPreview" />
-    </PreferenceCategory>
+    xmlns:lineage="http://schemas.android.com/apk/res-auto"
+    android:title="@string/look_lock_screen_title">
 
     <PreferenceCategory
         android:key="lockscreen_interface_category"
@@ -59,11 +56,18 @@
             android:summary="@string/lockscreen_battery_info_summary"
             android:defaultValue="true" />
 
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="lockscreen_enable_power_menu"
+            android:icon="@drawable/ic_power"
+            android:title="@string/lockscreen_enable_power_menu_title"
+            android:summary="@string/lockscreen_enable_power_menu_summary"
+            android:defaultValue="true" />
+
         <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="lockscreen_smartspace_enabled"
-            android:icon="@drawable/ic_weather"
-            android:title="@string/lockscreen_smartspace_title"
-            android:summary="@string/lockscreen_smartspace_summary"
+            android:key="ichthys_lockscreen_hide_statusbar"
+            android:icon="@drawable/ic_tune"
+            android:title="@string/ichthys_lockscreen_hide_statusbar_title"
+            android:summary="@string/ichthys_lockscreen_hide_statusbar_summary"
             android:defaultValue="false" />
 
     </PreferenceCategory>
@@ -73,6 +77,7 @@
         android:title="@string/lockscreen_weather_category">
 
         <Preference
+            android:key="lockscreen_weather_settings"
             android:icon="@drawable/ic_weather_settings"
             android:title="@string/weather_settings_title"
             android:summary="@string/weather_settings_summary">
@@ -122,94 +127,25 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="lockscreen_gestures_category"
-        android:title="@string/gestures_title">
+        android:key="lockscreen_ambient_category"
+        android:title="@string/look_lock_screen_ambient_category">
 
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="double_tap_sleep_lockscreen"
-            android:icon="@drawable/ic_double_tap"
-            android:title="@string/lockscreen_doubletap_sleep_title"
-            android:summary="@string/lockscreen_doubletap_sleep_summary"
-            android:defaultValue="true" />
-
+        <!-- Ambient display: schedule, wake gestures, ambient wallpaper. The on / always-on /
+             pick-up switches themselves are stock (Display > Lock screen). -->
         <Preference
-            android:key="udfps_icon_picker"
-            android:icon="@drawable/ic_fp_selector"
-            android:title="@string/udfps_icon_picker_title"
-            android:summary="@string/udfps_icon_picker_summary"
-            android:fragment="com.crdroid.settings.fragments.lockscreen.UdfpsIconPicker" />
+            android:key="doze_fragment"
+            android:icon="@drawable/ic_ambient"
+            android:title="@string/doze_display_title"
+            android:summary="@string/doze_display_summary"
+            android:fragment="com.crdroid.settings.fragments.ui.DozeSettings" />
 
+        <!-- Edge Light -->
         <Preference
-            android:key="udfps_recognizing_animation_preview"
-            android:icon="@drawable/ic_fp_selector"
-            android:title="@string/udfps_recog_animation_effect_title"
-            android:summary="@string/udfps_recog_animation_effect_summary"
-            android:fragment="com.crdroid.settings.fragments.lockscreen.UdfpsAnimation" />
-
-        <!-- IchthysOS: built-in press effects, pressed icon, idle icons, result effects, haptics -->
-        <Preference
-            android:key="ichthys_fingerprint_effects"
-            android:icon="@drawable/ic_fp_selector"
-            android:title="@string/ichthys_fp_effects_title"
-            android:summary="@string/ichthys_fp_effects_summary"
-            android:fragment="com.crdroid.settings.fragments.lockscreen.FingerprintEffects" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="fp_success_vibrate"
-            android:icon="@drawable/ic_fp"
-            android:title="@string/fp_success_vibrate_title"
-            android:summary="@string/fp_success_vibrate_summary"
-            android:defaultValue="true" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="fp_error_vibrate"
-            android:icon="@drawable/ic_fp"
-            android:title="@string/fp_error_vibrate_title"
-            android:summary="@string/fp_error_vibrate_summary"
-            android:defaultValue="true" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="enable_ripple_effect"
-            android:icon="@drawable/ic_unlock_outline"
-            android:title="@string/enable_fingerprint_ripple_effect_title"
-            android:summary="@string/enable_fingerprint_ripple_effect_summary"
-            android:defaultValue="true" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="lockscreen_misc_category"
-        android:title="@string/misc_title">
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-               android:key="lockscreen_enable_power_menu"
-               android:icon="@drawable/ic_power"
-               android:title="@string/lockscreen_enable_power_menu_title"
-               android:summary="@string/lockscreen_enable_power_menu_summary"
-               android:defaultValue="true" />
-
-        <!-- IchthysOS -->
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="ichthys_lockscreen_hide_statusbar"
-            android:title="@string/ichthys_lockscreen_hide_statusbar_title"
-            android:summary="@string/ichthys_lockscreen_hide_statusbar_summary"
-            android:defaultValue="false" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="ichthys_lockscreen_max_notifs"
-            android:title="@string/ichthys_lockscreen_max_notifs_title"
-            android:entries="@array/ichthys_lockscreen_max_notifs_entries"
-            android:entryValues="@array/ichthys_lockscreen_max_notifs_values"
-            android:summary="%s"
-            android:defaultValue="-1" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="ichthys_aod_notif_icons"
-            android:title="@string/ichthys_aod_notif_icons_title"
-            android:entries="@array/ichthys_aod_notif_icons_entries"
-            android:entryValues="@array/ichthys_aod_notif_icons_values"
-            android:summary="%s"
-            android:defaultValue="-1" />
+            android:key="edge_light_settings"
+            android:icon="@drawable/ic_edge_light"
+            android:title="@string/edge_light_title"
+            android:summary="@string/edge_light_summary"
+            android:fragment="com.crdroid.settings.fragments.ui.EdgeLightSettings" />
 
     </PreferenceCategory>
 

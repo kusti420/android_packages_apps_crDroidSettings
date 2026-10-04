@@ -14,15 +14,24 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<!-- IchthysOS Theme Studio. Nothing here is persisted by the preference itself: every change is
-     applied through IchthysConfigService (ichthys.nix, merge mode) so it lands in a generation. -->
+<!-- IchthysOS Theme Studio: the one place for look and feel. It is the "Look" row of the IchthysOS
+     settings entry (ichthys_hub.xml); every look option is either a row here or on a page linked
+     from here, and nowhere else.
+
+     Three kinds of rows:
+       * theme_studio_* lists and switches (android:persistent="false"): applied by
+         ThemeStudio.java through IchthysConfigService (ichthys.nix, merge mode), so each change
+         lands in a generation;
+       * links (android:fragment) to the pages that hold the rest of a section;
+       * the self-persisting settings in "Volume and system". -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/theme_studio_title">
 
+    <!-- Colours -->
     <PreferenceCategory
-        android:key="theme_studio_look"
-        android:title="@string/theme_studio_look_category">
+        android:key="theme_studio_colours"
+        android:title="@string/theme_studio_colours_category">
 
         <ListPreference
             android:key="theme_studio_preset"
@@ -31,11 +40,36 @@
             android:summary="%s"
             android:persistent="false" />
 
+        <!-- Accent swatches / custom colour, Monet or Abyss palette mode, pitch black. -->
         <Preference
             android:key="theme_studio_accent"
             android:icon="@drawable/ic_format_paint"
             android:title="@string/theme_studio_accent_title"
+            android:summary="@string/theme_studio_accent_summary"
             android:fragment="com.crdroid.settings.fragments.themes.ThemeEngine" />
+
+        <!-- Monet style and colour source (wallpaper or preset). -->
+        <Preference
+            android:key="theme_studio_palette"
+            android:icon="@drawable/ic_themes"
+            android:title="@string/theme_studio_palette_title"
+            android:summary="@string/theme_studio_palette_summary"
+            android:fragment="com.crdroid.settings.fragments.ui.MonetSettings" />
+    </PreferenceCategory>
+
+    <!-- Surfaces and shape -->
+    <PreferenceCategory
+        android:key="theme_studio_surfaces"
+        android:title="@string/theme_studio_surfaces_category">
+
+        <ListPreference
+            android:key="theme_studio_surface"
+            android:icon="@drawable/ic_shapes"
+            android:title="@string/theme_studio_surface_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_surface_entries"
+            android:entryValues="@array/theme_studio_surface_values"
+            android:persistent="false" />
 
         <ListPreference
             android:key="theme_studio_radius"
@@ -54,15 +88,25 @@
             android:entries="@array/theme_studio_shape_entries"
             android:entryValues="@array/theme_studio_shape_values"
             android:persistent="false" />
+    </PreferenceCategory>
+
+    <!-- Type -->
+    <PreferenceCategory
+        android:key="theme_studio_type"
+        android:title="@string/theme_studio_type_category">
 
         <ListPreference
-            android:key="theme_studio_surface"
-            android:icon="@drawable/ic_shapes"
-            android:title="@string/theme_studio_surface_title"
+            android:key="theme_studio_font"
+            android:icon="@drawable/ic_font"
+            android:title="@string/theme_studio_font_title"
             android:summary="%s"
-            android:entries="@array/theme_studio_surface_entries"
-            android:entryValues="@array/theme_studio_surface_values"
             android:persistent="false" />
+    </PreferenceCategory>
+
+    <!-- Icons -->
+    <PreferenceCategory
+        android:key="theme_studio_icons"
+        android:title="@string/theme_studio_icons_category">
 
         <SwitchPreferenceCompat
             android:key="theme_studio_badges"
@@ -80,18 +124,12 @@
             android:entryValues="@array/theme_studio_icon_style_values"
             android:dependency="theme_studio_badges"
             android:persistent="false" />
-
-        <ListPreference
-            android:key="theme_studio_font"
-            android:icon="@drawable/ic_font"
-            android:title="@string/theme_studio_font_title"
-            android:summary="%s"
-            android:persistent="false" />
     </PreferenceCategory>
 
+    <!-- Status bar -->
     <PreferenceCategory
-        android:key="theme_studio_layout"
-        android:title="@string/theme_studio_layout_category">
+        android:key="theme_studio_statusbar_category"
+        android:title="@string/theme_studio_statusbar_category">
 
         <ListPreference
             android:key="theme_studio_statusbar"
@@ -102,6 +140,21 @@
             android:entryValues="@array/theme_studio_statusbar_values"
             android:persistent="false" />
 
+        <!-- Clock, battery, logo, icons, notification dot, privacy indicators, weather,
+             padding. -->
+        <Preference
+            android:key="look_status_bar"
+            android:icon="@drawable/ic_clock"
+            android:title="@string/look_status_bar_title"
+            android:summary="@string/look_status_bar_summary"
+            android:fragment="com.crdroid.settings.fragments.StatusBar" />
+    </PreferenceCategory>
+
+    <!-- Quick settings -->
+    <PreferenceCategory
+        android:key="theme_studio_qs_category"
+        android:title="@string/theme_studio_qs_category">
+
         <ListPreference
             android:key="theme_studio_qs"
             android:icon="@drawable/ic_qs_tile"
@@ -110,8 +163,129 @@
             android:entries="@array/theme_studio_qs_entries"
             android:entryValues="@array/theme_studio_qs_values"
             android:persistent="false" />
+
+        <!-- Panel style, tile shape and labels, columns and rows, gradient, opacity, brightness
+             slider, footer buttons. -->
+        <Preference
+            android:key="look_quick_settings"
+            android:icon="@drawable/ic_tile_medium"
+            android:title="@string/look_quick_settings_title"
+            android:summary="@string/look_quick_settings_summary"
+            android:fragment="com.crdroid.settings.fragments.QuickSettings" />
     </PreferenceCategory>
 
+    <!-- Navigation bar -->
+    <PreferenceCategory
+        android:key="theme_studio_navbar_category"
+        android:title="@string/theme_studio_navbar_category">
+
+        <!-- The navigation bar style picker: the IchthysOS code-drawn styles (navBar.style,
+             Settings.Secure ichthys_navbar_style), applied live. -->
+        <Preference
+            android:key="theme_studio_navbar_style"
+            android:icon="@drawable/ic_navbar"
+            android:title="@string/theme_customization_navbar_title"
+            android:summary="@string/theme_customization_navbar_summary"
+            android:fragment="com.crdroid.settings.fragments.ui.NavbarStyles" />
+
+        <Preference
+            android:key="look_navigation_handle"
+            android:icon="@drawable/ic_navigation"
+            android:title="@string/ichthys_nav_handle_category"
+            android:summary="@string/look_navigation_handle_summary"
+            android:fragment="com.crdroid.settings.fragments.Navigation" />
+    </PreferenceCategory>
+
+    <!-- Lock screen. ThemeStudio.java removes the fingerprint row on devices without a
+         fingerprint sensor. -->
+    <PreferenceCategory
+        android:key="theme_studio_lockscreen_category"
+        android:title="@string/theme_studio_lockscreen_category">
+
+        <!-- Clock face and its options -->
+        <Preference
+            android:key="lockscreen_custom_clock_style"
+            android:icon="@drawable/ic_font"
+            android:title="@string/lockscreen_custom_clock_style_title"
+            android:summary="@string/lockscreen_custom_clock_style_summary"
+            android:fragment="com.crdroid.settings.fragments.lockscreen.CustomClockPreview" />
+
+        <!-- The one fingerprint page: icon and animation packs, press effects, pressed icon,
+             idle icon, result effects, haptics, ripple. -->
+        <Preference
+            android:key="ichthys_fingerprint_effects"
+            android:icon="@drawable/ic_fp_selector"
+            android:title="@string/look_fingerprint_title"
+            android:summary="@string/look_fingerprint_summary"
+            android:fragment="com.crdroid.settings.fragments.lockscreen.FingerprintEffects" />
+
+        <!-- Music visualizer, media art, weather, ambient display, edge light. -->
+        <Preference
+            android:key="look_lock_screen"
+            android:icon="@drawable/ic_lock_alert"
+            android:title="@string/look_lock_screen_title"
+            android:summary="@string/look_lock_screen_summary"
+            android:fragment="com.crdroid.settings.fragments.LockScreen" />
+    </PreferenceCategory>
+
+    <!-- Volume and system. These persist themselves (Settings.System / Secure). -->
+    <PreferenceCategory
+        android:key="theme_studio_system_category"
+        android:title="@string/theme_studio_system_category">
+
+        <!-- Premade volume slider looks (volume.style in ichthys.nix). Backend: Settings.System
+             "volume_panel_style", observed by the SystemUI volume dialog to swap the slider
+             rendering. 0 = Default (AOSP), 1 = One UI (IchthysOS default). -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="volume_panel_style"
+            android:icon="@drawable/ic_volume_vibrate"
+            android:title="@string/volume_panel_style_title"
+            android:summary="%s"
+            android:entries="@array/volume_panel_style_entries"
+            android:entryValues="@array/volume_panel_style_values"
+            android:defaultValue="1" />
+
+        <!-- Horizontal (8.1-style) volume slider -->
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="custom_volume_horizontal"
+            android:icon="@drawable/ic_sliders"
+            android:title="@string/custom_volume_horizontal_title"
+            android:summary="@string/custom_volume_horizontal_summary"
+            android:defaultValue="false" />
+
+        <!-- Screen on / off animation -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_screen_reveal_style"
+            android:icon="@drawable/ic_screensaver"
+            android:title="@string/ichthys_screen_reveal_style_title"
+            android:entries="@array/ichthys_screen_reveal_style_entries"
+            android:entryValues="@array/ichthys_screen_reveal_style_values"
+            android:summary="%s"
+            android:defaultValue="0" />
+
+        <!-- Recents style (recents.* in ichthys.nix). Read on every recents request by SystemUI
+             and Launcher, so it applies at once. -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="recents_type"
+            android:icon="@drawable/ic_sysbar_recent"
+            android:title="@string/recents_type_title"
+            android:summary="%s"
+            android:entries="@array/recents_type_entries"
+            android:entryValues="@array/recents_type_values"
+            android:defaultValue="0" />
+
+        <!-- Options of the Slim style (frameworks/opt/slimrecent, compiled into Launcher3, which
+             observes these keys). ThemeStudio.java enables the row while that style is
+             selected. -->
+        <Preference
+            android:key="slim_recents"
+            android:icon="@drawable/ic_sysbar_recent"
+            android:title="@string/look_recents_slim_title"
+            android:summary="@string/look_recents_slim_summary"
+            android:fragment="com.crdroid.settings.fragments.recents.SlimRecents" />
+    </PreferenceCategory>
+
+    <!-- ichthys.nix -->
     <PreferenceCategory
         android:key="theme_studio_config"
         android:title="@string/theme_studio_config_category">

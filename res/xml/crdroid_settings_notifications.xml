@@ -14,10 +14,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- IchthysOS > System > Notifications.
+
+     Options in ichthys.nix. This file is the "system.notifications" page for
+     frameworks/base/tools/ichthys-config/gen_crdroid_options.py. The "Counts and limits"
+     preferences came from the old Status bar and Lock screen tabs and keep the option paths
+     they had there (statusBar.*, lockscreen.*) through the generator's crdroid_paths.lock. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:lineage="http://schemas.android.com/apk/res-auto"
-    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
+    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+    android:title="@string/notifications_title">
 
     <com.crdroid.settings.preferences.SystemSettingSwitchPreference
         android:key="notification_sound_vib_screen_on"
@@ -118,7 +125,7 @@
             android:icon="@drawable/ic_flashlight"
             android:title="@string/flashlight_on_call_ignore_dnd_title"
             android:summary="@string/flashlight_on_call_ignore_dnd_summary"
-            android:defaultValue="false" /> 
+            android:defaultValue="false" />
 
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="flashlight_on_call_rate"
@@ -131,35 +138,44 @@
 
     </PreferenceCategory>
 
-    <!-- IchthysOS (a52sxq): the A52s 5G has NO notification/battery LED, so both entries below
-         are dead and their target screens have been emptied (see notification_light_settings.xml
-         and battery_light_settings.xml). This category and both Preference nodes must
-         nevertheless STAY in the XML: Notifications.java does an unconditional
-         findPreference("battery_lights"/"notification_lights"/"light_brightness") and then calls
-         prefScreen.removePreference(...) on the result, so commenting them out here would pass
-         null into removePreference() and crash the Notifications screen. They are already hidden
-         at runtime by exactly that code (config_deviceLightCapabilities = 8 < 64 and
-         config_intrusiveNotificationLed = false), which removes both entries and then this whole
-         category. Removing them properly needs a src/ change, not an XML change. -->
+    <!-- How many notifications and notification icons each surface shows. -->
     <PreferenceCategory
-        android:key="light_brightness"
-        android:title="@string/light_brightness_category">
+        android:key="notification_counts_category"
+        android:title="@string/ichthys_notifications_counts_category">
 
-        <!-- Battery light -->
-        <Preference
-            android:key="battery_lights"
-            android:icon="@drawable/ic_led_on"
-            android:title="@string/battery_light_title"
-            android:summary="@string/battery_light_summary"
-            android:fragment="com.crdroid.settings.fragments.notifications.notificationlight.BatteryLightSettings" />
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="statusbar_notif_count"
+            android:icon="@drawable/ic_counter"
+            android:title="@string/statusbar_notif_count_title"
+            android:summary="@string/statusbar_notif_count_summary"
+            android:defaultValue="false" />
 
-        <!-- Notification lights -->
-        <Preference
-            android:key="notification_lights"
-            android:icon="@drawable/ic_led_on"
-            android:title="@string/notification_light_title"
-            android:summary="@string/notification_light_summary"
-            android:fragment="com.crdroid.settings.fragments.notifications.notificationlight.NotificationLightSettings" />
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_statusbar_notif_icons"
+            android:icon="@drawable/ic_counter"
+            android:title="@string/ichthys_statusbar_notif_icons_title"
+            android:entries="@array/ichthys_notif_icon_limit_entries"
+            android:entryValues="@array/ichthys_notif_icon_limit_values"
+            android:summary="%s"
+            android:defaultValue="-1" />
+
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_lockscreen_max_notifs"
+            android:icon="@drawable/ic_counter"
+            android:title="@string/ichthys_lockscreen_max_notifs_title"
+            android:entries="@array/ichthys_lockscreen_max_notifs_entries"
+            android:entryValues="@array/ichthys_lockscreen_max_notifs_values"
+            android:summary="%s"
+            android:defaultValue="-1" />
+
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_aod_notif_icons"
+            android:icon="@drawable/ic_counter"
+            android:title="@string/ichthys_aod_notif_icons_title"
+            android:entries="@array/ichthys_aod_notif_icons_entries"
+            android:entryValues="@array/ichthys_aod_notif_icons_values"
+            android:summary="%s"
+            android:defaultValue="-1" />
     </PreferenceCategory>
 
 </PreferenceScreen>

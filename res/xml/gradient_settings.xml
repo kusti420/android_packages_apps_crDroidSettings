@@ -47,12 +47,12 @@
         <com.crdroid.settings.preferences.colorpicker.SystemSettingColorPickerPreference
             android:key="custom_gradient_start_color"
             android:title="@string/custom_gradient_start_color_title"
-            android:defaultValue="#ff0000" />
+            settings:accentDefault="true" />
 
         <com.crdroid.settings.preferences.colorpicker.SystemSettingColorPickerPreference
             android:key="custom_gradient_end_color"
             android:title="@string/custom_gradient_end_color_title"
-            android:defaultValue="#ff0000" />
+            settings:accentDefault="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

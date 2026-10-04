@@ -73,7 +73,7 @@ public class ThemeEngine extends SettingsPreferenceFragment {
 
     /**
      * Registered so R8/resource shrinking keeps this fragment (it is only
-     * referenced from theme_global.xml by name).
+     * referenced from theme_studio.xml by name).
      */
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
             new BaseSearchIndexProvider(R.xml.theme_engine_index);

@@ -23,6 +23,10 @@
         <attr name="showReset" format="boolean" />
         <attr name="dividerAbove" format="boolean" />
         <attr name="dividerBelow" format="boolean" />
+        <!-- The setting has no default colour of its own: while it is unset the reader uses the
+             theme accent, so the preference shows the accent and stores nothing until the user
+             picks a colour; its reset button deletes the stored colour again. -->
+        <attr name="accentDefault" format="boolean" />
     </declare-styleable>
 
     <!-- Base attributes available to CustomSeekBarPreference. -->

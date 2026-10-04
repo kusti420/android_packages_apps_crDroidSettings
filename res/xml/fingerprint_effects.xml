@@ -14,12 +14,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<!-- IchthysOS: fingerprint (UDFPS) effects. SystemUI reads these keys on each touch
-     (IchthysUdfpsSettings); the idle icon updates live. -->
+<!-- Look > Lock screen > Fingerprint: the one page for the fingerprint (UDFPS) sensor's look and
+     feedback. SystemUI reads the ichthys_udfps_* keys on each touch (IchthysUdfpsSettings); the
+     idle icon updates live.
+
+     The crDroid icon and animation packs are picked here too (UdfpsPackPreference, a dialog),
+     where they used to be two pages of their own; FingerprintEffects.java removes a picker
+     whose pack is not installed. fp_success_vibrate, fp_error_vibrate and enable_ripple_effect
+     came from the old Lock screen tab and keep the option paths they had there (lockscreen.*)
+     through crdroid_paths.lock of frameworks/base/tools/ichthys-config/gen_crdroid_options.py. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:settings="http://schemas.android.com/apk/res-auto"
-    android:title="@string/ichthys_fp_effects_title">
+    android:title="@string/look_fingerprint_title">
 
     <PreferenceCategory
         android:key="ichthys_fp_press_category"
@@ -32,6 +39,12 @@
             android:entries="@array/ichthys_fp_anim_effect_entries"
             android:entryValues="@array/ichthys_fp_anim_effect_values"
             android:defaultValue="0" />
+
+        <!-- Which animation of the pack plays; used by the "Animation pack" effect. -->
+        <com.crdroid.settings.preferences.UdfpsPackPreference
+            android:key="udfps_anim_style"
+            android:title="@string/look_fp_pack_animation_title"
+            android:persistent="false" />
 
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_udfps_anim_speed"
@@ -62,7 +75,7 @@
         <com.crdroid.settings.preferences.colorpicker.SystemSettingColorPickerPreference
             android:key="ichthys_udfps_anim_color"
             android:title="@string/ichthys_fp_custom_color_title"
-            android:defaultValue="0xff5cc8c2" />
+            settings:accentDefault="true" />
 
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_udfps_anim_offset_x"
@@ -119,7 +132,7 @@
         <com.crdroid.settings.preferences.colorpicker.SystemSettingColorPickerPreference
             android:key="ichthys_udfps_pressed_color"
             android:title="@string/ichthys_fp_custom_color_title"
-            android:defaultValue="0xff5cc8c2" />
+            settings:accentDefault="true" />
 
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_udfps_pressed_size"
@@ -143,6 +156,12 @@
             android:entries="@array/ichthys_fp_icon_style_entries"
             android:entryValues="@array/ichthys_fp_icon_style_values"
             android:defaultValue="0" />
+
+        <!-- Which icon of the pack shows; used by the "System" icon style. -->
+        <com.crdroid.settings.preferences.UdfpsPackPreference
+            android:key="udfps_icon"
+            android:title="@string/look_fp_pack_icon_title"
+            android:persistent="false" />
 
         <com.crdroid.settings.preferences.SystemSettingListPreference
             android:key="ichthys_udfps_icon_color_mode"
@@ -209,6 +228,24 @@
             android:entries="@array/ichthys_fp_haptic_error_entries"
             android:entryValues="@array/ichthys_fp_haptic_values"
             android:defaultValue="0" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="fp_success_vibrate"
+            android:title="@string/fp_success_vibrate_title"
+            android:summary="@string/fp_success_vibrate_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="fp_error_vibrate"
+            android:title="@string/fp_error_vibrate_title"
+            android:summary="@string/fp_error_vibrate_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="enable_ripple_effect"
+            android:title="@string/enable_fingerprint_ripple_effect_title"
+            android:summary="@string/enable_fingerprint_ripple_effect_summary"
+            android:defaultValue="true" />
 
     </PreferenceCategory>
 </PreferenceScreen>

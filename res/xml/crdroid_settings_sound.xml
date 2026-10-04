@@ -14,18 +14,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- IchthysOS > System > Sound & haptics.
+
+     Options in ichthys.nix. This file is the "volume" page for
+     frameworks/base/tools/ichthys-config/gen_crdroid_options.py. The adaptive playback
+     preferences came from a page of their own and keep their option paths
+     (volume.adaptivePlayback.*) through the generator's crdroid_paths.lock.
+     custom_volume_steps and disable_all_vibration came from the old IchthysOS tab, which the
+     generator skipped, so they are new options here. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:lineage="http://schemas.android.com/apk/res-auto"
-    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
-
-    <!-- Screenshot Sound  -->
-    <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-        android:key="screenshot_shutter_sound"
-        android:icon="@drawable/ic_cellphone_sound"
-        android:title="@string/screenshot_shutter_sound_title"
-        android:summary="@string/screenshot_shutter_sound_summary"
-        android:defaultValue="true" />
+    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+    android:title="@string/ichthys_sound_haptics_title">
 
     <!-- Disable Audio Focus -->
     <com.crdroid.settings.preferences.SystemSettingSwitchPreference
@@ -35,15 +36,16 @@
         android:summary="@string/disable_audio_focus_summary"
         android:defaultValue="false" />
 
-    <!-- Adaptive Playback
-    <Preference
-        android:key="adaptive_playback_settings"
-        android:icon="@drawable/ic_settings_sound"
-        android:title="@string/adaptive_playback_title"
-        android:summary="@string/adaptive_playback_summary"
-        android:fragment="com.crdroid.settings.fragments.sound.AdaptivePlayback" /> -->
+    <!-- Screenshot Sound  -->
+    <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+        android:key="screenshot_shutter_sound"
+        android:icon="@drawable/ic_cellphone_sound"
+        android:title="@string/screenshot_shutter_sound_title"
+        android:summary="@string/screenshot_shutter_sound_summary"
+        android:defaultValue="true" />
 
-    <!-- Volume panel -->
+    <!-- Volume panel. Its look (slider style, horizontal layout) is in Look > Volume and
+         system. -->
     <PreferenceCategory
         android:key="volume_panel"
         android:title="@string/volume_panel_category" >
@@ -63,34 +65,58 @@
             settings:interval="500"
             settings:units="@string/unit_milliseconds" />
 
+        <!-- Media volume steps (needs a reboot to take effect) -->
+        <com.crdroid.settings.preferences.SecureSettingSeekBarPreference
+            android:key="custom_volume_steps"
+            android:icon="@drawable/ic_volume_vibrate"
+            android:title="@string/custom_volume_steps_title"
+            android:summary="@string/custom_volume_steps_summary"
+            android:max="200"
+            settings:min="5"
+            android:defaultValue="200" />
+    </PreferenceCategory>
+
+    <!-- Adaptive playback: pause media when the volume reaches zero, resume when it is raised
+         again within the timeout (SystemUI AdaptivePlaybackController). -->
+    <PreferenceCategory
+        android:key="adaptive_playback"
+        android:title="@string/adaptive_playback_title">
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="adaptive_playback_enabled"
+            android:icon="@drawable/ic_music"
+            android:title="@string/adaptive_playback_title"
+            android:summary="@string/adaptive_playback_summary"
+            android:defaultValue="false" />
+
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="adaptive_playback_timeout"
+            android:icon="@drawable/ic_timer_outline"
+            android:title="@string/adaptive_playback_timeout_title"
+            android:defaultValue="30"
+            android:max="600"
+            settings:min="10"
+            settings:interval="10"
+            settings:units="@string/unit_seconds"
+            android:dependency="adaptive_playback_enabled" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="haptics"
+        android:title="@string/ichthys_haptics_category">
+
         <com.crdroid.settings.preferences.SecureSettingSwitchPreference
             android:key="volume_dialog_haptic_feedback"
             android:icon="@drawable/ic_volume_vibrate"
             android:title="@string/volume_dialog_haptic_feedback_title"
             android:defaultValue="true" />
-    </PreferenceCategory>
 
-    <!-- In-call feedback -->
-    <PreferenceCategory
-        android:key="incall_vib_options"
-        android:title="@string/incall_vibration_category" >
-
+        <!-- Global disable-all-vibration master toggle -->
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="vibrate_on_connect"
+            android:key="disable_all_vibration"
             android:icon="@drawable/ic_vibrate"
-            android:title="@string/incall_vibrate_connect_title"
-            android:defaultValue="false" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="vibrate_on_callwaiting"
-            android:icon="@drawable/ic_vibrate"
-            android:title="@string/incall_vibrate_call_wait_title"
-            android:defaultValue="false" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="vibrate_on_disconnect"
-            android:icon="@drawable/ic_vibrate"
-            android:title="@string/incall_vibrate_disconnect_title"
+            android:title="@string/disable_all_vibration_title"
+            android:summary="@string/disable_all_vibration_summary"
             android:defaultValue="false" />
     </PreferenceCategory>
 

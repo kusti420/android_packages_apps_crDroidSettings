@@ -78,23 +78,16 @@ class GradientSettings : SettingsPreferenceFragment() {
                 UserHandle.USER_CURRENT
             )
             Settings.System.putIntForUser(
-                resolver, Settings.System.QS_BRIGHTNESS_SLIDER_GRADIENT, 0,
-                UserHandle.USER_CURRENT
-            )
-            Settings.System.putIntForUser(
-                resolver, Settings.System.VOLUME_SLIDER_GRADIENT, 0,
-                UserHandle.USER_CURRENT
-            )
-            Settings.System.putIntForUser(
                 resolver, Settings.System.CUSTOM_GRADIENT_COLOR_MODE, 0,
                 UserHandle.USER_CURRENT
             )
-            Settings.System.putIntForUser(
-                resolver, Settings.System.CUSTOM_GRADIENT_START_COLOR, 0,
+            // No stored colours: SystemUI then uses the theme accent.
+            Settings.System.putStringForUser(
+                resolver, Settings.System.CUSTOM_GRADIENT_START_COLOR, null,
                 UserHandle.USER_CURRENT
             )
-            Settings.System.putIntForUser(
-                resolver, Settings.System.CUSTOM_GRADIENT_END_COLOR, 0,
+            Settings.System.putStringForUser(
+                resolver, Settings.System.CUSTOM_GRADIENT_END_COLOR, null,
                 UserHandle.USER_CURRENT
             )
         }

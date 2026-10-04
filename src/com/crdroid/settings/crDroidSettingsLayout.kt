@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: crDroid Android Project
+ * SPDX-FileCopyrightText: 2026 IchthysOS
  * SPDX-License-Identifier: GPL-3.0
  */
 
@@ -8,124 +9,64 @@ package com.crdroid.settings
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
-import android.view.ContextThemeWrapper
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.widget.ViewPager2
 
 import com.android.internal.logging.nano.MetricsProto
 import com.android.settings.R
 import com.android.settings.SettingsPreferenceFragment
+import com.android.settings.ichthys.ShoalStyle
 
-import com.crdroid.settings.fragments.*
-
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import com.crdroid.settings.fragments.Background
+import com.crdroid.settings.fragments.Buttons
+import com.crdroid.settings.fragments.IchthysApps
+import com.crdroid.settings.fragments.IchthysSystem
+import com.crdroid.settings.fragments.LockScreen
+import com.crdroid.settings.fragments.Navigation
+import com.crdroid.settings.fragments.Notifications
+import com.crdroid.settings.fragments.QuickSettings
+import com.crdroid.settings.fragments.Sound
+import com.crdroid.settings.fragments.StatusBar
+import com.crdroid.settings.fragments.recents.SlimRecents
+import com.crdroid.settings.fragments.themes.ThemeStudio
+import com.crdroid.settings.fragments.ui.DozeSettings
+import com.crdroid.settings.fragments.ui.EdgeLightSettings
+import com.crdroid.settings.fragments.ui.GradientSettings
+import com.crdroid.settings.fragments.ui.MonetSettings
+import com.crdroid.settings.fragments.ui.SmartPixels
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * The one IchthysOS entry on the Settings homepage (ichthys_hub.xml): the Protected card as the
+ * header, which opens Guard, and four rows.
+ *
+ *  - Look: Theme Studio and the pages it links to;
+ *  - Privacy: Guard;
+ *  - Apps: [IchthysApps];
+ *  - System: [IchthysSystem].
+ *
+ * It replaces the Protected card, the Guard row and the eleven-tab pager this class used to be.
+ * The class keeps its name because the homepage XMLs and SettingsGateway refer to it.
+ */
 class crDroidSettingsLayout : SettingsPreferenceFragment() {
-
-    private var pager: ViewPager2? = null
-    private var tabs: TabLayout? = null
-
-    private val shoalBadger =
-        object : androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
-            override fun onFragmentViewCreated(
-                fm: androidx.fragment.app.FragmentManager,
-                f: Fragment,
-                v: View,
-                savedInstanceState: Bundle?,
-            ) {
-                val page = f as? androidx.preference.PreferenceFragmentCompat ?: return
-                val color =
-                    if (f is IchthysOS) com.android.settings.ichthys.ShoalStyle.accent(v.context)
-                    else com.android.settings.ichthys.ShoalStyle.hue(
-                        TAB_FRAGMENTS.indexOf(f.javaClass))
-                com.android.settings.ichthys.ShoalStyle.badgeAll(page.preferenceScreen, color)
-            }
-        }
-    private var mediator: TabLayoutMediator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        requireActivity().setTitle(R.string.crdroid_settings_title)
+        addPreferencesFromResource(R.xml.ichthys_hub)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        // IchthysOS: inflate this layout through a MaterialComponents theme.
-        // com.google.android.material.tabs.TabLayout runs ThemeEnforcement in its constructor and
-        // throws IllegalArgumentException ("requires your app theme to be Theme.AppCompat") unless
-        // the context it is constructed with has an AppCompat-descendant theme. Settings' activity
-        // theme is a platform theme, and the android:theme attribute on the TabLayout in
-        // crdroid_settings.xml is not enough on its own - the host's inflater factory builds the
-        // view without applying it, so the constructor still saw the bare activity theme and the
-        // whole IchthysOS tab crashed on open. Cloning the inflater onto a themed context fixes it
-        // for every view in this layout. The child preference fragments in the pager are created
-        // separately and keep the activity's own theme, so nothing else changes appearance.
-        val themedInflater = inflater.cloneInContext(
-                ContextThemeWrapper(requireContext(), R.style.CrDroidMaterialOverlay))
-        val root = themedInflater.inflate(R.layout.crdroid_settings, container, false)
-
-        tabs = root.findViewById(R.id.tabs)
-        pager = root.findViewById(R.id.pager)
-
-        val adapter = object : FragmentStateAdapter(this) {
-            override fun getItemCount(): Int = TAB_TITLES.size
-
-            override fun createFragment(position: Int): Fragment = when (position) {
-                0 -> StatusBar()
-                1 -> QuickSettings()
-                2 -> LockScreen()
-                3 -> Buttons()
-                4 -> Navigation()
-                5 -> UserInterface()
-                6 -> Notifications()
-                7 -> Sound()
-                8 -> Miscellaneous()
-                9 -> IchthysOS()
-                10 -> About()
-                else -> StatusBar()
-            }
-        }
-
-        pager!!.adapter = adapter
-        pager!!.offscreenPageLimit = 1
-
-        // IchthysOS Shoal: every tab page's row icons become outlined badges, one hue per tab
-        // (the IchthysOS tab takes the accent). Done here, once per page view, instead of in each
-        // page fragment.
-        childFragmentManager.registerFragmentLifecycleCallbacks(shoalBadger, false)
-
-        mediator = TabLayoutMediator(tabs!!, pager!!) { tab, position ->
-            tab.setText(TAB_TITLES[position])
-        }.also { it.attach() }
-
-        return root
-    }
-
-    override fun onDestroyView() {
-        childFragmentManager.unregisterFragmentLifecycleCallbacks(shoalBadger)
-        mediator?.detach()
-        mediator = null
-        pager = null
-        tabs = null
-        super.onDestroyView()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // IchthysOS Shoal: the row icons become outlined badges in the accent.
+        ShoalStyle.badgeAll(preferenceScreen, ShoalStyle.accent(view.context))
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -151,18 +92,32 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
             .show()
     }
 
+    /**
+     * Restores the defaults of the Look, Apps and System settings. Guard's privacy settings and
+     * the ichthys.nix generations are not touched.
+     */
     private fun resetAll(context: Context) {
         lifecycleScope.launch(Dispatchers.Default) {
-            Buttons.reset(context)
-            IchthysOS.reset(context)
-            LockScreen.reset(context)
-            Miscellaneous.reset(context)
-            Navigation.reset(context)
-            Notifications.reset(context)
-            QuickSettings.reset(context)
-            Sound.reset(context)
+            // Look
+            ThemeStudio.reset(context)
             StatusBar.reset(context)
-            UserInterface.reset(context)
+            QuickSettings.reset(context)
+            Navigation.reset(context)
+            LockScreen.reset(context)
+            DozeSettings.reset(context)
+            EdgeLightSettings.reset(context)
+            GradientSettings.reset(context)
+            MonetSettings.reset(context)
+            SlimRecents.reset(context)
+            // Apps
+            IchthysApps.reset(context)
+            Background.reset(context)
+            // System
+            Buttons.reset(context)
+            Notifications.reset(context)
+            Sound.reset(context)
+            SmartPixels.reset(context)
+            IchthysSystem.reset(context)
 
             withContext(Dispatchers.Main) {
                 requireActivity().finish()
@@ -176,27 +131,5 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
 
     companion object {
         private const val MENU_RESET = Menu.FIRST
-
-        private val TAB_TITLES = intArrayOf(
-            R.string.statusbar_title,
-            R.string.quicksettings_title,
-            R.string.lockscreen_title,
-            R.string.button_title,
-            R.string.navigation_title,
-            R.string.ui_title,
-            R.string.notifications_title,
-            R.string.sound_title,
-            R.string.misc_title,
-            R.string.ichthys_title,
-            R.string.about_crdroid
-        )
-
-        /** Tab page classes in TAB_TITLES order (for the per-tab badge hue). */
-        private val TAB_FRAGMENTS: List<Class<*>> = listOf(
-            StatusBar::class.java, QuickSettings::class.java, LockScreen::class.java,
-            Buttons::class.java, Navigation::class.java, UserInterface::class.java,
-            Notifications::class.java, Sound::class.java, Miscellaneous::class.java,
-            IchthysOS::class.java, About::class.java
-        )
     }
 }

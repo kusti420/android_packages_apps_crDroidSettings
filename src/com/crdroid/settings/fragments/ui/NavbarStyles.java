@@ -17,12 +17,8 @@
 package com.crdroid.settings.fragments.ui;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,28 +33,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
-import com.android.internal.util.crdroid.ThemeUtils;
-import com.crdroid.settings.utils.SystemUtils;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
-
+/**
+ * Look &gt; Navigation bar &gt; style: picks one of the IchthysOS code-drawn navigation bar styles
+ * (navBar.style in ichthys.nix). The only state is Settings.Secure {@code ichthys_navbar_style};
+ * SystemUI's NavigationBarView and Launcher's taskbar both observe it and redraw live, so
+ * there are no overlay packages to enable and no SystemUI restart.
+ */
 public class NavbarStyles extends SettingsPreferenceFragment {
 
-    private static final String TAG = "NavbarStyles";
+    private static final String KEY_ICHTHYS_STYLE = "ichthys_navbar_style";
+    /** What an unset or unknown value means, in SystemUI and Launcher as well. */
+    private static final String DEFAULT_STYLE = "shoal";
+    /** In list order. "stock" is the plain AOSP bar. */
+    private static final String[] STYLES = {"shoal", "lattice", "mono", "gestures", "stock"};
 
     private RecyclerView mRecyclerView;
-    private ThemeUtils mThemeUtils;
-    private final String mCategory = "android.theme.customization.navbar";
-    private List<String> mPkgs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (!isAdded()) return;
         requireActivity().setTitle(R.string.theme_customization_navbar_title);
-        mThemeUtils = new ThemeUtils(requireContext());
-        mPkgs = mThemeUtils.getOverlayPackagesForCategory(mCategory, "com.android.systemui");
     }
 
     @Override
@@ -67,7 +63,7 @@ public class NavbarStyles extends SettingsPreferenceFragment {
         View view = inflater.inflate(R.layout.item_view, container, false);
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-        mRecyclerView.setAdapter(new Adapter(requireContext(), mPkgs, mThemeUtils, mCategory, mRecyclerView));
+        mRecyclerView.setAdapter(new Adapter(requireContext()));
         return view;
     }
 
@@ -85,89 +81,62 @@ public class NavbarStyles extends SettingsPreferenceFragment {
         return MetricsEvent.VIEW_UNKNOWN;
     }
 
-    public static class Adapter extends RecyclerView.Adapter<Adapter.CustomViewHolder> {
-        private final WeakReference<Context> contextRef;
-        private final List<String> mPkgs;
-        private final ThemeUtils mThemeUtils;
-        private final String mCategory;
-        private final RecyclerView mRecyclerView;
-        private final String mAppliedPkg;
-        private String mSelectedPkg;
+    /** Restores the default style. */
+    public static void reset(Context context) {
+        Settings.Secure.putString(context.getContentResolver(), KEY_ICHTHYS_STYLE, null);
+    }
 
-        public Adapter(Context context, List<String> pkgs, ThemeUtils themeUtils, String category, RecyclerView recyclerView) {
-            this.contextRef = new WeakReference<>(context);
-            this.mPkgs = pkgs;
-            this.mThemeUtils = themeUtils;
-            this.mCategory = category;
-            this.mRecyclerView = recyclerView;
+    private static class Adapter extends RecyclerView.Adapter<Adapter.CustomViewHolder> {
+        private final Context mContext;
+        private String mSelected;
 
-            mAppliedPkg = mThemeUtils.getOverlayInfos(mCategory, "com.android.systemui").stream()
-                    .filter(info -> info.isEnabled())
-                    .map(info -> info.packageName)
-                    .findFirst()
-                    .orElse("com.android.systemui");
-            mSelectedPkg = mAppliedPkg;
+        Adapter(Context context) {
+            mContext = context;
+            final String stored = Settings.Secure.getString(context.getContentResolver(),
+                    KEY_ICHTHYS_STYLE);
+            mSelected = isKnownStyle(stored) ? stored : DEFAULT_STYLE;
         }
 
         @NonNull
         @Override
         public CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.navbar_option, parent, false);
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.navbar_option, parent, false);
             return new CustomViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(@NonNull CustomViewHolder holder, int position) {
-            Context context = contextRef.get();
-            if (context == null) return;
-
-            String pkg = mPkgs.get(position);
-
-            holder.image1.setBackgroundDrawable(getDrawable(context, pkg, "ic_sysbar_back"));
-            holder.image2.setBackgroundDrawable(getDrawable(context, pkg, "ic_sysbar_home"));
-            holder.image3.setBackgroundDrawable(getDrawable(context, pkg, "ic_sysbar_recent"));
-
-            String label = getLabel(context, pkg);
-            holder.name.setText("com.android.systemui".equals(pkg) ? "Default" : label);
-            holder.itemView.setActivated(pkg.equals(mSelectedPkg));
-
+            final String style = STYLES[position];
+            // The styles are drawn in code, so there is nothing to preview: show the plain
+            // glyphs and say what the style looks like in the label.
+            holder.image1.setBackgroundResource(R.drawable.ic_sysbar_back);
+            holder.image2.setBackgroundResource(R.drawable.ic_sysbar_home);
+            holder.image3.setBackgroundResource(R.drawable.ic_sysbar_recent);
+            holder.name.setText(label(style));
+            holder.itemView.setActivated(style.equals(mSelected));
             holder.itemView.setOnClickListener(view -> {
-                if (!pkg.equals(mSelectedPkg)) {
-                    String oldPkg = mSelectedPkg;
-                    mSelectedPkg = pkg;
-                    mThemeUtils.setOverlayEnabled(mCategory, oldPkg, oldPkg);
-                    mThemeUtils.setOverlayEnabled(mCategory, pkg, "com.android.systemui");
-                    // Reliable signal for SystemUI's NavigationBarView: record the chosen
-                    // overlay package in a plain Settings key. SystemUI reads this instead of
-                    // querying OverlayManager (which returned null in its context, leaving the
-                    // style unapplied). Empty string / "com.android.systemui" means Default.
-                    Settings.System.putString(context.getContentResolver(),
-                            "navbar_style_pkg", pkg);
-                    // The RRO is enabled instantly, but SystemUI's NavigationBar
-                    // caches its button drawables and only re-reads the overlay on
-                    // re-inflation. Force a SystemUI restart so the navbar picks up
-                    // the new style immediately (crDroid pattern, matches
-                    // ClockPickerFragment). Toast + short delay, then force-stop.
-                    SystemUtils.restartSystemUI(context);
+                if (!style.equals(mSelected)) {
+                    mSelected = style;
+                    Settings.Secure.putString(mContext.getContentResolver(),
+                            KEY_ICHTHYS_STYLE, style);
+                    notifyDataSetChanged();
                 }
-                updateActivatedStatus();
             });
         }
 
         @Override
         public int getItemCount() {
-            return mPkgs.size();
+            return STYLES.length;
         }
 
-        private void updateActivatedStatus() {
-            notifyDataSetChanged();
-        }
+        static class CustomViewHolder extends RecyclerView.ViewHolder {
+            final TextView name;
+            final ImageView image1;
+            final ImageView image2;
+            final ImageView image3;
 
-        public static class CustomViewHolder extends RecyclerView.ViewHolder {
-            TextView name;
-            ImageView image1, image2, image3;
-
-            public CustomViewHolder(View itemView) {
+            CustomViewHolder(View itemView) {
                 super(itemView);
                 name = itemView.findViewById(R.id.option_label);
                 image1 = itemView.findViewById(R.id.image1);
@@ -176,31 +145,21 @@ public class NavbarStyles extends SettingsPreferenceFragment {
             }
         }
 
-        private Drawable getDrawable(Context context, String pkg, String drawableName) {
-            try {
-                if ("com.android.systemui".equals(pkg)) {
-                    pkg = "com.android.settings";
-                }
-                PackageManager pm = context.getPackageManager();
-                Resources res = pm.getResourcesForApplication(pkg);
-                int resId = res.getIdentifier(drawableName, "drawable", pkg);
-                if (resId != 0) {
-                    return res.getDrawable(resId, context.getTheme());
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "Drawable load failed for pkg: " + pkg + ", name: " + drawableName, e);
+        private static boolean isKnownStyle(String style) {
+            for (String s : STYLES) {
+                if (s.equals(style)) return true;
             }
-            return null;
+            return false;
         }
 
-        private String getLabel(Context context, String pkg) {
-            PackageManager pm = context.getPackageManager();
-            try {
-                return pm.getApplicationInfo(pkg, 0).loadLabel(pm).toString();
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "Label load failed for pkg: " + pkg, e);
+        private String label(String style) {
+            switch (style) {
+                case "shoal": return mContext.getString(R.string.navbar_style_shoal);
+                case "lattice": return mContext.getString(R.string.navbar_style_lattice);
+                case "mono": return mContext.getString(R.string.navbar_style_mono);
+                case "gestures": return mContext.getString(R.string.navbar_style_gestures);
+                default: return mContext.getString(R.string.navbar_style_stock);
             }
-            return pkg;
         }
     }
 }

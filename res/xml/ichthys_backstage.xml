@@ -14,25 +14,18 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 
-     Backstage page. The app list is filled in by Backstage.java; the service that acts on it is
-     IchthysBackstageService in system_server.
+     Backstage app picker, opened from IchthysOS > Apps > Background (ichthys_background.xml),
+     which also has the time limit. The app list is filled in by Backstage.java; the service that
+     acts on it is IchthysBackstageService in system_server.
 -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/backstage_title">
+    android:title="@string/ichthys_backstage_apps_title">
 
     <Preference
         android:key="backstage_intro"
         android:summary="@string/backstage_intro"
         android:selectable="false" />
-
-    <com.crdroid.settings.preferences.SecureSettingListPreference
-        android:key="ichthys_backstage_max_hours"
-        android:title="@string/backstage_max_hours_title"
-        android:summary="%s"
-        android:entries="@array/backstage_max_hours_entries"
-        android:entryValues="@array/backstage_max_hours_values"
-        android:defaultValue="0" />
 
     <PreferenceCategory
         android:key="backstage_apps"

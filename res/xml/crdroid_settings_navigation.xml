@@ -14,95 +14,52 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- Look > Navigation bar > Gesture pill: styling of the gesture handle (SystemUI
+     NavigationHandle). The navigation bar style picker is next to it in Theme Studio; button
+     order, the rotation button and the back gesture are in System > Buttons & gestures
+     (crdroid_settings_button.xml).
+
+     This file is still the "system.navigation" page for
+     frameworks/base/tools/ichthys-config/gen_crdroid_options.py. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:lineage="http://schemas.android.com/apk/res-auto"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
-    android:key="navigation_settings">
+    android:key="navigation_settings"
+    android:title="@string/ichthys_nav_handle_category">
 
-    <PreferenceCategory
-        android:key="navigation_buttons_category"
-        android:title="@string/navbar_layout_category_title">
+    <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+        android:key="ichthys_nav_handle_hide"
+        android:icon="@drawable/ic_navigation"
+        android:disableDependentsState="true"
+        android:title="@string/ichthys_nav_handle_hide_title"
+        android:summary="@string/ichthys_nav_handle_hide_summary"
+        android:defaultValue="false" />
 
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="navigationbar_key_order"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/navbar_invert_layout_title"
-            android:summary="@string/navbar_invert_layout_summary"
-            android:defaultValue="false" />
+    <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+        android:key="ichthys_nav_handle_width"
+        android:title="@string/ichthys_nav_handle_width_title"
+        android:defaultValue="100"
+        android:max="150"
+        settings:min="30"
+        settings:units="%"
+        android:dependency="ichthys_nav_handle_hide" />
 
-    </PreferenceCategory>
+    <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+        android:key="ichthys_nav_handle_thickness"
+        android:dependency="ichthys_nav_handle_hide"
+        android:title="@string/ichthys_nav_handle_thickness_title"
+        android:defaultValue="100"
+        android:max="250"
+        settings:min="50"
+        settings:units="%" />
 
-    <PreferenceCategory
-        android:key="navigation_gesture_category"
-        android:title="@string/navigation_gesture_category_title">
-
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="back_gesture_arrow"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/back_gesture_arrow_title"
-            android:summary="@string/back_gesture_arrow_summary"
-            android:defaultValue="true" />
-
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="back_gesture_haptic"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/back_gesture_haptic_title"
-            android:summary="@string/back_gesture_haptic_summary"
-            android:defaultValue="true" />
-
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="back_gesture_height"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/back_height_title"
-            android:summary="@string/back_height_summary"
-            android:defaultValue="0"
-            android:max="3"
-            settings:min="0"
-            settings:interval="1" />
-
-    </PreferenceCategory>
-
-    <!-- IchthysOS: gesture pill styling (SystemUI NavigationHandle). -->
-    <PreferenceCategory
-        android:key="ichthys_nav_handle_category"
-        android:title="@string/ichthys_nav_handle_category">
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="ichthys_nav_handle_hide"
-            android:icon="@drawable/ic_navigation"
-            android:disableDependentsState="true"
-            android:title="@string/ichthys_nav_handle_hide_title"
-            android:summary="@string/ichthys_nav_handle_hide_summary"
-            android:defaultValue="false" />
-
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="ichthys_nav_handle_width"
-            android:title="@string/ichthys_nav_handle_width_title"
-            android:defaultValue="100"
-            android:max="150"
-            settings:min="30"
-            settings:units="%"
-            android:dependency="ichthys_nav_handle_hide" />
-
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="ichthys_nav_handle_thickness"
-            android:dependency="ichthys_nav_handle_hide"
-            android:title="@string/ichthys_nav_handle_thickness_title"
-            android:defaultValue="100"
-            android:max="250"
-            settings:min="50"
-            settings:units="%" />
-
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="ichthys_nav_handle_opacity"
-            android:dependency="ichthys_nav_handle_hide"
-            android:title="@string/ichthys_nav_handle_opacity_title"
-            android:defaultValue="100"
-            android:max="100"
-            settings:min="10"
-            settings:units="%" />
-
-    </PreferenceCategory>
+    <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+        android:key="ichthys_nav_handle_opacity"
+        android:dependency="ichthys_nav_handle_hide"
+        android:title="@string/ichthys_nav_handle_opacity_title"
+        android:defaultValue="100"
+        android:max="100"
+        settings:min="10"
+        settings:units="%" />
 
 </PreferenceScreen>

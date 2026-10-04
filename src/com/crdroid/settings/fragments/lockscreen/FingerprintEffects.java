@@ -26,13 +26,23 @@ import androidx.preference.Preference;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.android.settings.search.BaseSearchIndexProvider;
+import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.preferences.SystemSettingListPreference;
+import com.crdroid.settings.preferences.UdfpsPackPreference;
+import com.crdroid.settings.utils.DeviceUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * IchthysOS: fingerprint (UDFPS) press effects, pressed icon, idle icon styles, result effects
- * and haptics. SystemUI's IchthysUdfpsSettings mirrors these keys and defaults.
+ * Look &gt; Lock screen &gt; Fingerprint: the one page for the fingerprint (UDFPS) sensor. Press
+ * effects, pressed icon, idle icon styles, result effects and haptics (SystemUI's
+ * IchthysUdfpsSettings mirrors these keys and defaults), the crDroid icon / animation pack
+ * pickers, and the vibration and ripple switches that used to be on the Lock screen tab.
  */
+@SearchIndexable
 public class FingerprintEffects extends SettingsPreferenceFragment
         implements Preference.OnPreferenceChangeListener {
 
@@ -45,6 +55,15 @@ public class FingerprintEffects extends SettingsPreferenceFragment
     private static final String KEY_ICON_STYLE = "ichthys_udfps_icon_style";
     private static final String KEY_ICON_COLOR_MODE = "ichthys_udfps_icon_color_mode";
     private static final String KEY_ICON_COLOR = "ichthys_udfps_icon_color";
+    private static final String KEY_PACK_ANIMATION = "udfps_anim_style";
+    private static final String KEY_PACK_ICON = "udfps_icon";
+    private static final String KEY_FP_SUCCESS_VIBRATE = "fp_success_vibrate";
+    private static final String KEY_FP_ERROR_VIBRATE = "fp_error_vibrate";
+
+    /** anim_effect: -1 = none, 0 = the animation pack, 1.. = the built-in effects. */
+    private static final int ANIM_EFFECT_PACK = 0;
+    /** icon_style: 0 = the system icon, which is the icon pack's selected icon. */
+    private static final int ICON_STYLE_SYSTEM = 0;
 
     private static final String[] ANIM_DEPENDENT = {
         "ichthys_udfps_anim_speed", "ichthys_udfps_anim_scale", KEY_ANIM_COLOR_MODE,
@@ -74,7 +93,25 @@ public class FingerprintEffects extends SettingsPreferenceFragment
         mPressedColorMode = bind(KEY_PRESSED_COLOR_MODE);
         mIconStyle = bind(KEY_ICON_STYLE);
         mIconColorMode = bind(KEY_ICON_COLOR_MODE);
+
+        // A pack picker without its resource pack has nothing to offer.
+        for (String key : new String[] {KEY_PACK_ANIMATION, KEY_PACK_ICON}) {
+            final UdfpsPackPreference pack = findPreference(key);
+            if (pack != null && !pack.isAvailable()) {
+                remove(pack);
+            }
+        }
+        if (!DeviceUtils.hasVibrator(getContext())) {
+            remove(findPreference(KEY_FP_SUCCESS_VIBRATE));
+            remove(findPreference(KEY_FP_ERROR_VIBRATE));
+        }
         updateEnabled();
+    }
+
+    private static void remove(Preference preference) {
+        if (preference != null && preference.getParent() != null) {
+            preference.getParent().removePreference(preference);
+        }
     }
 
     private SystemSettingListPreference bind(String key) {
@@ -93,6 +130,7 @@ public class FingerprintEffects extends SettingsPreferenceFragment
     /** Options only make sense when the thing they tune is on. */
     private void updateEnabled() {
         final int effect = mAnimEffect.getIntValue(0);
+        setEnabled(new String[] {KEY_PACK_ANIMATION}, effect == ANIM_EFFECT_PACK);
         // Built-in effects (1..8) use speed/size/colour; the crDroid pack (0) uses size only.
         setEnabled(ANIM_DEPENDENT, effect > 0);
         findPreference("ichthys_udfps_anim_scale").setEnabled(effect >= 0);
@@ -104,7 +142,8 @@ public class FingerprintEffects extends SettingsPreferenceFragment
         findPreference(KEY_PRESSED_COLOR).setEnabled(pressed
                 && mPressedColorMode.getIntValue(0) == 2);
 
-        final boolean icon = mIconStyle.getIntValue(0) != 0;
+        final boolean icon = mIconStyle.getIntValue(0) != ICON_STYLE_SYSTEM;
+        setEnabled(new String[] {KEY_PACK_ICON}, !icon);
         setEnabled(ICON_DEPENDENT, icon);
         findPreference(KEY_ICON_COLOR).setEnabled(icon && mIconColorMode.getIntValue(0) == 2);
     }
@@ -132,10 +171,30 @@ public class FingerprintEffects extends SettingsPreferenceFragment
         for (String key : keys) {
             Settings.System.putStringForUser(resolver, key, null, UserHandle.USER_CURRENT);
         }
+        UdfpsPackPreference.reset(context);
     }
 
     @Override
     public int getMetricsCategory() {
         return MetricsProto.MetricsEvent.VIEW_UNKNOWN;
     }
+
+    public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
+            new BaseSearchIndexProvider(R.xml.fingerprint_effects) {
+
+                @Override
+                protected boolean isPageSearchEnabled(Context context) {
+                    return DeviceUtils.hasFingerprint(context);
+                }
+
+                @Override
+                public List<String> getNonIndexableKeys(Context context) {
+                    final List<String> keys = super.getNonIndexableKeys(context);
+                    if (!DeviceUtils.hasVibrator(context)) {
+                        keys.add(KEY_FP_SUCCESS_VIBRATE);
+                        keys.add(KEY_FP_ERROR_VIBRATE);
+                    }
+                    return keys;
+                }
+            };
 }

@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.View;
 
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -35,6 +36,7 @@ import androidx.preference.SwitchPreferenceCompat;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.android.settings.ichthys.ShoalStyle;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 
@@ -45,21 +47,23 @@ import java.util.ArrayList;
 
 import lineageos.providers.LineageSettings;
 
+/**
+ * IchthysOS &gt; System &gt; Sound &amp; haptics: the old Sound tab plus adaptive playback, the
+ * media volume steps and the disable-all-vibration switch.
+ */
 @SearchIndexable
 public class Sound extends SettingsPreferenceFragment {
 
     public static final String TAG = "Sound";
 
-    private static final String KEY_VOLUME_CATEGORY = "volume_panel";
-    private static final String KEY_VIBRATE_CATEGORY = "incall_vib_options";
-    private static final String KEY_VIBRATE_CONNECT = "vibrate_on_connect";
-    private static final String KEY_VIBRATE_CALLWAITING = "vibrate_on_callwaiting";
-    private static final String KEY_VIBRATE_DISCONNECT = "vibrate_on_disconnect";
+    private static final String KEY_HAPTICS_CATEGORY = "haptics";
     private static final String KEY_VOLUME_PANEL_LEFT = "volume_panel_on_left";
     private static final String KEY_VOLUME_HAPTIC = "volume_dialog_haptic_feedback";
+    private static final String KEY_DISABLE_ALL_VIBRATION = "disable_all_vibration";
+    private static final String KEY_ADAPTIVE_PLAYBACK_ENABLED = "adaptive_playback_enabled";
+    private static final String KEY_ADAPTIVE_PLAYBACK_TIMEOUT = "adaptive_playback_timeout";
 
     private SwitchPreferenceCompat mVolumePanelLeft;
-    private SwitchPreferenceCompat mVolumeHaptic;
 
     private static volatile Boolean sAudioPanelOnLeft = null;
 
@@ -79,19 +83,20 @@ public class Sound extends SettingsPreferenceFragment {
         mVolumePanelLeft = prefScreen.findPreference(KEY_VOLUME_PANEL_LEFT);
         mVolumePanelLeft.setChecked(isAudioPanelOnLeft);
 
-        boolean hapticAvailable = DeviceUtils.hasVibrator(context);
+        // No vibrator: nothing in the haptics category applies.
+        if (!DeviceUtils.hasVibrator(context)) {
+            final PreferenceCategory haptics = prefScreen.findPreference(KEY_HAPTICS_CATEGORY);
+            if (haptics != null) {
+                prefScreen.removePreference(haptics);
+            }
+        }
+    }
 
-        // IchthysOS: the in-call vibration options were only read by the Lineage Dialer
-        // (InCallVibrationHandler), which IchthysOS removes in favour of Fossify Phone.
-        final PreferenceCategory vibCategory = prefScreen.findPreference(KEY_VIBRATE_CATEGORY);
-        if (vibCategory != null) {
-            prefScreen.removePreference(vibCategory);
-        }
-        if (!hapticAvailable) {
-            final PreferenceCategory volCategory = prefScreen.findPreference(KEY_VOLUME_CATEGORY);
-            mVolumeHaptic = volCategory.findPreference(KEY_VOLUME_HAPTIC);
-            volCategory.removePreference(mVolumeHaptic);
-        }
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // IchthysOS Shoal: the row icons become outlined badges in the accent.
+        ShoalStyle.badgeAll(getPreferenceScreen(), ShoalStyle.accent(view.getContext()));
     }
 
     public static void reset(Context mContext) {
@@ -104,13 +109,16 @@ public class Sound extends SettingsPreferenceFragment {
         Settings.Secure.putIntForUser(resolver,
                 Settings.Secure.VOLUME_DIALOG_HAPTIC_FEEDBACK, 1, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
-                Settings.System.VIBRATE_ON_CONNECT, 0, UserHandle.USER_CURRENT);
-        Settings.System.putIntForUser(resolver,
-                Settings.System.VIBRATE_ON_CALLWAITING, 0, UserHandle.USER_CURRENT);
-        Settings.System.putIntForUser(resolver,
-                Settings.System.VIBRATE_ON_DISCONNECT, 0, UserHandle.USER_CURRENT);
-        Settings.System.putIntForUser(resolver,
                 Settings.System.SCREENSHOT_SHUTTER_SOUND, 1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                KEY_DISABLE_ALL_VIBRATION, 0, UserHandle.USER_CURRENT);
+        // Deleting the key restores the framework's built-in number of media volume steps.
+        Settings.Secure.putStringForUser(resolver,
+                "custom_volume_steps", null, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                KEY_ADAPTIVE_PLAYBACK_ENABLED, 0, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver,
+                KEY_ADAPTIVE_PLAYBACK_TIMEOUT, 30, UserHandle.USER_CURRENT);
     }
 
     private static boolean isAudioPanelOnLeftSide(Context context) {
@@ -147,15 +155,9 @@ public class Sound extends SettingsPreferenceFragment {
                 public List<String> getNonIndexableKeys(Context context) {
                     List<String> keys = super.getNonIndexableKeys(context);
 
-                    boolean hapticAvailable = DeviceUtils.hasVibrator(context);
-
-                    // IchthysOS: always removed, see onCreate.
-                    keys.add(KEY_VIBRATE_CATEGORY);
-                    keys.add(KEY_VIBRATE_CONNECT);
-                    keys.add(KEY_VIBRATE_CALLWAITING);
-                    keys.add(KEY_VIBRATE_DISCONNECT);
-                    if (!hapticAvailable) {
+                    if (!DeviceUtils.hasVibrator(context)) {
                         keys.add(KEY_VOLUME_HAPTIC);
+                        keys.add(KEY_DISABLE_ALL_VIBRATION);
                     }
                     return keys;
                 }
