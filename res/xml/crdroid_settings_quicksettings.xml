@@ -160,6 +160,13 @@
              Backend: Settings.Secure, observed by SystemUI ShoalMediaDock.kt. The options are
              hand-written in IchthysOptions (quickSettings.mediaDock.*). -->
         <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="ichthys_qs_header_weather"
+            android:icon="@drawable/ic_weather"
+            android:title="@string/ichthys_qs_header_weather_title"
+            android:summary="@string/ichthys_qs_header_weather_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
             android:key="ichthys_qs_media_dock_reserve"
             android:icon="@drawable/ic_music"
             android:title="@string/ichthys_qs_media_dock_reserve_title"

@@ -57,6 +57,6 @@
         android:max="5"
         settings:min="1"
         settings:interval="1"
-        android:defaultValue="2" />
+        android:defaultValue="1" />
 
 </PreferenceScreen>
