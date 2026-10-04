@@ -59,6 +59,7 @@ public class StatusBar extends SettingsPreferenceFragment implements
     private static final String STATUS_BAR_CLOCK_STYLE = "status_bar_clock";
     // IchthysOS: notification dot and privacy indicator (Settings.System, read by SystemUI).
     private static final String NOTIF_DOT_ENABLED = "ichthys_notif_dot_enabled";
+    private static final String NOTIF_DOT_LOGIC = "ichthys_notif_dot_logic";
     private static final String NOTIF_DOT_AOD = "ichthys_notif_dot_aod";
     private static final String NOTIF_DOT_COLOR = "ichthys_notif_dot_color";
     private static final String NOTIF_DOT_REPLACE_ICONS = "ichthys_notif_dot_replace_icons";
@@ -158,6 +159,7 @@ public class StatusBar extends SettingsPreferenceFragment implements
                 UserHandle.USER_CURRENT);
         // IchthysOS: notification dot and privacy indicator back to their defaults.
         Settings.System.putIntForUser(resolver, NOTIF_DOT_ENABLED, 1, UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, NOTIF_DOT_LOGIC, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, NOTIF_DOT_AOD, 1, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, NOTIF_DOT_COLOR, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, NOTIF_DOT_REPLACE_ICONS, 0,

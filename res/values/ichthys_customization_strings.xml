@@ -77,7 +77,18 @@
         <item>12</item>
     </string-array>
     <string name="ichthys_notif_dot_title">Notification dot</string>
-    <string name="ichthys_notif_dot_summary">A dot in the corner of the status bar while there are new notifications you haven\'t seen</string>
+    <string name="ichthys_notif_dot_summary">A dot in the corner of the status bar for notifications you haven\'t looked at</string>
+    <string name="ichthys_notif_dot_logic_title">What lights the dot</string>
+    <string name="ichthys_notif_dot_logic_light">Notification light: screen off only, apps allowed to blink the light</string>
+    <string name="ichthys_notif_dot_logic_unseen">Any unseen notification, screen on or off</string>
+    <string-array name="ichthys_notif_dot_logic_entries" translatable="false">
+        <item>@string/ichthys_notif_dot_logic_light</item>
+        <item>@string/ichthys_notif_dot_logic_unseen</item>
+    </string-array>
+    <string-array name="ichthys_notif_dot_logic_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
     <string name="ichthys_notif_dot_aod_title">Notification dot on always-on display</string>
     <string name="ichthys_notif_dot_aod_summary">Keep the dot in the same place when the screen is off, dimmed</string>
     <string name="ichthys_notif_dot_color_title">Notification dot colour</string>

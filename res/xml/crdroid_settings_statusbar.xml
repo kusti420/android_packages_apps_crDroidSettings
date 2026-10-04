@@ -166,6 +166,16 @@
             android:summary="@string/ichthys_notif_dot_summary"
             android:defaultValue="true" />
 
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_notif_dot_logic"
+            android:icon="@drawable/ic_notifications"
+            android:title="@string/ichthys_notif_dot_logic_title"
+            android:entries="@array/ichthys_notif_dot_logic_entries"
+            android:entryValues="@array/ichthys_notif_dot_logic_values"
+            android:summary="%s"
+            android:defaultValue="0"
+            android:dependency="ichthys_notif_dot_enabled" />
+
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="ichthys_notif_dot_aod"
             android:icon="@drawable/ic_ambient"
