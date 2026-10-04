@@ -171,4 +171,10 @@
         <item>8</item>
         <item>12</item>
     </string-array>
+
+    <!-- Quick settings: docked media player (Shoal panel style) -->
+    <string name="ichthys_qs_media_dock_reserve_title">Keep room for the media player</string>
+    <string name="ichthys_qs_media_dock_reserve_summary">Leave the player\'s place above the footer buttons empty while nothing plays, so the footer never moves. Shoal style only</string>
+    <string name="ichthys_qs_media_dock_custom_action_title">Extra media button</string>
+    <string name="ichthys_qs_media_dock_custom_action_summary">Add a fourth button to the docked player for the app\'s first own action, such as like or shuffle. Shoal style only</string>
 </resources>

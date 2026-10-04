@@ -156,6 +156,23 @@
             android:summary="@string/qs_tile_haptic_summary"
             android:defaultValue="true" />
 
+        <!-- Docked media player of the Shoal panel style: the strip above the footer buttons.
+             Backend: Settings.Secure, observed by SystemUI ShoalMediaDock.kt. The options are
+             hand-written in IchthysOptions (quickSettings.mediaDock.*). -->
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="ichthys_qs_media_dock_reserve"
+            android:icon="@drawable/ic_music"
+            android:title="@string/ichthys_qs_media_dock_reserve_title"
+            android:summary="@string/ichthys_qs_media_dock_reserve_summary"
+            android:defaultValue="false" />
+
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="ichthys_qs_media_dock_custom_action"
+            android:icon="@drawable/ic_music"
+            android:title="@string/ichthys_qs_media_dock_custom_action_title"
+            android:summary="@string/ichthys_qs_media_dock_custom_action_summary"
+            android:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
