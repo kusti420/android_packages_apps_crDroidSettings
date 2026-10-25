@@ -170,8 +170,8 @@ data class Look(
 
 private val BUILT_IN =
     listOf(
-        Look("depth_heat", "Depth · touch heat", 80, fill = 2),
-        Look("depth_solid", "Depth · solid", 80, fill = 0),
+        Look("pond", "Pond", 80, fill = 0),
+        Look("depth_heat", "Pond · touch heat", 80, fill = 2),
         Look("depth_tilt", "Tilt", 80, fill = 1, dx = -40f, dy = 90f, scale = 0.9f, rot = -12f),
         Look("shoal", "Shoal Lattice", 68),
         Look("oneui", "One UI Stacked", 79),
@@ -187,6 +187,7 @@ private const val KEY_MARGIN_TOP = "lock_screen_custom_clock_margin_top"
 private const val KEY_OFFSET_X = "ichthys_clock_offset_x"
 private const val KEY_ROTATION = "ichthys_clock_rotation"
 private const val KEY_LOOK = "ichthys_lockscreen_look"
+private const val KEY_DETAILS = "ichthys_clock_details"
 private const val KEY_LOOKS = "ichthys_lockscreen_looks"
 
 const val EXTRA_WALLPAPER = "wallpaper"
@@ -231,6 +232,7 @@ fun LockscreenEditor(onDone: () -> Unit) {
     var saved by remember { mutableStateOf(readLooks(context)) }
     var look by remember { mutableStateOf(currentLook(context, saved)) }
     var guide by remember { mutableStateOf(false) }
+    var details by remember { mutableStateOf(secureInt(context, KEY_DETAILS, 0)) }
     var pictures by remember { mutableStateOf(LockPictures.load(context, screenW, screenH)) }
     val accent = MaterialTheme.colorScheme.primary
     val all = BUILT_IN + saved
@@ -425,6 +427,19 @@ fun LockscreenEditor(onDone: () -> Unit) {
                             contentScale = ContentScale.Crop,
                         )
                     }
+                }
+            }
+            if (look.style == DEPTH_CLOCK_STYLE) {
+                EditorRow(stringResource(R.string.ichthys_editor_status)) {
+                    listOf(R.string.ichthys_editor_status_date, R.string.ichthys_editor_status_details)
+                        .forEachIndexed { mode, label ->
+                            Chip(stringResource(label), details == mode, {
+                                details = mode
+                                putSecure(context, KEY_DETAILS, mode)
+                            }) {
+                                FaceThumb(look.style, look, pictures)
+                            }
+                        }
                 }
             }
             EditorRow(stringResource(R.string.ichthys_depth_title)) {
@@ -704,7 +719,7 @@ private fun currentLook(context: Context, saved: List<Look>): Look {
             id = id ?: "custom",
             label = "",
             style = secureInt(context, KEY_STYLE, 80).takeIf { it != 0 } ?: 80,
-            fill = secureInt(context, KEY_FILL, 2),
+            fill = secureInt(context, KEY_FILL, 0),
             depth = secureInt(context, KEY_DEPTH, 0),
             dx = secureInt(context, KEY_OFFSET_X, 0).toFloat(),
             dy = (margin - DEFAULT_MARGIN_TOP).toFloat(),

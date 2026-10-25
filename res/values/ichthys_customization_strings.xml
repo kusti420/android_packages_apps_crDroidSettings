@@ -210,5 +210,8 @@
     <string name="ichthys_editor_looks">Looks</string>
     <string name="ichthys_editor_face">Face</string>
     <string name="ichthys_editor_wallpapers">Depth wallpapers</string>
+    <string name="ichthys_editor_status">Above the clock</string>
+    <string name="ichthys_editor_status_date">Date</string>
+    <string name="ichthys_editor_status_details">Details</string>
     <string name="ichthys_wallpaper_koi">Koi pond</string>
 </resources>
