@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS lock screen clock, Depth (tracker#58): hours over minutes in tall condensed digits,
+     made to stand behind the wallpaper's subject on the depth lock screen, drawn by
+     com.android.settingslib.ichthys.clock.DepthClockView. Fills: Settings.Secure
+     ichthys_clock_fill. SystemUI's KeyguardCustomClockView inflates this same layout. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/clock_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|top"
+    android:gravity="center_horizontal|top"
+    android:orientation="vertical">
+
+    <com.android.settingslib.ichthys.clock.DepthClockView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

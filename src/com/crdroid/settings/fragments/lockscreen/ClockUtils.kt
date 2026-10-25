@@ -91,6 +91,7 @@ object ClockUtils {
         R.layout.keyguard_clock_ichthys_split, // 77
         R.layout.keyguard_clock_ichthys_typo, // 78
         R.layout.keyguard_clock_ichthys_oneui, // 79
+        R.layout.keyguard_clock_ichthys_depth, // 80
     )
 
     fun getClockNames(): Array<String> {
@@ -175,6 +176,7 @@ object ClockUtils {
             "Vertical Split",
             "Typographic",
             "One UI Stacked",
+            "Depth",
         )
     }
 }

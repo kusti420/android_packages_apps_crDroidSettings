@@ -118,11 +118,9 @@ public class CustomClockPreview extends SettingsPreferenceFragment {
         View browseButton = clockPreviewPref.findViewById(R.id.browse_clocks_button);
         if (browseButton != null) {
             browseButton.setOnClickListener(v -> {
-                new SubSettingLauncher(getContext())
-                    .setDestination(ClockPickerFragment.class.getName())
-                    .setTitleRes(R.string.lockscreen_custom_clock_style_title)
-                    .setSourceMetricsCategory(getMetricsCategory())
-                    .launch();
+                // IchthysOS (tracker#58): the lock screen editor; every face is in its Face row.
+                startActivity(new android.content.Intent(getContext(),
+                        LockscreenEditorActivity.class));
             });
         }
 

@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -201,6 +202,10 @@ fun ClockPickerScreen(
                 .fillMaxSize()
                 .nestedScroll(nestedScrollInterop)
         ) {
+            // IchthysOS depth lock screen (tracker#58): its rows head the grid, full width.
+            item(key = "depth", span = { GridItemSpan(maxLineSpan) }) {
+                DepthOptions(selectedClock, wallpaperBitmap)
+            }
             items(
                 count = clockLayouts.size,
                 key = { it }
