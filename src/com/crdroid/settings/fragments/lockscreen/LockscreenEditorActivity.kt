@@ -217,6 +217,29 @@ fun setDepthWallpaper(context: Context, id: String) {
         .start()
 }
 
+/**
+ * Sets a photo the user picked as the lock screen wallpaper ([home]: the home screen's too) and
+ * turns depth on; IchthysDepth then finds its subject. [done] runs on the main thread after.
+ */
+fun setPhotoWallpaper(context: Context, uri: Uri, home: Boolean, done: () -> Unit) {
+    val main = android.os.Handler(android.os.Looper.getMainLooper())
+    Thread {
+            try {
+                val which =
+                    if (home) WallpaperManager.FLAG_LOCK or WallpaperManager.FLAG_SYSTEM
+                    else WallpaperManager.FLAG_LOCK
+                context.contentResolver.openInputStream(uri)?.use {
+                    WallpaperManager.getInstance(context).setStream(it, null, true, which)
+                }
+                putSecure(context, KEY_DEPTH, 1)
+            } catch (e: Exception) {
+                android.util.Log.w("LockscreenEditor", "photo wallpaper not set", e)
+            }
+            main.post(done)
+        }
+        .start()
+}
+
 /** KeyguardCustomClockView's defaults: the clock's top padding and its margin setting. */
 private const val BASE_TOP_DP = 72
 private const val DEFAULT_MARGIN_TOP = 15
@@ -234,6 +257,41 @@ fun LockscreenEditor(onDone: () -> Unit) {
     var guide by remember { mutableStateOf(false) }
     var details by remember { mutableStateOf(secureInt(context, KEY_DETAILS, 0)) }
     var pictures by remember { mutableStateOf(LockPictures.load(context, screenW, screenH)) }
+    // Your own photo as the wallpaper: Android's photo picker, then lock screen or both.
+    var pickedPhoto by remember { mutableStateOf<Uri?>(null) }
+    val pickPhoto =
+        androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
+        ) { uri -> pickedPhoto = uri }
+    fun choosePhoto() {
+        pickPhoto.launch(
+            androidx.activity.result.PickVisualMediaRequest(
+                androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
+            )
+        )
+    }
+    pickedPhoto?.let { uri ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pickedPhoto = null },
+            title = { Text(stringResource(R.string.ichthys_wallpaper_use_for)) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    pickedPhoto = null
+                    setPhotoWallpaper(context, uri, home = false) {
+                        pictures = LockPictures.load(context, screenW, screenH)
+                    }
+                }) { Text(stringResource(R.string.ichthys_wallpaper_lock)) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    pickedPhoto = null
+                    setPhotoWallpaper(context, uri, home = true) {
+                        pictures = LockPictures.load(context, screenW, screenH)
+                    }
+                }) { Text(stringResource(R.string.ichthys_wallpaper_both)) }
+            },
+        )
+    }
     val accent = MaterialTheme.colorScheme.primary
     val all = BUILT_IN + saved
     val base = all.firstOrNull { it.id == look.id }
@@ -358,11 +416,8 @@ fun LockscreenEditor(onDone: () -> Unit) {
                 Text(stringResource(R.string.ichthys_editor_save_look), fontSize = 13.sp, maxLines = 1)
             }
             OutlinedButton(
-                onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_SET_WALLPAPER).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    )
-                }
+                // The ROM has no wallpaper picker app: any photo, through the photo picker.
+                onClick = { choosePhoto() }
             ) {
                 Text(stringResource(R.string.ichthys_editor_wallpaper), fontSize = 13.sp, maxLines = 1)
             }
@@ -415,6 +470,14 @@ fun LockscreenEditor(onDone: () -> Unit) {
                 }
             }
             EditorRow(stringResource(R.string.ichthys_editor_wallpapers)) {
+                Chip(stringResource(R.string.ichthys_wallpaper_photo), false, { choosePhoto() }) {
+                    Box(
+                        Modifier.fillMaxSize().background(Color(0xFF0E1417)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("+", fontSize = 34.sp, color = Color(0xFF9FE7DD))
+                    }
+                }
                 DEPTH_WALLPAPERS.forEach { (id, res, label) ->
                     Chip(stringResource(label), false, {
                         setDepthWallpaper(context, id)

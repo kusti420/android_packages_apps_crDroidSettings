@@ -110,13 +110,6 @@
                 android:summary="@string/lockscreen_quick_settings_summary"
                 android:defaultValue="true" />
             <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-                android:key="status_bar_brightness_control_lockscreen"
-                android:icon="@drawable/ic_brightness_auto"
-                android:title="@string/status_bar_toggle_brightness_lockscreen_title"
-                android:summary="@string/status_bar_toggle_brightness_lockscreen_summary"
-                android:defaultValue="false"
-                android:dependency="status_bar_brightness_control" />
-            <com.crdroid.settings.preferences.SystemSettingSwitchPreference
                 android:key="double_tap_sleep_lockscreen"
                 android:icon="@drawable/ic_double_tap"
                 android:title="@string/lockscreen_doubletap_sleep_title"
@@ -154,13 +147,6 @@
             android:entryValues="@array/ichthys_aod_notif_icons_values"
             android:summary="%s"
             android:defaultValue="-1" />
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="ichthys_notif_dot_aod"
-            android:icon="@drawable/ic_ambient"
-            android:title="@string/ichthys_notif_dot_aod_title"
-            android:summary="@string/ichthys_notif_dot_aod_summary"
-            android:defaultValue="true"
-            android:dependency="ichthys_notif_dot_enabled" />
     </PreferenceCategory>
 
 </PreferenceScreen>

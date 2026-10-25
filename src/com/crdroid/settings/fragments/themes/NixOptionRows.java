@@ -32,7 +32,6 @@ import com.android.internal.ichthys.config.NixParser;
 import com.android.internal.ichthys.config.NixPrinter;
 import com.android.internal.ichthys.config.OptionSchema;
 import com.android.settings.R;
-import com.crdroid.settings.utils.SystemUtils;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,6 +40,7 @@ import java.util.concurrent.Executors;
  * IchthysOS (tracker#59): list rows that are ichthys.nix options, on whichever page they belong
  * (the status bar's style on Status bar, the tiles' style on Quick settings). A change is applied
  * in merge mode, so it is a generation that can be rolled back; the row shows the live value.
+ * SystemUI follows these options live, so nothing is restarted.
  */
 public final class NixOptionRows {
     private static final String TAG = "NixOptionRows";
@@ -80,12 +80,9 @@ public final class NixOptionRows {
                     message = ctx.getString(R.string.theme_studio_error, e.getMessage());
                 }
                 final String toast = message;
-                MAIN.post(() -> {
-                    Toast.makeText(ctx, toast, Toast.LENGTH_LONG).show();
-                    if (fragment.isAdded()) {
-                        SystemUtils.INSTANCE.showSystemUiRestartDialog(fragment.getContext());
-                    }
-                });
+                // No SystemUI restart: both rows bound here (status bar layout, tiles style) are
+                // watched live by SystemUI (StatusIconContainer, rememberShoalQsEnabled).
+                MAIN.post(() -> Toast.makeText(ctx, toast, Toast.LENGTH_SHORT).show());
             });
             return true;
         });

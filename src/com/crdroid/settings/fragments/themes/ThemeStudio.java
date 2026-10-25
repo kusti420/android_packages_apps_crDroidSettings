@@ -158,23 +158,6 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 p.getParent().removePreference(p);
             }
         }
-        // The Slim recents options only apply to the Slim style.
-        final Preference recentsType = findPreference(KEY_RECENTS_TYPE);
-        if (recentsType != null) {
-            recentsType.setOnPreferenceChangeListener((pref, val) -> {
-                updateSlimRecents(Integer.parseInt((String) val));
-                return true;
-            });
-        }
-        updateSlimRecents(Settings.System.getIntForUser(context.getContentResolver(),
-                KEY_RECENTS_TYPE, 0, UserHandle.USER_CURRENT));
-    }
-
-    private void updateSlimRecents(int recentsType) {
-        final Preference slim = findPreference(KEY_SLIM_RECENTS);
-        if (slim != null) {
-            slim.setEnabled(recentsType == RECENTS_TYPE_SLIM);
-        }
     }
 
     /** Lock screen links to hide: no fingerprint sensor. */
@@ -349,7 +332,11 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 return false;
         }
         final String config = "{ " + path + " = " + NixPrinter.value(value) + "; }";
-        applyAsync(config, true, "Theme Studio: " + path, true);
+        // Only the options that rebuild the token overlays (preset, surfaces, shape, font) need
+        // SystemUI to start over; icon style and badges are Settings' own.
+        final boolean restart = !KEY_BADGES.equals(preference.getKey())
+                && !KEY_ICON_STYLE.equals(preference.getKey());
+        applyAsync(config, true, "Theme Studio: " + path, restart);
         return true;
     }
 

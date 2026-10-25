@@ -88,7 +88,6 @@ public class Buttons extends SettingsPreferenceFragment implements
     private static final String KEY_BACK_GESTURE_HAPTIC = "back_gesture_haptic";
     private static final String KEY_BACK_GESTURE_HEIGHT = "back_gesture_height";
     private static final String KEY_THREE_FINGERS_SWIPE = "three_fingers_swipe";
-    private static final String KEY_QUICK_PULLDOWN = "qs_quick_pulldown";
 
     private static final String CATEGORY_POWER = "power_key";
     private static final String CATEGORY_HOME = "home_key";
@@ -96,10 +95,6 @@ public class Buttons extends SettingsPreferenceFragment implements
     private static final String CATEGORY_VOLUME = "volume_keys";
     private static final String CATEGORY_NAV_GESTURE = "navigation_gesture_category";
 
-    private static final int PULLDOWN_DIR_NONE = 0;
-    private static final int PULLDOWN_DIR_RIGHT = 1;
-    private static final int PULLDOWN_DIR_LEFT = 2;
-    private static final int PULLDOWN_DIR_ALWAYS = 3;
 
     private ListPreference mHomeLongPressAction;
     private ListPreference mHomeDoubleTapAction;
@@ -109,7 +104,6 @@ public class Buttons extends SettingsPreferenceFragment implements
     private ListPreference mThreeFingersSwipeAction;
     private SwitchPreferenceCompat mSwapVolumeButtons;
     private SwitchPreferenceCompat mPowerEndCall;
-    private LineageSystemSettingListPreference mQuickPulldown;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -229,18 +223,6 @@ public class Buttons extends SettingsPreferenceFragment implements
         // Three fingers swipe.
         mThreeFingersSwipeAction = initList(KEY_THREE_FINGERS_SWIPE, Action.fromSettings(resolver,
                 LineageSettings.System.KEY_THREE_FINGERS_SWIPE_ACTION, Action.NOTHING));
-
-        // Status bar quick pulldown.
-        mQuickPulldown = findPreference(KEY_QUICK_PULLDOWN);
-        if (mQuickPulldown != null) {
-            mQuickPulldown.setOnPreferenceChangeListener(this);
-            if (getResources().getConfiguration().getLayoutDirection()
-                    == View.LAYOUT_DIRECTION_RTL) {
-                mQuickPulldown.setEntries(R.array.status_bar_quick_qs_pulldown_entries_rtl);
-                mQuickPulldown.setEntryValues(R.array.status_bar_quick_qs_pulldown_values_rtl);
-            }
-            updateQuickPulldownSummary(mQuickPulldown.getIntValue(0));
-        }
     }
 
     private void updateSlimRecents(int recentsType) {
@@ -365,31 +347,8 @@ public class Buttons extends SettingsPreferenceFragment implements
             handleSystemListChange((ListPreference) preference, newValue,
                     Settings.System.VOLUME_KEY_CURSOR_CONTROL);
             return true;
-        } else if (preference == mQuickPulldown) {
-            updateQuickPulldownSummary(Integer.parseInt((String) newValue));
-            return true;
         }
         return false;
-    }
-
-    private void updateQuickPulldownSummary(int value) {
-        String summary = "";
-        switch (value) {
-            case PULLDOWN_DIR_NONE:
-                summary = getString(R.string.status_bar_quick_qs_pulldown_off);
-                break;
-            case PULLDOWN_DIR_ALWAYS:
-                summary = getString(R.string.status_bar_quick_qs_pulldown_always);
-                break;
-            case PULLDOWN_DIR_LEFT:
-            case PULLDOWN_DIR_RIGHT:
-                summary = getString(R.string.status_bar_quick_qs_pulldown_summary,
-                        getString(value == PULLDOWN_DIR_LEFT
-                                ? R.string.status_bar_quick_qs_pulldown_summary_left
-                                : R.string.status_bar_quick_qs_pulldown_summary_right));
-                break;
-        }
-        mQuickPulldown.setSummary(summary);
     }
 
     @Override

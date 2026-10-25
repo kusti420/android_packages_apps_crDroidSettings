@@ -113,4 +113,5 @@
     <string name="weather_lockscreen_category">On the lock screen</string>
     <string name="ichthys_editor_summary">Looks, clock face, size and place, depth, wallpaper</string>
     <string name="ichthys_aod_category">Always-on display</string>
+    <string name="navbar_style_stock_pack">Stock · %1$s icons</string>
 </resources>
