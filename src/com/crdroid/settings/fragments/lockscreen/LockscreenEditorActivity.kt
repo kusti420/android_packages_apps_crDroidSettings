@@ -45,6 +45,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -54,6 +56,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -291,7 +294,7 @@ fun LockscreenEditor(onDone: () -> Unit) {
                 .forEach { (k, v) ->
                     Column {
                         Text(k, fontSize = 9.sp, color = Color(0xFF9AA3A7), letterSpacing = 1.sp)
-                        Text(v, fontSize = 13.sp, color = Color(0xFFF2ECE4),
+                        Text(v, fontSize = 12.sp, color = Color(0xFFF2ECE4),
                             fontFamily = FontFamily.Monospace)
                     }
                 }
@@ -306,7 +309,7 @@ fun LockscreenEditor(onDone: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             OutlinedButton(onClick = { base?.let { look = it } }, enabled = edited && base != null) {
-                Text(stringResource(R.string.ichthys_editor_reset))
+                Text(stringResource(R.string.ichthys_editor_reset), fontSize = 13.sp, maxLines = 1)
             }
             OutlinedButton(
                 onClick = {
@@ -321,7 +324,7 @@ fun LockscreenEditor(onDone: () -> Unit) {
                     look = mine
                 }
             ) {
-                Text(stringResource(R.string.ichthys_editor_save_look))
+                Text(stringResource(R.string.ichthys_editor_save_look), fontSize = 13.sp, maxLines = 1)
             }
             OutlinedButton(
                 onClick = {
@@ -330,12 +333,12 @@ fun LockscreenEditor(onDone: () -> Unit) {
                     )
                 }
             ) {
-                Text(stringResource(R.string.ichthys_editor_wallpaper))
+                Text(stringResource(R.string.ichthys_editor_wallpaper), fontSize = 13.sp, maxLines = 1)
             }
         }
 
         // The choices, one scrolling row each.
-        Column(Modifier.fillMaxWidth().height(300.dp).verticalScroll(rememberScrollState())) {
+        Column(Modifier.fillMaxWidth().heightIn(max = 330.dp).verticalScroll(rememberScrollState())) {
             EditorRow(stringResource(R.string.ichthys_editor_looks)) {
                 all.forEach { l ->
                     Chip(l.label, l.id == look.id, { look = l }) {
@@ -343,9 +346,22 @@ fun LockscreenEditor(onDone: () -> Unit) {
                     }
                 }
             }
-            EditorRow(stringResource(R.string.ichthys_editor_face)) {
-                val names = remember { ClockUtils.getClockNames() }
-                ClockUtils.CLOCK_LAYOUTS.indices.drop(1).reversed().forEach { style ->
+            // Eighty faces: built only as they scroll into view.
+            val names = remember { ClockUtils.getClockNames() }
+            val faces = remember { ClockUtils.CLOCK_LAYOUTS.indices.drop(1).reversed() }
+            Text(
+                stringResource(R.string.ichthys_editor_face).uppercase(),
+                fontSize = 10.sp,
+                letterSpacing = 1.5.sp,
+                color = Color(0xFF9AA3A7),
+                modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 6.dp),
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(faces.size, key = { faces[it] }) { i ->
+                    val style = faces[i]
                     Chip(names[style], style == look.style, { look = look.copy(style = style) }) {
                         FaceThumb(style, null, pictures)
                     }
@@ -403,7 +419,13 @@ fun LockscreenEditor(onDone: () -> Unit) {
 
 /** The lock screen at screen size: wallpaper, guard rails, the clock, the subject over it. */
 @Composable
-private fun LockPreview(look: Look, pictures: LockPictures, guide: Boolean, accent: Color) {
+private fun LockPreview(
+    look: Look,
+    pictures: LockPictures,
+    guide: Boolean,
+    accent: Color,
+    rails: Boolean = true,
+) {
     val density = LocalDensity.current
     val dm = LocalContext.current.resources.displayMetrics
     Box(Modifier.fillMaxSize()) {
@@ -412,7 +434,7 @@ private fun LockPreview(look: Look, pictures: LockPictures, guide: Boolean, acce
         } ?: Box(Modifier.fillMaxSize().background(Color(0xFF0B1418)))
 
         // Zones the clock may cross but should never cover: status bar, fingerprint, shortcuts.
-        ComposeCanvas(Modifier.fillMaxSize()) {
+        if (rails) ComposeCanvas(Modifier.fillMaxSize()) {
             val rail = Color(0x44F6F1EA)
             val dash = PathEffect.dashPathEffect(floatArrayOf(12f, 10f))
             drawRect(Color(0x22F6F1EA), size = androidx.compose.ui.geometry.Size(size.width, 40 * dm.density))
@@ -468,34 +490,35 @@ private fun ClockFace(style: Int, modifier: Modifier) {
     )
 }
 
-/** A small lock screen with [style] on it (and [look]'s depth and fill, when given). */
+/**
+ * A small lock screen with [style] on it (and [look]'s placement, depth and fill, when given):
+ * the same preview as the big one, scaled down.
+ */
 @Composable
 private fun FaceThumb(style: Int, look: Look?, pictures: LockPictures) {
-    Box(Modifier.fillMaxSize()) {
-        pictures.backdrop?.let {
-            Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.7f)
-        }
-        AndroidView(
-            factory = { ctx ->
-                FrameLayout(ctx).apply {
-                    clipChildren = false
-                    descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
-                    ClockUtils.CLOCK_LAYOUTS.getOrNull(style)?.let {
-                        LayoutInflater.from(ctx).inflate(it, this, true)
-                    }
-                    if (childCount > 0) {
-                        getChildAt(0).scaleX = 0.32f
-                        getChildAt(0).scaleY = 0.32f
-                        getChildAt(0).pivotY = 0f
-                    }
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val dm = context.resources.displayMetrics
+    val screenW = minOf(dm.widthPixels, dm.heightPixels)
+    val screenH = maxOf(dm.widthPixels, dm.heightPixels)
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val k = constraints.maxWidth.toFloat() / screenW
+        Box(
+            Modifier.wrapContentSize(Alignment.TopStart, unbounded = true)
+                .requiredSize(with(density) { screenW.toDp() }, with(density) { screenH.toDp() })
+                .graphicsLayer {
+                    scaleX = k
+                    scaleY = k
+                    transformOrigin = TransformOrigin(0f, 0f)
                 }
-            },
-            modifier = Modifier.fillMaxSize().padding(top = 10.dp),
-        )
-        if (look != null && look.depth != 0) {
-            pictures.cutout?.let {
-                Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            }
+        ) {
+            LockPreview(
+                (look ?: Look("face", "", style)).copy(style = style),
+                pictures,
+                guide = false,
+                accent = Color.Transparent,
+                rails = false,
+            )
         }
     }
 }
@@ -520,9 +543,9 @@ private fun EditorRow(title: String, content: @Composable () -> Unit) {
 @Composable
 private fun Chip(label: String, on: Boolean, onClick: () -> Unit, thumb: @Composable () -> Unit) {
     val shape = RoundedCornerShape(14.dp)
-    Column(Modifier.width(80.dp).clickable(onClick = onClick)) {
+    Column(Modifier.width(64.dp).clickable(onClick = onClick)) {
         Box(
-            Modifier.size(80.dp, 140.dp)
+            Modifier.size(64.dp, 128.dp)
                 .clip(shape)
                 .border(
                     if (on) BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
