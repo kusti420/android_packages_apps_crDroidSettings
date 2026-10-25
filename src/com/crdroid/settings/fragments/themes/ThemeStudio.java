@@ -66,12 +66,11 @@ import java.util.concurrent.Executors;
  * IchthysOS Theme Studio: the one place for look and feel, and the Settings front end of the
  * declarative OS config (ichthys.nix, IchthysConfigService).
  *
- * <p>The {@code theme_studio_*} rows apply one-option configs in merge mode, so each change is a
- * generation that can be rolled back; Import/Export move whole configs as files. The other rows
- * link to the pages that hold the rest of each section (accent and palette, status bar, quick
- * settings, navigation bar, lock screen), or are plain self-persisting settings (volume and
- * system). Nothing about the system's look lives outside this page and the pages it links to.
- * It is the "Look" row of the IchthysOS settings entry.
+ * <p>The Theme section of the IchthysOS hub (tracker#59): colours (preset, accent, palette style
+ * and colour source), surfaces and shape, type, icons, motion. The {@code theme_studio_*} rows
+ * apply one-option configs in merge mode, so each change is a generation that can be rolled back
+ * (System > ichthys.nix). Everything else that used to hang off this page (status bar, quick
+ * settings, navigation, lock screen, volume, recents) has its own hub section now.
  */
 @SearchIndexable
 public class ThemeStudio extends SettingsPreferenceFragment
@@ -108,6 +107,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mMain = new Handler(Looper.getMainLooper());
     private IIchthysConfig mService;
+    private PaletteRows mPalette;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,7 +116,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
         mService = IIchthysConfig.Stub.asInterface(ServiceManager.getService("ichthys_config"));
 
         for (String key : new String[] {KEY_PRESET, KEY_RADIUS, KEY_SHAPE, KEY_FONT,
-                KEY_STATUSBAR, KEY_QS, KEY_SURFACE, KEY_BADGES, KEY_ICON_STYLE}) {
+                KEY_SURFACE, KEY_BADGES, KEY_ICON_STYLE}) {
             final Preference p = findPreference(key);
             if (p != null) {
                 p.setOnPreferenceChangeListener(this);
@@ -126,29 +126,8 @@ public class ThemeStudio extends SettingsPreferenceFragment
         setupPresets();
         setupFonts();
         setupLinkedRows();
-        findPreference(KEY_IMPORT).setOnPreferenceClickListener(p -> {
-            final Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT)
-                    .addCategory(Intent.CATEGORY_OPENABLE)
-                    .setType("*/*");
-            startActivityForResult(i, REQUEST_IMPORT);
-            return true;
-        });
-        findPreference(KEY_EXPORT).setOnPreferenceClickListener(p -> {
-            final Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT)
-                    .addCategory(Intent.CATEGORY_OPENABLE)
-                    .setType("text/plain")
-                    .putExtra(Intent.EXTRA_TITLE, "ichthys.nix");
-            startActivityForResult(i, REQUEST_EXPORT);
-            return true;
-        });
-        findPreference(KEY_GENERATIONS).setOnPreferenceClickListener(p -> {
-            showGenerations();
-            return true;
-        });
+        mPalette = new PaletteRows(this);
         if (mService == null) {
-            findPreference(KEY_IMPORT).setEnabled(false);
-            findPreference(KEY_EXPORT).setEnabled(false);
-            findPreference(KEY_GENERATIONS).setEnabled(false);
             Toast.makeText(getContext(), R.string.theme_studio_unavailable, Toast.LENGTH_LONG)
                     .show();
         }
@@ -158,6 +137,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
     public void onResume() {
         super.onResume();
         refresh();
+        mPalette.refresh();
     }
 
     @Override
@@ -282,14 +262,9 @@ public class ThemeStudio extends SettingsPreferenceFragment
         }
         mExecutor.execute(() -> {
             final Map<String, Object> live;
-            final String genSummary;
             try {
                 live = OptionSchema.create().evaluate(NixParser.parse(
                         mService.exportConfig(true, UserHandle.USER_CURRENT)));
-                final String[] gens = mService.listGenerations(UserHandle.USER_CURRENT);
-                genSummary = gens.length == 0 ? null
-                        : getString(R.string.theme_studio_generations_current,
-                                Integer.parseInt(gens[0].split("\t")[0]));
             } catch (Exception e) {
                 Log.w(TAG, "refresh", e);
                 return;
@@ -308,11 +283,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 setValue(KEY_RADIUS, live.get("theme.shape.radius"), NULL);
                 setValue(KEY_SHAPE, live.get("theme.shape.style"), "pill");
                 setValue(KEY_FONT, live.get("theme.font.body"), NULL);
-                setValue(KEY_STATUSBAR, live.get("statusBar.layout"), "zigzag");
-                setValue(KEY_QS, live.get("quickSettings.style"), "shoal");
-                if (genSummary != null) {
-                    findPreference(KEY_GENERATIONS).setSummary(genSummary);
-                }
+
             });
         });
     }
@@ -403,150 +374,6 @@ public class ThemeStudio extends SettingsPreferenceFragment
                     if (restartHint) {
                         SystemUtils.INSTANCE.showSystemUiRestartDialog(getContext());
                     }
-                }
-            });
-        });
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null
-                || mService == null) {
-            return;
-        }
-        final Uri uri = data.getData();
-        if (requestCode == REQUEST_IMPORT) {
-            importFrom(uri);
-        } else if (requestCode == REQUEST_EXPORT) {
-            exportTo(uri);
-        }
-    }
-
-    private void importFrom(Uri uri) {
-        final Context ctx = getContext().getApplicationContext();
-        mExecutor.execute(() -> {
-            final String text;
-            final String replaceDiff;
-            final String mergeDiff;
-            try (InputStream in = ctx.getContentResolver().openInputStream(uri)) {
-                final ByteArrayOutputStream out = new ByteArrayOutputStream();
-                final byte[] buf = new byte[8192];
-                int n;
-                while ((n = in.read(buf)) > 0) {
-                    out.write(buf, 0, n);
-                    if (out.size() > 1024 * 1024) {
-                        throw new IllegalArgumentException("file larger than 1 MiB");
-                    }
-                }
-                text = out.toString(StandardCharsets.UTF_8.name());
-                replaceDiff = mService.diff(text, false, UserHandle.USER_CURRENT);
-                mergeDiff = mService.diff(text, true, UserHandle.USER_CURRENT);
-            } catch (Exception e) {
-                final String msg = ctx.getString(R.string.theme_studio_error, e.getMessage());
-                mMain.post(() -> Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show());
-                return;
-            }
-            mMain.post(() -> {
-                if (!isAdded()) {
-                    return;
-                }
-                new AlertDialog.Builder(getContext())
-                        .setTitle(R.string.theme_studio_review_title)
-                        .setMessage(getString(R.string.theme_studio_review_hint)
-                                + "\n\n" + replaceDiff)
-                        .setPositiveButton(R.string.theme_studio_apply, (d, w) ->
-                                applyAsync(text, false, "import", true))
-                        .setNeutralButton(R.string.theme_studio_merge, (d, w) -> {
-                            if (mergeDiff.startsWith("no changes")) {
-                                Toast.makeText(ctx, R.string.theme_studio_no_changes,
-                                        Toast.LENGTH_SHORT).show();
-                            } else {
-                                applyAsync(text, true, "import (merge)", true);
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .show();
-            });
-        });
-    }
-
-    private void exportTo(Uri uri) {
-        final Context ctx = getContext().getApplicationContext();
-        mExecutor.execute(() -> {
-            String msg;
-            try (OutputStream out = ctx.getContentResolver().openOutputStream(uri, "wt")) {
-                out.write(mService.exportConfig(false, UserHandle.USER_CURRENT)
-                        .getBytes(StandardCharsets.UTF_8));
-                msg = ctx.getString(R.string.theme_studio_exported);
-            } catch (Exception e) {
-                msg = ctx.getString(R.string.theme_studio_error, e.getMessage());
-            }
-            final String toast = msg;
-            mMain.post(() -> Toast.makeText(ctx, toast, Toast.LENGTH_LONG).show());
-        });
-    }
-
-    private void showGenerations() {
-        final Context ctx = getContext();
-        final String[] gens;
-        try {
-            gens = mService.listGenerations(UserHandle.USER_CURRENT);
-        } catch (RemoteException | RuntimeException e) {
-            Toast.makeText(ctx, getString(R.string.theme_studio_error, e.getMessage()),
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
-        final List<String> labels = new ArrayList<>();
-        final List<Integer> numbers = new ArrayList<>();
-        for (String line : gens) {
-            final String[] f = line.split("\t", -1);
-            if (f.length < 5) {
-                continue;
-            }
-            final int n = Integer.parseInt(f[0]);
-            final String when = DateFormat.getMediumDateFormat(ctx).format(
-                    new Date(Long.parseLong(f[1]))) + " "
-                    + DateFormat.getTimeFormat(ctx).format(new Date(Long.parseLong(f[1])));
-            labels.add(("1".equals(f[4]) ? "● " : "") + n + " · " + when + "\n" + f[2]);
-            numbers.add(n);
-        }
-        if (labels.isEmpty()) {
-            return;
-        }
-        new AlertDialog.Builder(ctx)
-                .setTitle(R.string.theme_studio_generations_title)
-                .setItems(labels.toArray(new CharSequence[0]), (d, which) -> {
-                    final int gen = numbers.get(which);
-                    if (which == 0) {
-                        return; // already current
-                    }
-                    new AlertDialog.Builder(ctx)
-                            .setTitle(getString(R.string.theme_studio_rollback_title, gen))
-                            .setPositiveButton(R.string.theme_studio_rollback, (d2, w2) ->
-                                    rollbackAsync(gen))
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show();
-                })
-                .show();
-    }
-
-    private void rollbackAsync(int gen) {
-        final Context ctx = getContext().getApplicationContext();
-        mExecutor.execute(() -> {
-            String msg;
-            try {
-                final int now = mService.rollback(gen, UserHandle.USER_CURRENT);
-                msg = ctx.getString(R.string.theme_studio_applied, now);
-            } catch (RemoteException | RuntimeException e) {
-                msg = ctx.getString(R.string.theme_studio_error, e.getMessage());
-            }
-            final String toast = msg;
-            mMain.post(() -> {
-                Toast.makeText(ctx, toast, Toast.LENGTH_LONG).show();
-                if (isAdded()) {
-                    refresh();
-                    SystemUtils.INSTANCE.showSystemUiRestartDialog(getContext());
                 }
             });
         });

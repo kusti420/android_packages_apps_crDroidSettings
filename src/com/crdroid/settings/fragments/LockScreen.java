@@ -63,13 +63,17 @@ public class LockScreen extends SettingsPreferenceFragment
 
         addPreferencesFromResource(R.xml.crdroid_settings_lockscreen);
 
-        mWeather = (SwitchPreferenceCompat) findPreference(KEY_WEATHER);
-        mWeather.setOnPreferenceChangeListener(this);
+        // IchthysOS (tracker#59): the weather rows moved to Weather (WeatherSettings); the
+        // fingerprint page needs a sensor.
+        if (!com.crdroid.settings.utils.DeviceUtils.hasFingerprint(getContext())) {
+            final Preference fp = findPreference("ichthys_fingerprint_effects");
+            if (fp != null && fp.getParent() != null) fp.getParent().removePreference(fp);
+        }
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        if (preference == mWeather) {
+        if (mWeather != null && preference == mWeather) {
             // The lock screen weather view is only created when SystemUI starts.
             mWeather.setChecked((Boolean) newValue);
             SystemUtils.showSystemUiRestartDialog(getContext());

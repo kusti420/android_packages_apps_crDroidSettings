@@ -82,6 +82,9 @@ public class StatusBar extends SettingsPreferenceFragment implements
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.crdroid_settings_statusbar);
+        // IchthysOS (tracker#59): the status bar's style, an ichthys.nix option, lives here now.
+        com.crdroid.settings.fragments.themes.NixOptionRows.bind(this, "theme_studio_statusbar",
+                "statusBar.layout", "zigzag");
 
         final Context context = getActivity().getApplicationContext();
 

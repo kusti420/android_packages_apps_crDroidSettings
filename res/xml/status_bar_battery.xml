@@ -151,26 +151,6 @@
             settings:units="@string/unit_percent" />
     </PreferenceCategory>
 
-    <!-- Battery icon in the quick settings header. Rendered by SystemUI's QsHeader battery
-         (tracker#37); "Follow status bar" uses the status bar's style. -->
-    <PreferenceCategory
-        android:key="battery_qs_category"
-        android:title="@string/look_qs_battery_category">
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_battery_style"
-            android:title="@string/status_bar_battery_style_title"
-            android:entries="@array/qs_battery_style_entries"
-            android:entryValues="@array/qs_battery_style_values"
-            android:defaultValue="-1" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_show_battery_percent"
-            android:title="@string/status_bar_battery_percent_title"
-            android:entries="@array/qs_show_battery_percent_entries"
-            android:entryValues="@array/qs_show_battery_percent_values"
-            android:defaultValue="-1" />
-    </PreferenceCategory>
 
     <!-- Battery bar: a thin level bar along the status bar. -->
     <PreferenceCategory

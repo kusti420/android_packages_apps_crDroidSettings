@@ -24,26 +24,8 @@
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
     android:title="@string/ichthys_hub_system_title">
 
-    <Preference
-        android:key="ichthys_buttons_gestures"
-        android:icon="@drawable/ic_buttons"
-        android:title="@string/ichthys_buttons_gestures_title"
-        android:summary="@string/ichthys_buttons_gestures_summary"
-        android:fragment="com.crdroid.settings.fragments.Buttons" />
 
-    <Preference
-        android:key="ichthys_notifications"
-        android:icon="@drawable/ic_notifications"
-        android:title="@string/notifications_title"
-        android:summary="@string/ichthys_notifications_summary"
-        android:fragment="com.crdroid.settings.fragments.Notifications" />
 
-    <Preference
-        android:key="ichthys_sound_haptics"
-        android:icon="@drawable/ic_settings_sound"
-        android:title="@string/ichthys_sound_haptics_title"
-        android:summary="@string/ichthys_sound_haptics_summary"
-        android:fragment="com.crdroid.settings.fragments.Sound" />
 
     <PreferenceCategory
         android:key="ichthys_system_battery_display_category"
@@ -91,6 +73,30 @@
             android:summary="@string/duress_credential_summary"
             settings:keywords="@string/duress_credential_keywords"
             android:fragment="com.crdroid.settings.fragments.security.DuressCredentialSettings" />
+    </PreferenceCategory>
+
+    <!-- ichthys.nix -->
+    <PreferenceCategory
+        android:key="theme_studio_config"
+        android:title="@string/theme_studio_config_category">
+
+        <Preference
+            android:key="theme_studio_import"
+            android:icon="@drawable/ic_backup"
+            android:title="@string/theme_studio_import_title"
+            android:summary="@string/theme_studio_import_summary" />
+
+        <Preference
+            android:key="theme_studio_export"
+            android:icon="@drawable/ic_backup"
+            android:title="@string/theme_studio_export_title"
+            android:summary="@string/theme_studio_export_summary" />
+
+        <Preference
+            android:key="theme_studio_generations"
+            android:icon="@drawable/ic_backup"
+            android:title="@string/theme_studio_generations_title"
+            android:summary="@string/theme_studio_generations_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -83,4 +83,34 @@
 
     <!-- Colour pickers whose unset value follows the theme accent -->
     <string name="color_default_accent">Accent (default)</string>
+
+    <!-- Hub sections (tracker#59) -->
+    <string name="ichthys_hub_theme_title">Theme</string>
+    <string name="ichthys_hub_theme_summary">Accent, palette, surfaces, corners, font, icons</string>
+    <string name="ichthys_hub_lockscreen_title">Lock screen</string>
+    <string name="ichthys_hub_lockscreen_summary">Clock and looks, fingerprint, always-on display</string>
+    <string name="ichthys_hub_statusbar_title">Status bar</string>
+    <string name="ichthys_hub_statusbar_summary">Clock, battery, icons, notification dot</string>
+    <string name="ichthys_hub_quicksettings_title">Quick settings</string>
+    <string name="ichthys_hub_quicksettings_summary">Tiles, brightness slider, header, pull down</string>
+    <string name="ichthys_hub_navigation_title">Navigation and buttons</string>
+    <string name="ichthys_hub_navigation_summary">Navigation bar, gesture pill, recents, power and volume buttons</string>
+    <string name="ichthys_hub_sound_title">Sound and notifications</string>
+    <string name="ichthys_hub_sound_summary">Volume panel, heads up, audio, vibration</string>
+    <string name="ichthys_hub_weather_title">Weather</string>
+    <string name="ichthys_hub_weather_summary">Where it comes from and where it shows</string>
+
+    <!-- Section categories -->
+    <string name="theme_studio_motion_category">Motion</string>
+    <string name="look_status_bar_style_category">Style</string>
+    <string name="look_status_bar_gestures_category">Gestures</string>
+    <string name="qs_pulldown_category">Pull down</string>
+    <string name="ichthys_recents_category">Recents</string>
+    <string name="ichthys_navigation_mode_title">Navigation mode</string>
+    <string name="ichthys_navigation_mode_summary">Gestures or buttons</string>
+    <string name="weather_source_category">Source</string>
+    <string name="weather_where_category">Where it shows</string>
+    <string name="weather_lockscreen_category">On the lock screen</string>
+    <string name="ichthys_editor_summary">Looks, clock face, size and place, depth, wallpaper</string>
+    <string name="ichthys_aod_category">Always-on display</string>
 </resources>

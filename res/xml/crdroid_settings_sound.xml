@@ -26,7 +26,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:lineage="http://schemas.android.com/apk/res-auto"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
-    android:title="@string/ichthys_sound_haptics_title">
+    android:title="@string/ichthys_hub_sound_title">
+
+    <Preference
+        android:key="ichthys_notifications"
+        android:icon="@drawable/ic_notifications"
+        android:title="@string/notifications_title"
+        android:summary="@string/ichthys_notifications_summary"
+        android:fragment="com.crdroid.settings.fragments.Notifications" />
+
 
     <!-- Disable Audio Focus -->
     <com.crdroid.settings.preferences.SystemSettingSwitchPreference
@@ -74,6 +82,25 @@
             android:max="200"
             settings:min="5"
             android:defaultValue="200" />
+
+        <!-- Premade volume slider looks (volume.style in ichthys.nix). Backend: Settings.System
+             "volume_panel_style", observed by the SystemUI volume dialog to swap the slider
+             rendering. 0 = Default (AOSP), 1 = One UI (IchthysOS default). -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="volume_panel_style"
+            android:icon="@drawable/ic_volume_vibrate"
+            android:title="@string/volume_panel_style_title"
+            android:summary="%s"
+            android:entries="@array/volume_panel_style_entries"
+            android:entryValues="@array/volume_panel_style_values"
+            android:defaultValue="1" />
+        <!-- Horizontal (8.1-style) volume slider -->
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="custom_volume_horizontal"
+            android:icon="@drawable/ic_sliders"
+            android:title="@string/custom_volume_horizontal_title"
+            android:summary="@string/custom_volume_horizontal_summary"
+            android:defaultValue="false" />
     </PreferenceCategory>
 
     <!-- Adaptive playback: pause media when the volume reaches zero, resume when it is raised

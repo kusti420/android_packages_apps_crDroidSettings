@@ -15,12 +15,19 @@
      limitations under the License.
 -->
 <!-- The one IchthysOS entry on the Settings homepage (crDroidSettingsLayout). The Protected card
-     is the header and opens Guard; under it are the four areas everything else hangs off:
+     is the header and opens Guard; under it, every setting the ROM adds, each in one place
+     (tracker#59):
 
-       Look     Theme Studio (theme_studio.xml) and the pages it links to
-       Privacy  Guard (GuardActivity)
-       Apps     ichthys_apps.xml
-       System   ichthys_system.xml
+       Theme                    theme_studio.xml: colour, shape, type, motion
+       Lock screen              crdroid_settings_lockscreen.xml: the editor, fingerprint, AOD
+       Status bar               crdroid_settings_statusbar.xml
+       Quick settings           crdroid_settings_quicksettings.xml
+       Navigation and buttons   crdroid_settings_button.xml
+       Sound and notifications  crdroid_settings_sound.xml (Notifications one level down)
+       Weather                  weather_settings.xml
+       Privacy                  Guard (GuardActivity)
+       Apps                     ichthys_apps.xml
+       System                   ichthys_system.xml
 
      No setting lives on this page. -->
 <PreferenceScreen
@@ -37,9 +44,51 @@
     <Preference
         android:key="ichthys_hub_look"
         android:icon="@drawable/ic_color_bucket"
-        android:title="@string/ichthys_hub_look_title"
-        android:summary="@string/ichthys_hub_look_summary"
+        android:title="@string/ichthys_hub_theme_title"
+        android:summary="@string/ichthys_hub_theme_summary"
         android:fragment="com.crdroid.settings.fragments.themes.ThemeStudio" />
+
+    <Preference
+        android:key="ichthys_hub_lockscreen"
+        android:icon="@drawable/ic_settings_lockscreens"
+        android:title="@string/ichthys_hub_lockscreen_title"
+        android:summary="@string/ichthys_hub_lockscreen_summary"
+        android:fragment="com.crdroid.settings.fragments.LockScreen" />
+
+    <Preference
+        android:key="ichthys_hub_statusbar"
+        android:icon="@drawable/ic_settings_statusbar"
+        android:title="@string/ichthys_hub_statusbar_title"
+        android:summary="@string/ichthys_hub_statusbar_summary"
+        android:fragment="com.crdroid.settings.fragments.StatusBar" />
+
+    <Preference
+        android:key="ichthys_hub_quicksettings"
+        android:icon="@drawable/ic_settings_quicksettings"
+        android:title="@string/ichthys_hub_quicksettings_title"
+        android:summary="@string/ichthys_hub_quicksettings_summary"
+        android:fragment="com.crdroid.settings.fragments.QuickSettings" />
+
+    <Preference
+        android:key="ichthys_hub_navigation"
+        android:icon="@drawable/ic_settings_navbar"
+        android:title="@string/ichthys_hub_navigation_title"
+        android:summary="@string/ichthys_hub_navigation_summary"
+        android:fragment="com.crdroid.settings.fragments.Buttons" />
+
+    <Preference
+        android:key="ichthys_hub_sound"
+        android:icon="@drawable/ic_settings_sound"
+        android:title="@string/ichthys_hub_sound_title"
+        android:summary="@string/ichthys_hub_sound_summary"
+        android:fragment="com.crdroid.settings.fragments.Sound" />
+
+    <Preference
+        android:key="ichthys_hub_weather"
+        android:icon="@drawable/ic_weather"
+        android:title="@string/ichthys_hub_weather_title"
+        android:summary="@string/ichthys_hub_weather_summary"
+        android:fragment="com.crdroid.settings.fragments.WeatherSettings" />
 
     <!-- Guard is an activity, launched by explicit intent. -->
     <Preference

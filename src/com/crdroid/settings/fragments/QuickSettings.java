@@ -74,6 +74,11 @@ public class QuickSettings extends SettingsPreferenceFragment implements
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.crdroid_settings_quicksettings);
+        // IchthysOS (tracker#59): the tiles' style (an ichthys.nix option) and the pull down
+        // gestures live here now.
+        com.crdroid.settings.fragments.themes.NixOptionRows.bind(this, "theme_studio_qs",
+                "quickSettings.style", "shoal");
+        setupQuickPulldown();
 
         final Context context = getContext();
         final ContentResolver resolver = context.getContentResolver();
@@ -136,6 +141,10 @@ public class QuickSettings extends SettingsPreferenceFragment implements
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        if (preference == mQuickPulldown) {
+            updateQuickPulldownSummary(Integer.parseInt((String) newValue));
+            return true;
+        }
         if (preference == mShowBrightnessSlider) {
             int value = Integer.parseInt((String) newValue);
             mBrightnessSliderPosition.setEnabled(value > 0);
@@ -217,4 +226,44 @@ public class QuickSettings extends SettingsPreferenceFragment implements
                     return keys;
                 }
             };
+
+    // Status bar quick pulldown (moved from Buttons with its row, tracker#59).
+    private static final String KEY_QUICK_PULLDOWN = "qs_quick_pulldown";
+    private static final int PULLDOWN_DIR_NONE = 0;
+    private static final int PULLDOWN_DIR_RIGHT = 1;
+    private static final int PULLDOWN_DIR_LEFT = 2;
+    private static final int PULLDOWN_DIR_ALWAYS = 3;
+    private lineageos.preference.LineageSystemSettingListPreference mQuickPulldown;
+
+    private void setupQuickPulldown() {
+        mQuickPulldown = findPreference(KEY_QUICK_PULLDOWN);
+        if (mQuickPulldown == null) return;
+        mQuickPulldown.setOnPreferenceChangeListener(this);
+        if (getResources().getConfiguration().getLayoutDirection()
+                == android.view.View.LAYOUT_DIRECTION_RTL) {
+            mQuickPulldown.setEntries(R.array.status_bar_quick_qs_pulldown_entries_rtl);
+            mQuickPulldown.setEntryValues(R.array.status_bar_quick_qs_pulldown_values_rtl);
+        }
+        updateQuickPulldownSummary(mQuickPulldown.getIntValue(0));
+    }
+
+    private void updateQuickPulldownSummary(int value) {
+        String summary = "";
+        switch (value) {
+            case PULLDOWN_DIR_NONE:
+                summary = getString(R.string.status_bar_quick_qs_pulldown_off);
+                break;
+            case PULLDOWN_DIR_ALWAYS:
+                summary = getString(R.string.status_bar_quick_qs_pulldown_always);
+                break;
+            case PULLDOWN_DIR_LEFT:
+            case PULLDOWN_DIR_RIGHT:
+                summary = getString(R.string.status_bar_quick_qs_pulldown_summary,
+                        getString(value == PULLDOWN_DIR_LEFT
+                                ? R.string.status_bar_quick_qs_pulldown_summary_left
+                                : R.string.status_bar_quick_qs_pulldown_summary_right));
+                break;
+        }
+        mQuickPulldown.setSummary(summary);
+    }
 }

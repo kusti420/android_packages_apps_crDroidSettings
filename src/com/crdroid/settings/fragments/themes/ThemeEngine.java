@@ -126,7 +126,7 @@ public class ThemeEngine extends SettingsPreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (isAdded()) {
-            requireActivity().setTitle(R.string.theme_engine_title);
+            requireActivity().setTitle(R.string.theme_studio_accent_title);
         }
     }
 

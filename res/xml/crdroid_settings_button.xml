@@ -43,7 +43,137 @@
     xmlns:lineage="http://schemas.android.com/apk/res-auto"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
     android:key="button_settings"
-    android:title="@string/ichthys_buttons_gestures_title">
+    android:title="@string/ichthys_hub_navigation_title">
+
+    <!-- Android's own navigation mode page (gestures or buttons). -->
+    <Preference
+        android:key="ichthys_navigation_mode"
+        android:icon="@drawable/ic_navbar_mode"
+        android:title="@string/ichthys_navigation_mode_title"
+        android:summary="@string/ichthys_navigation_mode_summary"
+        android:fragment="com.android.settings.gestures.SystemNavigationGestureSettings" />
+
+
+    <!-- Navigation bar. Buttons.java drops the button-order switch in gesture navigation and the
+         whole gesture category in 3-button navigation. How the bar is drawn (style, gesture
+         pill) is in Look > Navigation bar. -->
+    <PreferenceCategory
+        android:key="navigation_buttons_category"
+        android:title="@string/navigation_title">
+
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="navigationbar_key_order"
+            android:icon="@drawable/ic_navigation"
+            android:title="@string/navbar_invert_layout_title"
+            android:summary="@string/navbar_invert_layout_summary"
+            android:defaultValue="true" />
+
+        <!-- Rotation button -->
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="enable_rotation_button"
+            android:icon="@drawable/ic_rotation"
+            android:title="@string/floating_rotation_button_title"
+            android:summary="@string/floating_rotation_button_summary"
+            android:defaultValue="true" />
+
+        <!-- The navigation bar style picker: the IchthysOS code-drawn styles (navBar.style,
+             Settings.Secure ichthys_navbar_style), applied live. -->
+        <Preference
+            android:key="theme_studio_navbar_style"
+            android:icon="@drawable/ic_navbar"
+            android:title="@string/theme_customization_navbar_title"
+            android:summary="@string/theme_customization_navbar_summary"
+            android:fragment="com.crdroid.settings.fragments.ui.NavbarStyles" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:key="navigation_gesture_category"
+        android:title="@string/navigation_gesture_category_title">
+
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="back_gesture_arrow"
+            android:icon="@drawable/ic_navigation"
+            android:title="@string/back_gesture_arrow_title"
+            android:summary="@string/back_gesture_arrow_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="back_gesture_haptic"
+            android:icon="@drawable/ic_navigation"
+            android:title="@string/back_gesture_haptic_title"
+            android:summary="@string/back_gesture_haptic_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="back_gesture_height"
+            android:icon="@drawable/ic_navigation"
+            android:title="@string/back_height_title"
+            android:summary="@string/back_height_summary"
+            android:defaultValue="0"
+            android:max="3"
+            settings:min="0"
+            settings:interval="1" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="ichthys_nav_handle_hide"
+            android:icon="@drawable/ic_navigation"
+            android:disableDependentsState="true"
+            android:title="@string/ichthys_nav_handle_hide_title"
+            android:summary="@string/ichthys_nav_handle_hide_summary"
+            android:defaultValue="false" />
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="ichthys_nav_handle_width"
+            android:title="@string/ichthys_nav_handle_width_title"
+            android:defaultValue="100"
+            android:max="150"
+            settings:min="30"
+            settings:units="%"
+            android:dependency="ichthys_nav_handle_hide" />
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="ichthys_nav_handle_thickness"
+            android:dependency="ichthys_nav_handle_hide"
+            android:title="@string/ichthys_nav_handle_thickness_title"
+            android:defaultValue="100"
+            android:max="250"
+            settings:min="50"
+            settings:units="%" />
+        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
+            android:key="ichthys_nav_handle_opacity"
+            android:dependency="ichthys_nav_handle_hide"
+            android:title="@string/ichthys_nav_handle_opacity_title"
+            android:defaultValue="100"
+            android:max="100"
+            settings:min="10"
+            settings:units="%" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:key="recents_category"
+        android:title="@string/ichthys_recents_category">
+
+        <!-- Recents style (recents.* in ichthys.nix). Read on every recents request by SystemUI
+             and Launcher, so it applies at once. -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="recents_type"
+            android:icon="@drawable/ic_sysbar_recent"
+            android:title="@string/recents_type_title"
+            android:summary="%s"
+            android:entries="@array/recents_type_entries"
+            android:entryValues="@array/recents_type_values"
+            android:defaultValue="0" />
+        <!-- Options of the Slim style (frameworks/opt/slimrecent, compiled into Launcher3, which
+             observes these keys). ThemeStudio.java enables the row while that style is
+             selected. -->
+        <Preference
+            android:key="slim_recents"
+            android:icon="@drawable/ic_sysbar_recent"
+            android:title="@string/look_recents_slim_title"
+            android:summary="@string/look_recents_slim_summary"
+            android:fragment="com.crdroid.settings.fragments.recents.SlimRecents" />
+    </PreferenceCategory>
+
 
     <PreferenceCategory
         android:key="power_key"
@@ -195,57 +325,7 @@
             android:persistent="false" />
     </PreferenceCategory>
 
-    <!-- Navigation bar. Buttons.java drops the button-order switch in gesture navigation and the
-         whole gesture category in 3-button navigation. How the bar is drawn (style, gesture
-         pill) is in Look > Navigation bar. -->
-    <PreferenceCategory
-        android:key="navigation_buttons_category"
-        android:title="@string/navigation_title">
 
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="navigationbar_key_order"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/navbar_invert_layout_title"
-            android:summary="@string/navbar_invert_layout_summary"
-            android:defaultValue="true" />
-
-        <!-- Rotation button -->
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="enable_rotation_button"
-            android:icon="@drawable/ic_rotation"
-            android:title="@string/floating_rotation_button_title"
-            android:summary="@string/floating_rotation_button_summary"
-            android:defaultValue="true" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="navigation_gesture_category"
-        android:title="@string/navigation_gesture_category_title">
-
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="back_gesture_arrow"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/back_gesture_arrow_title"
-            android:summary="@string/back_gesture_arrow_summary"
-            android:defaultValue="true" />
-
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="back_gesture_haptic"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/back_gesture_haptic_title"
-            android:summary="@string/back_gesture_haptic_summary"
-            android:defaultValue="true" />
-
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="back_gesture_height"
-            android:icon="@drawable/ic_navigation"
-            android:title="@string/back_height_title"
-            android:summary="@string/back_height_summary"
-            android:defaultValue="0"
-            android:max="3"
-            settings:min="0"
-            settings:interval="1" />
-    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="gestures_screen_category"
@@ -262,59 +342,6 @@
             android:persistent="false" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="gestures_statusbar_category"
-        android:title="@string/ichthys_gestures_statusbar_category">
 
-        <lineageos.preference.LineageSystemSettingSwitchPreference
-            android:key="double_tap_sleep_gesture"
-            android:icon="@drawable/ic_double_tap"
-            android:title="@string/statusbar_doubletap_sleep_title"
-            android:summary="@string/statusbar_doubletap_sleep_summary"
-            android:defaultValue="true" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="status_bar_brightness_control"
-            android:icon="@drawable/ic_brightness_auto"
-            android:title="@string/status_bar_toggle_brightness_title"
-            android:summary="@string/status_bar_toggle_brightness_summary"
-            android:defaultValue="false" />
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="status_bar_brightness_control_lockscreen"
-            android:icon="@drawable/ic_brightness_auto"
-            android:title="@string/status_bar_toggle_brightness_lockscreen_title"
-            android:summary="@string/status_bar_toggle_brightness_lockscreen_summary"
-            android:defaultValue="false"
-            android:dependency="status_bar_brightness_control" />
-
-        <lineageos.preference.LineageSystemSettingListPreference
-            android:key="qs_quick_pulldown"
-            android:icon="@drawable/ic_arrow_down"
-            android:title="@string/status_bar_quick_qs_pulldown_title"
-            android:entries="@array/status_bar_quick_qs_pulldown_entries"
-            android:entryValues="@array/status_bar_quick_qs_pulldown_values"
-            android:defaultValue="0" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="qs_smart_pulldown"
-            android:icon="@drawable/ic_arrow_down"
-            android:title="@string/smart_pulldown_title"
-            android:entries="@array/smart_pulldown_entries"
-            android:entryValues="@array/smart_pulldown_values"
-            android:defaultValue="0" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="gestures_lockscreen_category"
-        android:title="@string/ichthys_gestures_lockscreen_category">
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="double_tap_sleep_lockscreen"
-            android:icon="@drawable/ic_double_tap"
-            android:title="@string/lockscreen_doubletap_sleep_title"
-            android:summary="@string/lockscreen_doubletap_sleep_summary"
-            android:defaultValue="true" />
-    </PreferenceCategory>
 
 </PreferenceScreen>

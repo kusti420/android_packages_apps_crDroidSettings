@@ -51,10 +51,28 @@ public class IchthysSystem extends SettingsPreferenceFragment {
     private static final String KEY_SOURCE = "crdroid_source";
     private static final String KEY_TELEGRAM = "crdroid_telegram";
 
+    private com.crdroid.settings.fragments.themes.NixConfigActions mNix;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (mNix == null || !mNix.onActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mNix != null) mNix.shutdown();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.ichthys_system);
+        // ichthys.nix import / export / generations (moved from Theme Studio, tracker#59).
+        mNix = new com.crdroid.settings.fragments.themes.NixConfigActions(this);
+        mNix.setup();
 
         // Charging control only exists when the Lineage Health binder is published, which needs
         // (a) the internal health sources compiled into org.lineageos.platform, (b) the

@@ -215,6 +215,17 @@ public class Buttons extends SettingsPreferenceFragment implements
             removePref(CATEGORY_NAV_GESTURE);
         }
 
+        // Recents style; the Slim options only apply to the Slim style (moved from Theme
+        // Studio with their rows, tracker#59).
+        final Preference recentsType = findPreference("recents_type");
+        if (recentsType != null) {
+            recentsType.setOnPreferenceChangeListener((pref, val) -> {
+                updateSlimRecents(Integer.parseInt((String) val));
+                return true;
+            });
+            updateSlimRecents(Settings.System.getIntForUser(resolver, "recents_type", 0,
+                    UserHandle.USER_CURRENT));
+        }
         // Three fingers swipe.
         mThreeFingersSwipeAction = initList(KEY_THREE_FINGERS_SWIPE, Action.fromSettings(resolver,
                 LineageSettings.System.KEY_THREE_FINGERS_SWIPE_ACTION, Action.NOTHING));
@@ -229,6 +240,13 @@ public class Buttons extends SettingsPreferenceFragment implements
                 mQuickPulldown.setEntryValues(R.array.status_bar_quick_qs_pulldown_values_rtl);
             }
             updateQuickPulldownSummary(mQuickPulldown.getIntValue(0));
+        }
+    }
+
+    private void updateSlimRecents(int recentsType) {
+        final Preference slim = findPreference("slim_recents");
+        if (slim != null) {
+            slim.setEnabled(recentsType == 2 /* Slim */);
         }
     }
 

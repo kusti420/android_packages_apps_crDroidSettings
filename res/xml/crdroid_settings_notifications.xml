@@ -40,12 +40,6 @@
         android:summary="@string/notification_row_transparency_summary"
         android:defaultValue="true" />
 
-    <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-        android:key="notification_row_transparency_lockscreen"
-        android:icon="@drawable/ic_chat_dashed"
-        android:title="@string/notification_row_transparency_lockscreen_title"
-        android:summary="@string/notification_row_transparency_lockscreen_summary"
-        android:defaultValue="true" />
 
     <com.crdroid.settings.preferences.SecureSettingSwitchPreference
         android:key="media_squiggle_animation"
@@ -138,44 +132,5 @@
 
     </PreferenceCategory>
 
-    <!-- How many notifications and notification icons each surface shows. -->
-    <PreferenceCategory
-        android:key="notification_counts_category"
-        android:title="@string/ichthys_notifications_counts_category">
-
-        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
-            android:key="statusbar_notif_count"
-            android:icon="@drawable/ic_counter"
-            android:title="@string/statusbar_notif_count_title"
-            android:summary="@string/statusbar_notif_count_summary"
-            android:defaultValue="false" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="ichthys_statusbar_notif_icons"
-            android:icon="@drawable/ic_counter"
-            android:title="@string/ichthys_statusbar_notif_icons_title"
-            android:entries="@array/ichthys_notif_icon_limit_entries"
-            android:entryValues="@array/ichthys_notif_icon_limit_values"
-            android:summary="%s"
-            android:defaultValue="-1" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="ichthys_lockscreen_max_notifs"
-            android:icon="@drawable/ic_counter"
-            android:title="@string/ichthys_lockscreen_max_notifs_title"
-            android:entries="@array/ichthys_lockscreen_max_notifs_entries"
-            android:entryValues="@array/ichthys_lockscreen_max_notifs_values"
-            android:summary="%s"
-            android:defaultValue="-1" />
-
-        <com.crdroid.settings.preferences.SystemSettingListPreference
-            android:key="ichthys_aod_notif_icons"
-            android:icon="@drawable/ic_counter"
-            android:title="@string/ichthys_aod_notif_icons_title"
-            android:entries="@array/ichthys_aod_notif_icons_entries"
-            android:entryValues="@array/ichthys_aod_notif_icons_values"
-            android:summary="%s"
-            android:defaultValue="-1" />
-    </PreferenceCategory>
 
 </PreferenceScreen>

@@ -25,7 +25,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
     xmlns:lineage="http://schemas.android.com/apk/res-auto"
-    android:title="@string/look_quick_settings_title">
+    android:title="@string/ichthys_hub_quicksettings_title">
 
     <!-- Tiles. Panel style, tile shape, labels and animation apply to the Grid tile layout; the
          Shoal honeycomb (Theme Studio > Quick settings tiles) draws its own circles. -->
@@ -40,6 +40,15 @@
             android:entries="@array/qs_panel_style_entries"
             android:entryValues="@array/qs_panel_style_values"
             android:defaultValue="0" />
+
+        <ListPreference
+            android:key="theme_studio_qs"
+            android:icon="@drawable/ic_qs_tile"
+            android:title="@string/theme_studio_qs_title"
+            android:summary="%s"
+            android:entries="@array/theme_studio_qs_entries"
+            android:entryValues="@array/theme_studio_qs_values"
+            android:persistent="false" />
 
         <com.crdroid.settings.preferences.SystemSettingListPreference
             android:key="qs_tile_shape"
@@ -95,13 +104,6 @@
             android:summary="@string/qs_layout_columns_rows_summary"
             android:fragment="com.crdroid.settings.fragments.quicksettings.LayoutSettings" />
 
-        <!-- Tile gradient and its colours -->
-        <Preference
-            android:key="gradient_settings"
-            android:icon="@drawable/ic_gradient"
-            android:title="@string/gradient_settings_title"
-            android:summary="@string/gradient_settings_summary"
-            android:fragment="com.crdroid.settings.fragments.ui.GradientSettings" />
     </PreferenceCategory>
 
     <!-- Panel -->
@@ -129,6 +131,27 @@
             android:defaultValue="0" />
     </PreferenceCategory>
 
+    <!-- Battery icon in the quick settings header. Rendered by SystemUI's QsHeader battery
+         (tracker#37); "Follow status bar" uses the status bar's style. -->
+    <PreferenceCategory
+        android:key="battery_qs_category"
+        android:title="@string/look_qs_battery_category">
+
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_battery_style"
+            android:title="@string/status_bar_battery_style_title"
+            android:entries="@array/qs_battery_style_entries"
+            android:entryValues="@array/qs_battery_style_values"
+            android:defaultValue="-1" />
+
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_show_battery_percent"
+            android:title="@string/status_bar_battery_percent_title"
+            android:entries="@array/qs_show_battery_percent_entries"
+            android:entryValues="@array/qs_show_battery_percent_values"
+            android:defaultValue="-1" />
+    </PreferenceCategory>
+
     <!-- What the panel shows and how it behaves -->
     <PreferenceCategory
          android:key="qs_misc_category"
@@ -142,12 +165,6 @@
             android:summary="@string/battery_estimate_summary"
             android:defaultValue="true" />
 
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="enable_lockscreen_quick_settings"
-            android:icon="@drawable/ic_lock_alert"
-            android:title="@string/lockscreen_quick_settings_title"
-            android:summary="@string/lockscreen_quick_settings_summary"
-            android:defaultValue="true" />
 
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="qs_tile_haptic"
@@ -156,15 +173,6 @@
             android:summary="@string/qs_tile_haptic_summary"
             android:defaultValue="true" />
 
-        <!-- Docked media player of the Shoal panel style: the strip above the footer buttons.
-             Backend: Settings.Secure, observed by SystemUI ShoalMediaDock.kt. The options are
-             hand-written in IchthysOptions (quickSettings.mediaDock.*). -->
-        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
-            android:key="ichthys_qs_header_weather"
-            android:icon="@drawable/ic_weather"
-            android:title="@string/ichthys_qs_header_weather_title"
-            android:summary="@string/ichthys_qs_header_weather_summary"
-            android:defaultValue="true" />
 
         <com.crdroid.settings.preferences.SecureSettingSwitchPreference
             android:key="ichthys_qs_media_dock_reserve"
@@ -260,6 +268,26 @@
             android:title="@string/qs_footer_settings_icon_title"
             android:defaultValue="true" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="qs_pulldown_category"
+        android:title="@string/qs_pulldown_category">
+
+        <lineageos.preference.LineageSystemSettingListPreference
+            android:key="qs_quick_pulldown"
+            android:icon="@drawable/ic_arrow_down"
+            android:title="@string/status_bar_quick_qs_pulldown_title"
+            android:entries="@array/status_bar_quick_qs_pulldown_entries"
+            android:entryValues="@array/status_bar_quick_qs_pulldown_values"
+            android:defaultValue="0" />
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_smart_pulldown"
+            android:icon="@drawable/ic_arrow_down"
+            android:title="@string/smart_pulldown_title"
+            android:entries="@array/smart_pulldown_entries"
+            android:entryValues="@array/smart_pulldown_values"
+            android:defaultValue="0" />
     </PreferenceCategory>
 
 </PreferenceScreen>
