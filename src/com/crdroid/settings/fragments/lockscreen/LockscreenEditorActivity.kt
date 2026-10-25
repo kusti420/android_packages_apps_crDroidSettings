@@ -122,6 +122,8 @@ class LockscreenEditorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // "wallpaper=koi": set a depth wallpaper on the lock screen straight away.
+        intent.getStringExtra(EXTRA_WALLPAPER)?.let { setDepthWallpaper(this, it) }
         setContent { SettingsTheme { LockscreenEditor(onDone = { finish() }) } }
     }
 }
@@ -187,6 +189,33 @@ private const val KEY_ROTATION = "ichthys_clock_rotation"
 private const val KEY_LOOK = "ichthys_lockscreen_look"
 private const val KEY_LOOKS = "ichthys_lockscreen_looks"
 
+const val EXTRA_WALLPAPER = "wallpaper"
+
+/** Wallpapers painted for the depth lock screen: a clear subject to stand in front of the clock. */
+private val DEPTH_WALLPAPERS =
+    listOf(Triple("koi", R.drawable.ichthys_wallpaper_koi, R.string.ichthys_wallpaper_koi))
+
+/**
+ * Sets the depth wallpaper [id] on the lock screen only (the home screen keeps its own). IchthysDepth
+ * then finds its subject, and SystemUI draws it over the clock.
+ */
+fun setDepthWallpaper(context: Context, id: String) {
+    val res = DEPTH_WALLPAPERS.firstOrNull { it.first == id }?.second ?: return
+    Thread {
+            try {
+                context.resources.openRawResource(res).use {
+                    WallpaperManager.getInstance(context)
+                        .setStream(it, null, true, WallpaperManager.FLAG_LOCK)
+                }
+                // The lock screen's depth is what these are for.
+                putSecure(context, KEY_DEPTH, 1)
+            } catch (e: Exception) {
+                android.util.Log.w("LockscreenEditor", "wallpaper $id not set", e)
+            }
+        }
+        .start()
+}
+
 /** KeyguardCustomClockView's defaults: the clock's top padding and its margin setting. */
 private const val BASE_TOP_DP = 72
 private const val DEFAULT_MARGIN_TOP = 15
@@ -202,7 +231,7 @@ fun LockscreenEditor(onDone: () -> Unit) {
     var saved by remember { mutableStateOf(readLooks(context)) }
     var look by remember { mutableStateOf(currentLook(context, saved)) }
     var guide by remember { mutableStateOf(false) }
-    val pictures = remember { LockPictures.load(context, screenW, screenH) }
+    var pictures by remember { mutableStateOf(LockPictures.load(context, screenW, screenH)) }
     val accent = MaterialTheme.colorScheme.primary
     val all = BUILT_IN + saved
     val base = all.firstOrNull { it.id == look.id }
@@ -381,6 +410,21 @@ fun LockscreenEditor(onDone: () -> Unit) {
                                 FaceThumb(look.style, look.copy(fill = mode), pictures)
                             }
                         }
+                }
+            }
+            EditorRow(stringResource(R.string.ichthys_editor_wallpapers)) {
+                DEPTH_WALLPAPERS.forEach { (id, res, label) ->
+                    Chip(stringResource(label), false, {
+                        setDepthWallpaper(context, id)
+                        pictures = LockPictures.load(context, screenW, screenH)
+                    }) {
+                        Image(
+                            androidx.compose.ui.res.painterResource(res),
+                            null,
+                            Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
                 }
             }
             EditorRow(stringResource(R.string.ichthys_depth_title)) {

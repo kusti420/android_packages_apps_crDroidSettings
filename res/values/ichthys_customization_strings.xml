@@ -209,4 +209,6 @@
     <string name="ichthys_editor_wallpaper">Wallpaper</string>
     <string name="ichthys_editor_looks">Looks</string>
     <string name="ichthys_editor_face">Face</string>
+    <string name="ichthys_editor_wallpapers">Depth wallpapers</string>
+    <string name="ichthys_wallpaper_koi">Koi pond</string>
 </resources>
