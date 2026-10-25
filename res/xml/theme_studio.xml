@@ -207,8 +207,12 @@
             android:key="lockscreen_custom_clock_style"
             android:icon="@drawable/ic_font"
             android:title="@string/lockscreen_custom_clock_style_title"
-            android:summary="@string/lockscreen_custom_clock_style_summary"
-            android:fragment="com.crdroid.settings.fragments.lockscreen.CustomClockPreview" />
+            android:summary="@string/ichthys_editor_open">
+            <!-- IchthysOS (tracker#58): the lock screen editor, whose preview is the real face. -->
+            <intent
+                android:targetPackage="com.android.settings"
+                android:targetClass="com.crdroid.settings.fragments.lockscreen.LockscreenEditorActivity" />
+        </Preference>
 
         <!-- The one fingerprint page: icon and animation packs, press effects, pressed icon,
              idle icon, result effects, haptics, ripple. -->

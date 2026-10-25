@@ -305,7 +305,7 @@ fun LockscreenEditor(onDone: () -> Unit) {
                             transformOrigin = TransformOrigin(0f, 0f)
                         }
                 ) {
-                    LockPreview(look, pictures, guide, accent)
+                    LockPreview(look, pictures, guide, accent, details = details != 0)
                 }
             }
         }
@@ -484,6 +484,7 @@ private fun LockPreview(
     guide: Boolean,
     accent: Color,
     rails: Boolean = true,
+    details: Boolean = false,
 ) {
     val density = LocalDensity.current
     val dm = LocalContext.current.resources.displayMetrics
@@ -513,6 +514,8 @@ private fun LockPreview(
         val top = with(density) { (40 + BASE_TOP_DP).dp.toPx() } + DEFAULT_MARGIN_TOP + look.dy
         ClockFace(
             look.style,
+            look.fill,
+            details,
             Modifier.fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .offset { IntOffset(look.dx.roundToInt(), top.roundToInt()) }
@@ -534,7 +537,7 @@ private fun LockPreview(
 
 /** A face, inflated from the picker's own layout, as the lock screen would show it. */
 @Composable
-private fun ClockFace(style: Int, modifier: Modifier) {
+private fun ClockFace(style: Int, fill: Int, details: Boolean, modifier: Modifier) {
     AndroidView(
         factory = { ctx -> FrameLayout(ctx) },
         update = { frame ->
@@ -544,9 +547,24 @@ private fun ClockFace(style: Int, modifier: Modifier) {
                 val layout = ClockUtils.CLOCK_LAYOUTS.getOrNull(style) ?: return@AndroidView
                 LayoutInflater.from(frame.context).inflate(layout, frame, true)
             }
+            // The look's own fill and status line, not whatever the lock screen has now.
+            forEachDepthFace(frame) {
+                it.previewFill = fill
+                it.previewDetails = details
+            }
         },
         modifier = modifier,
     )
+}
+
+private fun forEachDepthFace(
+    view: android.view.View,
+    action: (com.android.settingslib.ichthys.clock.DepthClockView) -> Unit,
+) {
+    when (view) {
+        is com.android.settingslib.ichthys.clock.DepthClockView -> action(view)
+        is ViewGroup -> for (i in 0 until view.childCount) forEachDepthFace(view.getChildAt(i), action)
+    }
 }
 
 /**

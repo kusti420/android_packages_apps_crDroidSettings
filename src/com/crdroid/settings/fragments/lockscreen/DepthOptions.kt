@@ -201,7 +201,7 @@ private fun FillThumb(mode: Int, accent: Color) {
         drawRect(Color(0xFF0B1418))
         when (mode) {
             0 -> drawDigits("13", Color.White)
-            1 -> drawDigits("13", Color.White, gradientTop = accent)
+            1 -> drawDigits("13", Color.White, gradientTop = Color(0xFF9FE7DD))
             else -> {
                 drawDigits("13", Color(0xFF04090B), outline = Color.White.copy(alpha = 0.3f))
                 // Glowing touch heat seen through the digits (the thumb's arc, low on the screen).
