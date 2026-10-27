@@ -76,6 +76,20 @@
         android:key="weather_lockscreen_category"
         android:title="@string/weather_lockscreen_category">
 
+        <!-- IchthysOS: where the lock screen weather sits, what it shows, its icons and size, in
+             the lock screen editor's Weather sheet (live preview). -->
+        <Preference
+            android:key="ichthys_lockscreen_weather_style"
+            android:icon="@drawable/ic_weather"
+            android:title="@string/ichthys_weather_lockscreen_style_title"
+            android:summary="@string/ichthys_weather_lockscreen_style_summary">
+            <intent
+                android:targetPackage="com.android.settings"
+                android:targetClass="com.crdroid.settings.fragments.lockscreen.editor2.LockscreenEditor2Activity">
+                <extra android:name="sheet" android:value="weather" />
+            </intent>
+        </Preference>
+
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="lockscreen_weather_location"
             android:icon="@drawable/ic_map_marker"

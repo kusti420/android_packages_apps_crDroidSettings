@@ -84,7 +84,13 @@ const val DEPTH_CLOCK_STYLE = 80
 fun DepthOptions(selectedClock: Int, wallpaper: ImageBitmap?) {
     val context = LocalContext.current
     var depth by remember { mutableIntStateOf(secureInt(context, KEY_DEPTH, 0)) }
-    var fill by remember { mutableIntStateOf(secureInt(context, KEY_FILL, 2)) }
+    // IchthysOS: the default DepthClockView draws with, so an unset fill shows what is drawn.
+    var fill by remember {
+        mutableIntStateOf(
+            secureInt(context, KEY_FILL,
+                com.android.settingslib.ichthys.clock.DepthClockView.FILL_SOLID)
+        )
+    }
     val accent = MaterialTheme.colorScheme.primary
     Column(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
         OptionRow(stringResource(R.string.ichthys_depth_title)) {

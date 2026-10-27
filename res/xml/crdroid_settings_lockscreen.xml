@@ -37,7 +37,7 @@
         android:summary="@string/ichthys_editor_summary">
         <intent
             android:targetPackage="com.android.settings"
-            android:targetClass="com.crdroid.settings.fragments.lockscreen.LockscreenEditorActivity" />
+            android:targetClass="com.crdroid.settings.fragments.lockscreen.editor2.LockscreenEditor2Activity" />
     </Preference>
     <!-- The one fingerprint page: icon and animation packs, press effects, pressed icon,
          idle icon, result effects, haptics, ripple. -->

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- IchthysOS lock screen editor v2 (tracker#58). -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Bars -->
+    <string name="ichthys_ed2_ideas">Ideas</string>
+    <string name="ichthys_ed2_wallpaper">Wallpaper</string>
+    <string name="ichthys_ed2_clock">Clock</string>
+    <string name="ichthys_ed2_looks">Looks</string>
+    <string name="ichthys_ed2_discard_title">Discard your changes?</string>
+    <string name="ichthys_ed2_discard">Discard</string>
+    <string name="ichthys_ed2_keep_editing">Keep editing</string>
+    <string name="ichthys_ed2_idea_open">Idea: <xliff:g id="name">%1$s</xliff:g></string>
+
+    <!-- Clock sheet -->
+    <string name="ichthys_ed2_tab_style">Style</string>
+    <string name="ichthys_ed2_tab_colour">Colour</string>
+    <string name="ichthys_ed2_tab_depth">Depth</string>
+    <string name="ichthys_ed2_tab_size">Size</string>
+    <string name="ichthys_ed2_faces">Faces</string>
+    <string name="ichthys_ed2_font">Font</string>
+    <string name="ichthys_ed2_font_tall">Tall</string>
+    <string name="ichthys_ed2_font_flex">Flex</string>
+    <string name="ichthys_ed2_font_wide">Wide</string>
+    <string name="ichthys_ed2_font_thin">Thin</string>
+    <string name="ichthys_ed2_font_serif">Serif</string>
+    <string name="ichthys_ed2_font_mono">Mono</string>
+    <string name="ichthys_ed2_digits">Digits</string>
+    <string name="ichthys_ed2_colour_wallpaper">From the wallpaper</string>
+    <string name="ichthys_ed2_colour_custom">Your own colour</string>
+    <string name="ichthys_ed2_hue">Hue</string>
+    <string name="ichthys_ed2_saturation">Strength</string>
+    <string name="ichthys_ed2_opacity">Opacity</string>
+    <string name="ichthys_ed2_size">Size</string>
+    <string name="ichthys_ed2_rotation">Turn</string>
+    <string name="ichthys_ed2_depth_off">Off</string>
+    <string name="ichthys_ed2_depth_overlap">Overlap</string>
+    <string name="ichthys_ed2_depth_xray">X-ray</string>
+    <string name="ichthys_ed2_depth_shape">Shape</string>
+    <string name="ichthys_ed2_depth_no_subject">No subject found in this wallpaper yet. Depth needs a person or object in front (it is found a few seconds after the wallpaper is set).</string>
+    <string name="ichthys_ed2_shape">Shape</string>
+    <string name="ichthys_ed2_shape_stretch">Stretch</string>
+    <string name="ichthys_ed2_shape_tuck">Tuck</string>
+    <string name="ichthys_ed2_shape_follow">Follow</string>
+    <string name="ichthys_ed2_shape_stretch_summary">The digits get taller or shorter so the clock fills the space above the subject and ends just above it.</string>
+    <string name="ichthys_ed2_shape_tuck_summary">Like Stretch, but the bottom of the clock tucks behind the subject.</string>
+    <string name="ichthys_ed2_shape_follow_summary">Each digit gets its own height from the outline under it, at most a fifth apart.</string>
+
+    <!-- Date line -->
+    <string name="ichthys_ed2_date_shows">Shows</string>
+    <string name="ichthys_ed2_date">Date</string>
+    <string name="ichthys_ed2_details">Details</string>
+    <string name="ichthys_ed2_hidden">Hidden</string>
+    <string name="ichthys_ed2_position">Position</string>
+    <string name="ichthys_ed2_above">Above</string>
+    <string name="ichthys_ed2_below">Below</string>
+    <string name="ichthys_ed2_align">Align</string>
+    <string name="ichthys_ed2_left">Left</string>
+    <string name="ichthys_ed2_centre">Centre</string>
+    <string name="ichthys_ed2_right">Right</string>
+
+    <!-- Notifications and shortcuts -->
+    <string name="ichthys_ed2_notifications">Notifications</string>
+    <string name="ichthys_ed2_notif_show">Show on lock screen</string>
+    <string name="ichthys_ed2_notif_content">Show content</string>
+    <string name="ichthys_ed2_notif_fixed">Notifications always appear under the clock; their place can\'t be moved.</string>
+    <string name="ichthys_ed2_notif_sample_title">Messages</string>
+    <string name="ichthys_ed2_notif_sample_text">2 new messages</string>
+    <string name="ichthys_ed2_notif_hidden">Contents hidden</string>
+    <string name="ichthys_ed2_shortcut_left">Left shortcut</string>
+    <string name="ichthys_ed2_shortcut_right">Right shortcut</string>
+    <string name="ichthys_ed2_none">None</string>
+    <string name="ichthys_ed2_shortcuts_unavailable">The lock screen\'s shortcuts can\'t be read right now.</string>
+
+    <!-- Weather (IchthysOS lock screen weather) -->
+    <string name="ichthys_ed2_weather">Weather</string>
+    <string name="ichthys_ed2_weather_show">Show weather</string>
+    <string name="ichthys_ed2_weather_temp">Temperature</string>
+    <string name="ichthys_ed2_weather_condition">Condition</string>
+    <string name="ichthys_ed2_weather_highlow">High / low</string>
+    <string name="ichthys_ed2_weather_location">Location</string>
+    <string name="ichthys_ed2_weather_by_date">By the date</string>
+    <string name="ichthys_ed2_weather_under">Under clock</string>
+    <string name="ichthys_ed2_weather_top_left">Top left</string>
+    <string name="ichthys_ed2_weather_top_right">Top right</string>
+    <string name="ichthys_ed2_weather_icons">Icons</string>
+    <string name="ichthys_ed2_weather_icons_follow">Weather app</string>
+    <string name="ichthys_ed2_weather_no_data">No weather yet: turn it on in the weather settings. Until then the preview shows an example.</string>
+    <string name="ichthys_ed2_weather_settings">Weather settings</string>
+    <string name="ichthys_ed2_weather_sample">Partly cloudy</string>
+    <string name="ichthys_ed2_weather_sample_city">Your city</string>
+    <string name="ichthys_ed2_idea_weather">Weather</string>
+    <string name="ichthys_ed2_idea_forecast">Forecast</string>
+    <string name="ichthys_weather_lockscreen_style_title">Place and style on the lock screen</string>
+    <string name="ichthys_weather_lockscreen_style_summary">By the date, under the clock or in a corner; what it shows, icons and size</string>
+
+    <!-- Wallpaper and looks -->
+    <string name="ichthys_ed2_wallpaper_current">Current</string>
+    <string name="ichthys_ed2_wallpaper_note">The wallpaper is set when you tap Apply.</string>
+    <string name="ichthys_ed2_delete">Delete</string>
+    <string name="ichthys_ed2_look_pond">Pond</string>
+    <string name="ichthys_ed2_look_heat">Touch heat</string>
+    <string name="ichthys_ed2_look_stretch">Stretch</string>
+    <string name="ichthys_ed2_look_shoal">Shoal Lattice</string>
+    <string name="ichthys_ed2_look_oneui">One UI Stacked</string>
+    <string name="ichthys_ed2_look_typo">Typographic</string>
+    <string name="ichthys_ed2_look_matrix">Night Matrix</string>
+
+    <!-- Ideas -->
+    <string name="ichthys_ed2_ideas_count"><xliff:g id="count">%1$d</xliff:g> ideas</string>
+    <string name="ichthys_ed2_ideas_current">Lock wallpaper</string>
+    <string name="ichthys_ed2_ideas_photo">Choose photo</string>
+    <string name="ichthys_ed2_ideas_make">Make ideas</string>
+    <string name="ichthys_ed2_ideas_working">Looking at your photo…</string>
+    <string name="ichthys_ed2_ideas_no_subject">No person or object found, so these ideas have no depth.</string>
+    <string name="ichthys_ed2_idea_stretch">Stretch</string>
+    <string name="ichthys_ed2_idea_tuck">Tuck</string>
+    <string name="ichthys_ed2_idea_follow">Follow</string>
+    <string name="ichthys_ed2_idea_behind">Behind the head</string>
+    <string name="ichthys_ed2_idea_xray">X-ray heat</string>
+    <string name="ichthys_ed2_idea_deep">Deep</string>
+    <string name="ichthys_ed2_idea_gradient">Gradient</string>
+    <string name="ichthys_ed2_idea_thin">Thin</string>
+    <string name="ichthys_ed2_idea_serif">Serif</string>
+    <string name="ichthys_ed2_idea_mono">Mono</string>
+    <string name="ichthys_ed2_idea_wide">Wide</string>
+    <string name="ichthys_ed2_idea_date_below">Date below</string>
+    <string name="ichthys_ed2_idea_details">Details</string>
+    <string name="ichthys_ed2_idea_side">To the side</string>
+    <string name="ichthys_ed2_idea_classic">Classic</string>
+    <string name="ichthys_ed2_idea_heat">Touch heat</string>
+</resources>

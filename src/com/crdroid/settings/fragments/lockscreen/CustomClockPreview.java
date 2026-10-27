@@ -118,9 +118,10 @@ public class CustomClockPreview extends SettingsPreferenceFragment {
         View browseButton = clockPreviewPref.findViewById(R.id.browse_clocks_button);
         if (browseButton != null) {
             browseButton.setOnClickListener(v -> {
-                // IchthysOS (tracker#58): the lock screen editor; every face is in its Face row.
+                // IchthysOS (tracker#58): the lock screen editor v2; every face is in its clock sheet.
                 startActivity(new android.content.Intent(getContext(),
-                        LockscreenEditorActivity.class));
+                        com.crdroid.settings.fragments.lockscreen.editor2
+                                .LockscreenEditor2Activity.class));
             });
         }
 

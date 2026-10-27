@@ -102,4 +102,12 @@
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:elevation">0dp</item>
     </style>
+
+    <!-- IchthysOS: the lock screen editor zooms out of the lock screen itself; no splash or
+         preview window in front of that (the Settings icon splash flashed before it). -->
+    <style name="Theme.Ichthys.LockEditor" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <item name="android:windowSplashScreenBackground">@android:color/black</item>
+    </style>
 </resources>

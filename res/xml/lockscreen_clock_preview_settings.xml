@@ -63,13 +63,15 @@
         android:summary="@string/lockscreen_custom_clock_aod_anim_summary"
         android:defaultValue="true" />
 
+    <!-- IchthysOS: the lock screen editor moves the clock from -10 % to +45 % of the screen's
+         height (about -225 .. +1095 px here); the slider covers that, so it never clamps. -->
     <com.crdroid.settings.preferences.SecureSettingSeekBarPreference
         android:key="lock_screen_custom_clock_margin_top"
         android:title="@string/lockscreen_custom_clock_frame_margin_top_title"
         android:summary="@string/lockscreen_custom_clock_frame_margin_top_summary"
         android:defaultValue="15"
-        android:max="100"
-        settings:min="0" 
+        android:max="1100"
+        settings:min="-250" 
         settings:units="@string/unit_pixels" />
 
     <!-- IchthysOS: options for the drawn "Shoal" faces (Shoal Lattice ... Word Grid). -->

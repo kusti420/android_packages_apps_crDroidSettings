@@ -40,6 +40,7 @@ import android.graphics.SweepGradient
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.SystemClock
+import android.provider.Settings
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -61,6 +62,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
+import org.json.JSONObject
 
 /**
  * IchthysOS (tracker#59): list settings choose from pictures instead of words. When a list row
@@ -106,7 +108,23 @@ object OptionPreviews {
         val wall2 = ctx.getColor(android.R.color.system_accent3_400)
         val green = 0xFF3DDC84.toInt()
         val red = 0xFFFF4D4D.toInt()
-        val seedColors: WallpaperColors? = try {
+        /**
+         * IchthysOS: the seed the system palette really uses when the colour source is "preset"
+         * (a custom accent, Abyss, …): the system_palette colour of the theme JSON. Null when the
+         * palette follows the wallpaper.
+         */
+        val presetSeed: Int? = try {
+            val o = JSONObject(Settings.Secure.getString(ctx.contentResolver,
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES) ?: "{}")
+            val palette = o.optString("android.theme.customization.system_palette")
+            if (o.optString("android.theme.customization.color_source") == "preset" &&
+                palette.isNotEmpty()) {
+                Color.parseColor(if (palette.startsWith("#")) palette else "#$palette")
+            } else null
+        } catch (e: Exception) {
+            null
+        }
+        val seedColors: WallpaperColors? = if (presetSeed != null) null else try {
             WallpaperManager.getInstance(ctx).getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
         } catch (e: RuntimeException) {
             null
@@ -459,6 +477,9 @@ object OptionPreviews {
                 val rad = gap * 0.32f
                 if (v == "tonal") {
                     c.drawRoundRect(tmp, rad, rad, fillPaint(alpha(p.accent, 0.2f)))
+                } else if (v == "stock") {
+                    // IchthysOS: plain Monet surfaces: quiet neutral fills, no outline.
+                    c.drawRoundRect(tmp, rad, rad, fillPaint(alpha(p.fg, 0.1f)))
                 } else {
                     c.drawRoundRect(tmp, rad, rad, strokePaint(alpha(p.fg, 0.4f), gap * 0.035f))
                 }
@@ -557,7 +578,9 @@ object OptionPreviews {
             val style = try { ThemeStyle.valueOf(v) } catch (e: RuntimeException) {
                 ThemeStyle.TONAL_SPOT
             }
-            val scheme = p.seedColors?.let { ColorScheme(it, p.dark, style) }
+            // IchthysOS: the preset seed first, so a custom accent previews its own palettes.
+            val scheme = p.presetSeed?.let { ColorScheme(it, p.dark, style) }
+                ?: p.seedColors?.let { ColorScheme(it, p.dark, style) }
                 ?: ColorScheme(p.accent, p.dark, style)
             val r = min(b.width(), b.height()) * 0.36f
             val cx = b.centerX()
