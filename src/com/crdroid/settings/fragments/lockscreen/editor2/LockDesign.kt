@@ -27,6 +27,7 @@ import com.android.internal.util.crdroid.ThemeUtils
 import com.android.settings.R
 import com.android.settingslib.ichthys.clock.DepthClockView
 import com.android.settingslib.ichthys.clock.LockWeather
+import com.android.settingslib.ichthys.sky.LivingSky
 import com.crdroid.settings.utils.SystemUtils
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -122,6 +123,10 @@ data class LockDesign(
     /** Not edited here (the Weather page has them); kept so previews match the lock screen. */
     val weatherWind: Boolean = false,
     val weatherHumidity: Boolean = false,
+    // IchthysOS Living Sky (LivingSky's keys): the photo's sky follows the time and the weather.
+    val livingSky: Boolean = false,
+    val skyWeather: Boolean = true,
+    val skyIntensity: Int = 100,
 ) {
     val isDepthFace: Boolean
         get() = style == DEPTH_STYLE
@@ -183,6 +188,7 @@ data class LockDesign(
             .put("weatherHighLow", weatherHighLow)
             .put("weatherIcons", weatherIcons)
             .put("weatherSize", weatherSize)
+            .put("livingSky", livingSky)
 
     /** [o] (a saved look; v1 looks have only the first few fields) over this design. */
     fun withLook(o: JSONObject): LockDesign =
@@ -213,6 +219,8 @@ data class LockDesign(
             weatherHighLow = o.optBoolean("weatherHighLow", weatherHighLow),
             weatherIcons = o.optString("weatherIcons", weatherIcons),
             weatherSize = o.optInt("weatherSize", weatherSize),
+            // Looks saved before Living Sky keep it as it is.
+            livingSky = o.optBoolean("livingSky", livingSky),
         )
 }
 
@@ -261,6 +269,7 @@ object LockStore {
     fun read(context: Context, start: String = "", end: String = ""): LockDesign {
         val margin = int(context, LockKeys.MARGIN_TOP, LockKeys.DEFAULT_MARGIN_TOP)
         val w = LockWeather.readOptions(context)
+        val sky = LivingSky.readOptions(context.contentResolver, UserHandle.USER_CURRENT)
         return LockDesign(
             style = int(context, LockKeys.STYLE, 0),
             fill = int(context, LockKeys.FILL, DepthClockView.FILL_SOLID),
@@ -293,6 +302,9 @@ object LockStore {
             weatherSize = w.size,
             weatherWind = w.wind,
             weatherHumidity = w.humidity,
+            livingSky = sky.enabled,
+            skyWeather = sky.weather,
+            skyIntensity = sky.intensity,
         )
     }
 
@@ -345,6 +357,10 @@ object LockStore {
         if (draft.weather != original.weather) {
             putSys(context, LockWeather.KEY_ENABLED, b(draft.weather))
         }
+        // IchthysOS Living Sky; SystemUI follows these live. Its switch last, like the weather's.
+        i(LivingSky.KEY_INTENSITY, draft.skyIntensity, original.skyIntensity)
+        i(LivingSky.KEY_WEATHER, b(draft.skyWeather), b(original.skyWeather))
+        i(LivingSky.KEY_ENABLED, b(draft.livingSky), b(original.livingSky))
         if (draft.look != original.look) put(context, LockKeys.LOOK, draft.look)
         if (draft.shortcutStart != original.shortcutStart) {
             LockShortcuts.select(context, LockShortcuts.SLOT_START, draft.shortcutStart)

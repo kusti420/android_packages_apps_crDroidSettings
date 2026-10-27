@@ -33,7 +33,9 @@ import android.os.UserHandle
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import com.android.settingslib.ichthys.clock.DepthSource
 import com.android.settingslib.ichthys.clock.SubjectOutline
+import com.android.settingslib.ichthys.sky.LivingSky
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
 import kotlin.math.min
@@ -47,6 +49,9 @@ import kotlin.math.roundToInt
  * - [outline]: the subject's top outline in full screen pixels (the Shape mode, the Ideas).
  * - [palette]: colours the clock can take from the picture; [darkBehindClock]: the area above the
  *   subject is dark, so light ink reads there.
+ * - IchthysOS Living Sky: [sky] (the sky's coverage in alpha, the backdrop's size), [land] (the
+ *   rest, for the weather's far layers) and [skyInfo] (whether Living Sky can grade it, and how);
+ *   null while IchthysDepth hasn't found the sky yet.
  */
 class LockPicture(
     val backdrop: ImageBitmap?,
@@ -56,7 +61,16 @@ class LockPicture(
     val darkBehindClock: Boolean,
     /** The half-size picture itself, for the Ideas' segmentation of a not-yet-wallpaper. */
     val source: Bitmap?,
+    val sky: Bitmap? = null,
+    val land: Bitmap? = null,
+    val skyInfo: LivingSky.SkyInfo? = null,
+    /** The subject's coverage (alpha), the backdrop's size, for the graded cut-out. */
+    val cutoutMask: Bitmap? = null,
 ) {
+    /** Living Sky can grade this picture. */
+    val livingSky: Boolean
+        get() = sky != null && source != null && skyInfo?.hasSky == true
+
     companion object {
         val EMPTY = LockPicture(null, null, null, emptyList(), true, null)
     }
@@ -66,6 +80,8 @@ object LockPictures {
     private const val TAG = "LockEditor2"
     private const val MASKS = "content://org.ichthys.depth/mask"
     private const val SEGMENT = "content://org.ichthys.depth.segment"
+    /** IchthysOS Living Sky: IchthysDepth's sky masks (MaskProvider), like [MASKS]. */
+    private const val SKIES = LivingSky.SKY_URI
 
     /**
      * The current lock wallpaper (or the home one when the lock screen has none). Its mask comes
@@ -91,23 +107,27 @@ object LockPictures {
                     val back = crop(pic, region, w / 2, h / 2)
                     val key = "L$lockId" + "S" +
                         wm.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, user)
-                    val mask =
+                    fun open(base: String): Bitmap? =
                         try {
                             context.contentResolver
-                                .openFileDescriptor(Uri.parse("$MASKS/$user/$key"), "r")
+                                .openFileDescriptor(Uri.parse("$base/$user/$key"), "r")
                                 ?.use { BitmapFactory.decodeFileDescriptor(it.fileDescriptor) }
                         } catch (e: Exception) {
                             null
                         }
-                    val cutMask =
-                        mask?.let {
-                            val sx = it.width.toFloat() / pic.width
-                            val sy = it.height.toFloat() / pic.height
-                            crop(it, Rect((region.left * sx).toInt(), (region.top * sy).toInt(),
-                                (region.right * sx).toInt(), (region.bottom * sy).toInt()),
-                                w / 2, h / 2)
-                        }
-                    build(back, cutMask, w, h)
+                    fun cut(m: Bitmap): Bitmap {
+                        val sx = m.width.toFloat() / pic.width
+                        val sy = m.height.toFloat() / pic.height
+                        return crop(m, Rect((region.left * sx).toInt(), (region.top * sy).toInt(),
+                            (region.right * sx).toInt(), (region.bottom * sy).toInt()),
+                            w / 2, h / 2)
+                    }
+                    val cutMask = open(MASKS)?.let { cut(it) }
+                    // Opening it also starts it (MaskProvider notifies SKIES/<user> when made).
+                    val skyMask =
+                        if (LivingSky.readOptions(context.contentResolver, user).enabled ||
+                            wantSky) open(SKIES)?.let { cut(it) } else null
+                    build(back, cutMask, w, h, skyMask)
                 }
             }
         } catch (e: Exception) {
@@ -146,23 +166,44 @@ object LockPictures {
         }
 
     /**
-     * [picture] with its subject found by IchthysDepth's segment call (U²-Netp, ~4 s). The same
-     * picture without a cut-out when IchthysDepth can't (missing, or no subject). Blocking.
+     * IchthysOS Living Sky: ask for the current wallpaper's sky even while Living Sky is off (the
+     * editor's Wallpaper sheet, to say whether the photo has one). Set before [current].
+     */
+    @Volatile var wantSky = false
+
+    /**
+     * [picture] with its subject found by IchthysDepth's segment call (U²-Netp, ~4 s), and, IchthysOS
+     * Living Sky, its sky (the "sky" call returns both from one run). The same picture without a
+     * cut-out when IchthysDepth can't (missing, or no subject). Blocking.
      */
     fun withSubject(context: Context, picture: LockPicture, w: Int, h: Int): LockPicture {
+        // The current wallpaper's masks come from MaskProvider (its sky too, see [wantSky]).
         if (picture.cutout != null) return picture
         val src = picture.source ?: return picture
         return try {
             val small = scaleToLongSide(src, 640)
             val out = ByteArrayOutputStream()
             small.compress(Bitmap.CompressFormat.JPEG, 90, out)
-            val result =
-                context.contentResolver.call(Uri.parse(SEGMENT), "segment", null,
-                    Bundle().apply { putByteArray("image", out.toByteArray()) })
-            val bytes = result?.getByteArray("mask") ?: return picture
-            val mask = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return picture
-            val full = Bitmap.createScaledBitmap(mask, src.width, src.height, true)
-            build(src, full, w, h)
+            val image = out.toByteArray()
+            fun call(method: String): Bundle? =
+                context.contentResolver.call(Uri.parse(SEGMENT), method, null,
+                    Bundle().apply { putByteArray("image", image) })
+            fun decode(bytes: ByteArray?): Bitmap? =
+                bytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+                    ?.let { Bitmap.createScaledBitmap(it, src.width, src.height, true) }
+            // An IchthysDepth without the sky call answers null: the subject alone then.
+            val both = try { call("sky") } catch (e: Exception) { null }
+            val mask: Bitmap?
+            val sky: Bitmap?
+            if (both != null) {
+                mask = decode(both.getByteArray("subject"))
+                sky = decode(both.getByteArray("mask"))
+            } else {
+                mask = decode(call("segment")?.getByteArray("mask"))
+                sky = null
+            }
+            if (mask == null && sky == null) return picture
+            build(src, mask, w, h, sky)
         } catch (e: Exception) {
             Log.w(TAG, "no subject from IchthysDepth", e)
             picture
@@ -173,10 +214,13 @@ object LockPictures {
      * Cut-out, outline and palette for [back] (half screen size) and its [mask] (same size, alpha =
      * subject; null: none). A mask covering almost nothing counts as none, like SystemUI's.
      */
-    private fun build(back: Bitmap, mask: Bitmap?, w: Int, h: Int): LockPicture {
+    private fun build(back: Bitmap, mask: Bitmap?, w: Int, h: Int, sky: Bitmap? = null): LockPicture {
         var outline = mask?.let { SubjectOutline.fromMask(it, w, h) }
         var cut: Bitmap? = null
-        if (mask != null && outline != null && coverage(mask) >= 0.01f) {
+        // IchthysOS: the same test SystemUI's lock screen makes (DepthSource): only a real
+        // subject stands in front of the clock.
+        val real = mask != null && DepthSource.isRealSubject(mask, back).first
+        if (mask != null && outline != null && coverage(mask) >= 0.01f && real) {
             cut = Bitmap.createBitmap(back.width, back.height, Bitmap.Config.ARGB_8888)
             val c = Canvas(cut)
             val paint = Paint(Paint.FILTER_BITMAP_FLAG)
@@ -186,7 +230,24 @@ object LockPictures {
         } else {
             outline = null
         }
+        // IchthysOS Living Sky: the sky as SystemUI sees it (LivingSky.analyse), and the land.
+        val skyInfo = sky?.let { LivingSky.analyse(back, it) }
+        // No real subject but a crisp skyline: the clock stays above it, as on the lock screen.
+        if (outline == null && sky != null && skyInfo?.hasSky == true) {
+            outline = DepthSource.skyline(sky, back, w, h)
+        }
         val dark = darkAbove(back, outline)
+        val land =
+            sky?.takeIf { skyInfo?.hasSky == true }?.let {
+                Bitmap.createBitmap(back.width, back.height, Bitmap.Config.ALPHA_8).also { l ->
+                    val c = Canvas(l)
+                    c.drawColor(Color.BLACK)
+                    c.drawBitmap(it, null, Rect(0, 0, back.width, back.height),
+                        Paint(Paint.FILTER_BITMAP_FLAG).apply {
+                            xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT)
+                        })
+                }
+            }
         return LockPicture(
             back.asImageBitmap(),
             cut?.asImageBitmap(),
@@ -194,6 +255,10 @@ object LockPictures {
             palette(back, mask, dark),
             dark,
             back,
+            sky = sky,
+            land = land,
+            skyInfo = skyInfo,
+            cutoutMask = cut,
         )
     }
 

@@ -46,13 +46,17 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,9 +69,11 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
@@ -85,10 +91,12 @@ import com.android.settingslib.ichthys.clock.DepthClockView
 import com.android.settingslib.ichthys.clock.IchthysClockFace
 import com.android.settingslib.ichthys.clock.LockWeather
 import com.android.settingslib.ichthys.clock.LockWeatherView
+import com.android.settingslib.ichthys.sky.LivingSky
 import com.crdroid.settings.fragments.lockscreen.ClockUtils
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** What can be selected on the preview. */
@@ -155,6 +163,9 @@ fun rememberScreen(): IntSize {
  * - [selected]: framed (IchthysOS polish: the frame glides from one selection to the next, hugs
  *   what the element shows and turns with the clock).
  * - [zoom]: 0 in its place .. 1 filling the window (the editor's open / close, read while drawing).
+ * - IchthysOS Living Sky: the picture graded as the lock screen grades it, at [skyMinute] (minutes
+ *   after midnight; null: now). Its weather moves only in the editor's own preview (with
+ *   [onLayout]), not in thumbnails.
  */
 @Composable
 fun LockScreenPreview(
@@ -169,6 +180,7 @@ fun LockScreenPreview(
     overlay: (DrawScope.(LockLayout) -> Unit)? = null,
     selected: LockElement? = null,
     zoom: () -> Float = { 0f },
+    skyMinute: Float? = null,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -185,6 +197,19 @@ fun LockScreenPreview(
     // IchthysOS polish: what the face shows (screen px, unturned) and, on the Depth face, where
     // it wants the weather line under the clock (screen px), for the face style they came from.
     var faceContent by remember { mutableStateOf<FaceReport?>(null) }
+    // IchthysOS: whether the Depth face's fit lets the subject stand in front (DepthClockView).
+    var faceDepth by remember { mutableStateOf(true) }
+    // IchthysOS: the glass clock's frost and contrast come from the previewed picture, as on the
+    // lock screen (ClockBackdrop).
+    val frostSource = picture.source
+    LaunchedEffect(frostSource) {
+        if (frostSource != null) {
+            com.android.settingslib.ichthys.clock.ClockBackdrop.publishPhoto(
+                com.android.settingslib.ichthys.clock.ClockBackdrop.measure(frostSource))
+            com.android.settingslib.ichthys.clock.ClockBackdrop.publishFrost(
+                frostSource, screen.width, screen.height)
+        }
+    }
     val motion = remember { FrameMotion() }
     val placedAt = remember { FloatArray(4) }
 
@@ -294,8 +319,15 @@ fun LockScreenPreview(
                         transformOrigin = TransformOrigin(0f, 0f)
                     }
             ) {
+                // IchthysOS Living Sky: the same grade (and weather) the lock screen draws.
+                val sky =
+                    if (design.livingSky && picture.livingSky) {
+                        rememberPreviewSky(design, picture, skyMinute, motion = onLayout != null,
+                            screen.width, screen.height)
+                    } else null
                 picture.backdrop?.let {
-                    Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    if (sky != null) LivingSkyImage(sky, picture, null, Modifier.fillMaxSize())
+                    else Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 } ?: Box(Modifier.fillMaxSize().background(Color(0xFF0B1418)))
 
                 // The face, as KeyguardCustomClockView lays it out: 40 dp in from the screen's
@@ -304,6 +336,7 @@ fun LockScreenPreview(
                 AndroidView(
                     factory = { FaceFrame(it) },
                     update = { frame ->
+                        frame.onDepthApplies = { a -> if (a != faceDepth) faceDepth = a }
                         frame.onWeather =
                             if (onLayout != null) { b -> if (b != faceWeather) faceWeather = b } else null
                         frame.onContent =
@@ -326,10 +359,16 @@ fun LockScreenPreview(
                             },
                 )
 
-                // The subject in front (every depth mode; in Shape it only shows where they meet).
-                if (design.depth != DepthClockView.DEPTH_OFF) {
+                // The subject in front (every depth mode), unless the face's fit stepped back
+                // (no room above the subject: the clock stands whole in front, as on the lock screen).
+                if (design.depth != DepthClockView.DEPTH_OFF && faceDepth) {
                     picture.cutout?.let {
-                        Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                        val mask = picture.cutoutMask
+                        if (sky != null && mask != null) {
+                            LivingSkyImage(sky, picture, mask, Modifier.fillMaxSize())
+                        } else {
+                            Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                        }
                     }
                 }
 
@@ -390,6 +429,148 @@ fun LockScreenPreview(
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * IchthysOS Living Sky in the preview: the grade of the moment, the weather the grade paints into
+ * the scene, and (in the editor's own preview) its frames, as SystemUI's LivingSkyMotion; shared by
+ * the backdrop and the subject drawn over the clock.
+ */
+private class PreviewSky(val width: Int, val height: Int) {
+    var grade: LivingSky.Grade? = null
+    var info: LivingSky.SkyInfo? = null
+    var intensity = 1f
+    var weather: LivingSky.Weather? = null
+    var time = 0f
+    var flash = 0f
+    val frame = mutableLongStateOf(0L)
+}
+
+@Composable
+private fun rememberPreviewSky(
+    design: LockDesign,
+    picture: LockPicture,
+    minute: Float?,
+    motion: Boolean,
+    w: Int,
+    h: Int,
+): PreviewSky {
+    val context = LocalContext.current
+    val sky = remember(w, h) { PreviewSky(w, h) }
+    // The lock screen's weather (LockWeather is filled while someone listens).
+    var now by remember { mutableStateOf(LockWeather.current) }
+    DisposableEffect(Unit) {
+        val listener: () -> Unit = { now = LockWeather.current }
+        LockWeather.addListener(context, listener)
+        now = LockWeather.current
+        onDispose { LockWeather.removeListener(listener) }
+    }
+    // Showing now: a new grade every minute, as on the lock screen.
+    var tick by remember { mutableIntStateOf(0) }
+    LaunchedEffect(minute) {
+        if (minute != null) return@LaunchedEffect
+        while (true) {
+            delay(60_000L - System.currentTimeMillis() % 60_000L)
+            tick++
+        }
+    }
+    val info = picture.skyInfo ?: LivingSky.SkyInfo.UNKNOWN
+    val weather = if (design.skyWeather) now?.let { LivingSky.weatherFor(it.code) } else null
+    val grade =
+        remember(tick, minute, weather, info, now?.sunrise, now?.sunset) {
+            val times = LivingSky.sunTimes(context)
+            val sun =
+                if (minute != null) {
+                    LivingSky.sun(times, minute,
+                        java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR))
+                } else LivingSky.sunNow(times)
+            LivingSky.grade(sun, weather, info.horizon, LivingSky.moonPhase())
+        }
+    sky.grade = grade
+    sky.info = info
+    sky.intensity = design.skyIntensity / 100f
+    // IchthysOS: the Depth face's contrast follows the preview's graded sky (as on the lock screen).
+    SideEffect {
+        com.android.settingslib.ichthys.clock.ClockBackdrop.publish(
+            LivingSky.brightnessBehindClock(grade, sky.intensity))
+    }
+
+    val saver = remember {
+        context.getSystemService(android.os.PowerManager::class.java)?.isPowerSaveMode == true
+    }
+    val go = motion && !saver
+    val wx = weather?.takeIf { it.type != LivingSky.TYPE_NONE }
+    sky.weather = weather
+    DisposableEffect(Unit) {
+        onDispose { sky.flash = 0f }
+    }
+    val stars = grade.stars > 0f
+    val storm = wx?.storm == true && android.animation.ValueAnimator.areAnimatorsEnabled()
+    val falling = wx != null && (wx.type == LivingSky.TYPE_RAIN || wx.type == LivingSky.TYPE_SNOW)
+    LaunchedEffect(wx, stars, storm, go) {
+        if (!go || (wx == null && !stars)) return@LaunchedEffect
+        val step =
+            when {
+                falling || storm -> 15_500_000L
+                wx != null -> 41_000_000L
+                else -> 40_000_000L
+            }
+        var last = 0L
+        var bolt = 0f
+        var nextBolt = 2f + 6f * kotlin.random.Random.nextFloat()
+        while (true) {
+            withFrameNanos { t ->
+                if (last != 0L && t - last < step) return@withFrameNanos
+                val dt = if (last == 0L) 0f else ((t - last) / 1e9f).coerceAtMost(0.1f)
+                last = t
+                sky.time += dt
+                if (storm) {
+                    nextBolt -= dt
+                    if (nextBolt <= 0f) {
+                        bolt = 0f
+                        nextBolt = 4f + 10f * kotlin.random.Random.nextFloat()
+                    }
+                    bolt += dt
+                    sky.flash =
+                        if (bolt < 0.6f) {
+                            0.55f * kotlin.math.exp(-bolt / 0.07f) +
+                                0.3f * kotlin.math.exp(-kotlin.math.abs(bolt - 0.22f) / 0.05f)
+                        } else 0f
+                }
+                sky.frame.longValue = t
+            }
+        }
+    }
+    return sky
+}
+
+/** The graded [picture] over the previewed screen (screen px); with [mask], only the subject. */
+@Composable
+private fun LivingSkyImage(sky: PreviewSky, picture: LockPicture, mask: Bitmap?, modifier: Modifier) {
+    val src = picture.source ?: return
+    val skyMask = picture.sky ?: return
+    val painter = remember { LivingSky.Painter() }
+    val shader = remember(src, sky.width, sky.height) { LivingSky.fitted(src, sky.width, sky.height) }
+    val skyShader =
+        remember(skyMask, sky.width, sky.height) { LivingSky.fitted(skyMask, sky.width, sky.height) }
+    // The subject is the nearest thing in the scene: rain and snow behind it stay behind.
+    val subjectMask = picture.cutoutMask
+    val subject =
+        remember(subjectMask, sky.width, sky.height) {
+            subjectMask?.let { LivingSky.fitted(it, sky.width, sky.height) }
+        }
+    val grade = sky.grade ?: return
+    val info = sky.info ?: return
+    val intensity = sky.intensity
+    Canvas(modifier) {
+        sky.frame.longValue
+        painter.bind(shader, skyShader, info, grade, intensity, sky.width,
+            sky.height, density, sky.time, sky.flash, sky.weather, subject)
+        drawIntoCanvas {
+            if (mask != null) painter.drawMasked(it.nativeCanvas, sky.width, sky.height, mask)
+            else painter.draw(it.nativeCanvas, sky.width, sky.height)
         }
     }
 }
@@ -534,6 +715,8 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     /** IchthysOS: told where the Depth face drew the weather, in screen px (null: nowhere). */
     var onWeather: ((Rect?) -> Unit)? = null
+    /** IchthysOS: told whether the Depth face lets the subject stand in front of it. */
+    var onDepthApplies: ((Boolean) -> Unit)? = null
     private var weatherLocal: android.graphics.RectF? = null
     private var depthPlace: FloatArray? = null
 
@@ -599,6 +782,7 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
                     // Out of the face's draw: the preview's state changes on the next frame.
                     post { emitWeather() }
                 }
+                v.onDepthApplies = { a -> onDepthApplies?.invoke(a) }
                 v.onFaceLayout = { r, under ->
                     depthContent = r
                     depthUnder = under
@@ -703,9 +887,14 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
             val fw = width.toFloat()
             val left = LockKeys.SIDE_DP * g.density + d.dx + fw / 2f + (x - fw / 2f) * d.scale
             val top = g.top0 + d.dy + y * d.scale
+            // IchthysOS: and the turn (rotationZ about this frame's middle), for the clear glass,
+            // which has to sit exactly over the picture.
+            val px = LockKeys.SIDE_DP * g.density + d.dx + fw / 2f
+            val py = g.top0 + d.dy + height * d.scale / 2f
             val old = v.previewPlacement
-            if (old == null || old[0] != left || old[1] != top || old[2] != d.scale) {
-                v.previewPlacement = floatArrayOf(left, top, d.scale)
+            if (old == null || old.size < 6 || old[0] != left || old[1] != top ||
+                old[2] != d.scale || old[3] != d.rot || old[4] != px || old[5] != py) {
+                v.previewPlacement = floatArrayOf(left, top, d.scale, d.rot, px, py)
             }
             val was = depthPlace
             if (was == null || was[0] != left || was[1] != top || was[2] != d.scale) {

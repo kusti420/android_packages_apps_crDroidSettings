@@ -91,6 +91,8 @@ abstract class BaseAppListSettingsFragment : Fragment(R.layout.app_list_layout) 
 
     override fun onDestroy() {
         super.onDestroy()
+        // IchthysOS: quitSafely() still runs what is queued; drop it, the fragment is gone.
+        bgHandler.removeCallbacksAndMessages(null)
         handlerThread.quitSafely()
     }
 
@@ -134,7 +136,8 @@ abstract class BaseAppListSettingsFragment : Fragment(R.layout.app_list_layout) 
     }
 
     private fun refreshList() {
-        if (!::adapter.isInitialized) return
+        // IchthysOS: the first call runs on bgHandler; leaving the page first must not crash.
+        if (!::adapter.isInitialized || !isAdded) return
         val initialList = getInitialCheckedList()
         bgHandler.post {
             val list =
@@ -154,7 +157,12 @@ abstract class BaseAppListSettingsFragment : Fragment(R.layout.app_list_layout) 
                         )
                     )
             Log.d(TAG, "refreshList: ${list.size} items")
-            requireActivity().runOnUiThread {
+            // IchthysOS: activity, not requireActivity(): this is the background thread, and
+            // the user may have left the page while the app list was loading (uncaught
+            // IllegalStateException killed Settings).
+            val host = activity ?: return@post
+            host.runOnUiThread {
+                if (!isAdded || view == null) return@runOnUiThread
                 if (isLoading) {
                     isLoading = false
                     loadingView.visibility = View.GONE

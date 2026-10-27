@@ -112,10 +112,12 @@
         <item>3</item>
     </string-array>
 
+    <!-- IchthysOS: SystemUI mirrors 1 (end) and 2 (start) under RTL, so in RTL "Left" is 1 and
+         "Right" is 2. These used to map "Off" to 2 and "Right" to 0. -->
     <string-array name="status_bar_quick_qs_pulldown_values_rtl" translatable="false">
-        <item>2</item>
-        <item>1</item>
         <item>0</item>
+        <item>1</item>
+        <item>2</item>
         <item>3</item>
     </string-array>
 
@@ -572,7 +574,9 @@
     <string-array name="navbar_keys_action_entries" translatable="false">
         <item>@string/hardware_keys_action_nothing</item>
         <item>@string/hardware_keys_action_app_switch</item>
-        <item>@string/hardware_keys_action_search</item>
+        <!-- <item>@string/hardware_keys_action_search</item> IchthysOS: "Search assistant" is an
+             assistant surface; the launcher could only inject KEYCODE_SEARCH, the same as
+             in-app search below, so the label promised something it never did -->
         <!-- <item>@string/hardware_keys_action_voice_search</item> IchthysOS: assistant removed -->
         <item>@string/hardware_keys_action_in_app_search</item>
         <item>@string/hardware_keys_action_launch_camera</item>
@@ -589,7 +593,7 @@
     <string-array name="navbar_keys_action_values" translatable="false">
         <item>0</item>
         <item>2</item>
-        <item>3</item>
+        <!-- <item>3</item> search assistant - IchthysOS: assistant removed -->
         <!-- <item>4</item> voice search - IchthysOS: assistant removed -->
         <item>5</item>
         <item>6</item>

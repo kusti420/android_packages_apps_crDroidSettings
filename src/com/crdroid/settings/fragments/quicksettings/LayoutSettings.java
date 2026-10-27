@@ -57,12 +57,14 @@ public class LayoutSettings extends SettingsPreferenceFragment {
 
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
+        // IchthysOS: the XML defaults, which are SystemUI's stock grid (6/8 columns, 3/2 rows,
+        // QSColumnsRepository / QSRowsRepository). Reset used to write 4/4/4.
         Settings.System.putIntForUser(resolver,
-                Settings.System.QS_TILES_COLUMNS, 4, UserHandle.USER_CURRENT);
+                Settings.System.QS_TILES_COLUMNS, 6, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
-                Settings.System.QS_TILES_COLUMNS_LANDSCAPE, 4, UserHandle.USER_CURRENT);
+                Settings.System.QS_TILES_COLUMNS_LANDSCAPE, 8, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
-                Settings.System.QS_TILES_ROWS, 4, UserHandle.USER_CURRENT);
+                Settings.System.QS_TILES_ROWS, 3, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
                 Settings.System.QS_TILES_ROWS_LANDSCAPE, 2, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,

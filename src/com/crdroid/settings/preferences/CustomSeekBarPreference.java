@@ -110,7 +110,13 @@ public class CustomSeekBarPreference extends SliderPreference {
                 }
             }
 
-            int interval = attrs.getAttributeIntValue(SETTINGS_NS, "interval", 0);
+            // IchthysOS: the styled attribute first. getAttributeIntValue() only matches the
+            // namespace URI as written, so settings:interval under res-auto (fingerprint_effects)
+            // was never read and those sliders moved in steps of 1.
+            int interval = a.getInt(R.styleable.CustomSeekBarPreference_interval, 0);
+            if (interval == 0) {
+                interval = attrs.getAttributeIntValue(SETTINGS_NS, "interval", 0);
+            }
             if (interval == 0) {
                 interval = attrs.getAttributeIntValue(ANDROIDNS, "interval", 0);
             }
@@ -144,8 +150,21 @@ public class CustomSeekBarPreference extends SliderPreference {
 
     @Override
     public void setValue(int sliderValue) {
-        super.setValue(sliderValue);
+        super.setValue(snapToStep(sliderValue));
         if (!mInUserDrag) updateSummaryNow();
+    }
+
+    /**
+     * IchthysOS: the Material slider throws IllegalStateException while drawing when its value
+     * is not min plus a multiple of the step. A stored value off the step (written by adb, a
+     * restore, a config import or a build with another step) would crash the page on open.
+     */
+    private int snapToStep(int value) {
+        final int step = getSliderIncrement();
+        final int min = getMin();
+        final int max = getMax();
+        if (step <= 1 || value <= min || value >= max) return value; // super clamps the ends
+        return Math.min(max, min + Math.round((value - min) / (float) step) * step);
     }
 
     private void updateSummaryNow() {

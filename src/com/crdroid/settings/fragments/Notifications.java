@@ -100,7 +100,9 @@ public class Notifications extends SettingsPreferenceFragment implements
             mFlashOnCallRate = (CustomSeekBarPreference)
                     prefScreen.findPreference(FLASHLIGHT_RATE_PREF);
 
-            mFlashOnCallIgnoreDND.setEnabled(value > 1);
+            // IchthysOS: FlashlightBlinkController honours "Ignore DND" in every mode, "When
+            // ringing" too (a call DND lets through still rings), so it is not greyed out there.
+            mFlashOnCallIgnoreDND.setEnabled(value > 0);
             mFlashOnCallRate.setEnabled(value > 0);
         }
     }
@@ -109,7 +111,7 @@ public class Notifications extends SettingsPreferenceFragment implements
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference == mFlashOnCall) {
             int value = Integer.parseInt((String) newValue);
-            mFlashOnCallIgnoreDND.setEnabled(value > 1);
+            mFlashOnCallIgnoreDND.setEnabled(value > 0);
             mFlashOnCallRate.setEnabled(value > 0);
             return true;
         }

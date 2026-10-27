@@ -39,6 +39,7 @@
     <string name="ichthys_ed2_font_thin">Thin</string>
     <string name="ichthys_ed2_font_serif">Serif</string>
     <string name="ichthys_ed2_font_mono">Mono</string>
+    <string name="ichthys_ed2_font_square">Square</string>
     <string name="ichthys_ed2_digits">Digits</string>
     <string name="ichthys_ed2_colour_wallpaper">From the wallpaper</string>
     <string name="ichthys_ed2_colour_custom">Your own colour</string>
@@ -115,6 +116,11 @@
     <string name="ichthys_ed2_look_pond">Pond</string>
     <string name="ichthys_ed2_look_heat">Touch heat</string>
     <string name="ichthys_ed2_look_stretch">Stretch</string>
+    <string name="ichthys_ed2_look_glass">Glass</string>
+    <string name="ichthys_ed2_finish">Finish</string>
+    <string name="ichthys_ed2_finish_solid">Solid</string>
+    <string name="ichthys_ed2_finish_gradient">Gradient</string>
+    <string name="ichthys_ed2_finish_glass">Glass</string>
     <string name="ichthys_ed2_look_shoal">Shoal Lattice</string>
     <string name="ichthys_ed2_look_oneui">One UI Stacked</string>
     <string name="ichthys_ed2_look_typo">Typographic</string>
@@ -127,7 +133,8 @@
     <string name="ichthys_ed2_ideas_make">Make ideas</string>
     <string name="ichthys_ed2_ideas_working">Looking at your photo…</string>
     <string name="ichthys_ed2_ideas_no_subject">No person or object found, so these ideas have no depth.</string>
-    <string name="ichthys_ed2_idea_stretch">Stretch</string>
+    <string name="ichthys_ed2_idea_stretch">Fitted</string>
+    <string name="ichthys_ed2_idea_beside">Beside</string>
     <string name="ichthys_ed2_idea_tuck">Tuck</string>
     <string name="ichthys_ed2_idea_follow">Follow</string>
     <string name="ichthys_ed2_idea_behind">Behind the head</string>
@@ -138,9 +145,27 @@
     <string name="ichthys_ed2_idea_serif">Serif</string>
     <string name="ichthys_ed2_idea_mono">Mono</string>
     <string name="ichthys_ed2_idea_wide">Wide</string>
+    <string name="ichthys_ed2_idea_square">Square</string>
     <string name="ichthys_ed2_idea_date_below">Date below</string>
     <string name="ichthys_ed2_idea_details">Details</string>
     <string name="ichthys_ed2_idea_side">To the side</string>
     <string name="ichthys_ed2_idea_classic">Classic</string>
     <string name="ichthys_ed2_idea_heat">Touch heat</string>
+
+    <!-- IchthysOS Living Sky (Wallpaper sheet) -->
+    <string name="ichthys_ed2_sky">Living sky</string>
+    <string name="ichthys_ed2_sky_follow">Follow the sun</string>
+    <string name="ichthys_ed2_sky_weather">Show the weather</string>
+    <string name="ichthys_ed2_sky_intensity">Intensity</string>
+    <string name="ichthys_ed2_sky_note">The photo\'s sky warms at sunrise, turns gold and blue at sunset and shows the stars at night.</string>
+    <string name="ichthys_ed2_sky_none">This photo has no sky to bring to life.</string>
+    <string name="ichthys_ed2_sky_dark">This photo\'s sky is already a night sky.</string>
+    <string name="ichthys_ed2_sky_looking">Looking for the sky in this photo\u2026</string>
+    <string name="ichthys_ed2_sky_no_photo">Needs a photo as the lock screen wallpaper.</string>
+    <string name="ichthys_ed2_sky_day">Preview the day</string>
+    <string name="ichthys_ed2_sky_now">Now</string>
+    <string name="ichthys_ed2_sky_sun_up">sun %1$d\u00b0 up</string>
+    <string name="ichthys_ed2_sky_sun_down">sun %1$d\u00b0 down</string>
+    <string name="ichthys_ed2_sky_times">Sunrise %1$s \u00b7 sunset %2$s</string>
+    <string name="ichthys_ed2_idea_sky">Living sky</string>
 </resources>

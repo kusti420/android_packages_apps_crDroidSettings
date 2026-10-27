@@ -122,7 +122,7 @@
             settings:interval="1"
             settings:units="%"
             android:max="100"
-            android:min="1" />
+            settings:min="1" />
 
         <com.crdroid.settings.preferences.SystemSettingListPreference
             android:key="qs_brightness_slider_shape"

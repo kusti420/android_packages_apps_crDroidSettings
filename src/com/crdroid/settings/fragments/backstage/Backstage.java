@@ -17,9 +17,11 @@ package com.crdroid.settings.fragments.backstage;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,16 +38,20 @@ import com.android.settings.SettingsPreferenceFragment;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * IchthysOS &gt; Apps &gt; Background &gt; Apps in Backstage: pick apps to keep running "in the
  * foreground" on a hidden display. The time limit is on the Background page.
  * Only edits Settings.Secure ichthys_backstage_pkgs; IchthysBackstageService in system_server does
- * the work and removes apps from the list when they leave Backstage (brought back via the
- * notification, finished, or stopped). (kusti420/ichthysos-tracker#38)
+ * the work. An app opened again stays in the list (it goes back to its hidden display when the
+ * user leaves it); the service takes it out of the list when it is stopped (notification, time
+ * limit), uninstalled, or when the list is cleared at boot or user switch.
+ * (kusti420/ichthysos-tracker#38)
  */
 public class Backstage extends SettingsPreferenceFragment {
 
@@ -93,28 +99,64 @@ public class Backstage extends SettingsPreferenceFragment {
         final List<ResolveInfo> infos = pm.queryIntentActivities(launcher, 0);
         final Set<String> seen = new LinkedHashSet<>();
         final List<ResolveInfo> apps = new ArrayList<>();
+        // IchthysOS: labels loaded once; the sort used to load them again on every comparison.
+        final Map<String, CharSequence> labels = new HashMap<>();
         for (ResolveInfo info : infos) {
             final String pkg = info.activityInfo.packageName;
             if (!pkg.equals(context.getPackageName()) && seen.add(pkg)) {
                 apps.add(info);
+                labels.put(pkg, info.loadLabel(pm));
             }
         }
         final Collator collator = Collator.getInstance();
         apps.sort((a, b) -> collator.compare(
-                String.valueOf(a.loadLabel(pm)), String.valueOf(b.loadLabel(pm))));
+                String.valueOf(labels.get(a.activityInfo.packageName)),
+                String.valueOf(labels.get(b.activityInfo.packageName))));
 
         for (ResolveInfo info : apps) {
             final String pkg = info.activityInfo.packageName;
-            final SwitchPreferenceCompat pref = new SwitchPreferenceCompat(context);
-            pref.setKey(pkg);
-            pref.setPersistent(false);
-            pref.setTitle(info.loadLabel(pm));
-            pref.setIcon(info.loadIcon(pm));
-            pref.setOnPreferenceChangeListener((p, value) -> {
-                setInBackstage(pkg, (Boolean) value);
-                return true;
-            });
-            mApps.addPreference(pref);
+            addAppPreference(context, pkg, labels.get(pkg), info.loadIcon(pm));
+        }
+    }
+
+    private SwitchPreferenceCompat addAppPreference(Context context, String pkg,
+            CharSequence label, Drawable icon) {
+        final SwitchPreferenceCompat pref = new SwitchPreferenceCompat(context);
+        pref.setKey(pkg);
+        pref.setPersistent(false);
+        pref.setTitle(label);
+        pref.setIcon(icon);
+        pref.setOnPreferenceChangeListener((p, value) -> {
+            setInBackstage(pkg, (Boolean) value);
+            // IchthysOS: refreshStates() already set the switch from the list. Returning true
+            // let the framework flip it afterwards, so a pick refused because Backstage is
+            // full (e.g. the tile filled it meanwhile) still showed as on.
+            return false;
+        });
+        mApps.addPreference(pref);
+        return pref;
+    }
+
+    /**
+     * IchthysOS: a listed app without a row here (this Settings app, sent by the Backstage tile,
+     * or an app whose launcher entry is gone) still holds one of the 3 places. Give it a row so
+     * it can be switched off instead of leaving the page "full" with nothing to untick.
+     */
+    private void addMissingListedApps(List<String> pkgs) {
+        final Context context = getPrefContext();
+        final PackageManager pm = context.getPackageManager();
+        for (String pkg : pkgs) {
+            if (mApps.findPreference(pkg) != null) continue;
+            CharSequence label = pkg;
+            Drawable icon = null;
+            try {
+                final ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                label = pm.getApplicationLabel(ai);
+                icon = pm.getApplicationIcon(ai);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Uninstalled meanwhile: the package name is all there is.
+            }
+            addAppPreference(context, pkg, label, icon);
         }
     }
 
@@ -145,8 +187,9 @@ public class Backstage extends SettingsPreferenceFragment {
 
     /** Mirrors the list (which the service also edits) and disables new picks when full. */
     private void refreshStates() {
-        if (mApps == null) return;
+        if (mApps == null || getPrefContext() == null) return;
         final List<String> pkgs = readPackages(getPrefContext());
+        addMissingListedApps(pkgs);
         final boolean full = pkgs.size() >= MAX_APPS;
         for (int i = 0; i < mApps.getPreferenceCount(); i++) {
             final SwitchPreferenceCompat pref = (SwitchPreferenceCompat) mApps.getPreference(i);

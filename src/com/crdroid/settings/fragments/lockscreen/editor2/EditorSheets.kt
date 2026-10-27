@@ -42,6 +42,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -66,8 +67,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -80,6 +83,8 @@ import androidx.compose.ui.unit.sp
 import com.android.settings.R
 import com.android.settingslib.ichthys.clock.DepthClockView
 import com.android.settingslib.ichthys.clock.LockWeather
+import com.android.settingslib.ichthys.clock.SquareDigits
+import com.android.settingslib.ichthys.sky.LivingSky
 import com.crdroid.settings.fragments.lockscreen.ClockUtils
 
 private val SHEET_BG = Color(0xFF18161A)
@@ -99,6 +104,7 @@ fun EditorSheetHost(
     onDraft: (LockDesign) -> Unit,
     onWallpaper: (WallpaperDraft) -> Unit,
     onClose: () -> Unit,
+    onSkyMinute: (Float?) -> Unit = {},
 ) {
     Column(
         Modifier.fillMaxWidth()
@@ -133,7 +139,7 @@ fun EditorSheetHost(
                         ShortcutSheet(true, state.draft, catalog, onDraft)
                     EditorSheet.SHORTCUT_END ->
                         ShortcutSheet(false, state.draft, catalog, onDraft)
-                    EditorSheet.WALLPAPER -> WallpaperSheet(state, onWallpaper)
+                    EditorSheet.WALLPAPER -> WallpaperSheet(state, onWallpaper, onDraft, onSkyMinute)
                     EditorSheet.LOOKS -> LooksSheet(state, onDraft)
                     EditorSheet.NONE -> Unit
                 }
@@ -185,7 +191,7 @@ private fun PictureChip(label: String, on: Boolean, onClick: () -> Unit, thumb: 
 
 @Composable
 private fun TextChip(label: String, on: Boolean, onClick: () -> Unit, family: FontFamily? = null,
-    big: Boolean = false) {
+    big: Boolean = false, square: Boolean = false) {
     val shape = RoundedCornerShape(10.dp)
     Box(
         Modifier.clip(shape).background(CHIP_BG)
@@ -194,7 +200,23 @@ private fun TextChip(label: String, on: Boolean, onClick: () -> Unit, family: Fo
             .padding(horizontal = 12.dp, vertical = if (big) 6.dp else 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, fontSize = if (big) 20.sp else 12.sp, color = INK, fontFamily = family)
+        // IchthysOS: the Square font has no typeface; the text keeps the chip its size (unseen)
+        // and the digits are drawn over it as the Depth face draws them.
+        Text(label, fontSize = if (big) 20.sp else 12.sp, color = if (square) Color.Transparent else INK,
+            fontFamily = family)
+        if (square) {
+            Box(
+                Modifier.matchParentSize().drawWithCache {
+                    val textSize = (if (big) 20.sp else 12.sp).toPx()
+                    val path = android.graphics.Path()
+                    val w = SquareDigits.advance(textSize) * label.length
+                    SquareDigits.textPath(label, 0, label.length, (size.width - w) / 2f,
+                        (size.height + SquareDigits.capHeight(textSize)) / 2f, textSize, path)
+                    val glyphs = path.asComposePath()
+                    onDrawBehind { drawPath(glyphs, INK) }
+                }
+            )
+        }
     }
 }
 
@@ -281,7 +303,8 @@ private fun StyleTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
                 DepthClockView.FONT_WIDE to R.string.ichthys_ed2_font_wide,
                 DepthClockView.FONT_THIN to R.string.ichthys_ed2_font_thin,
                 DepthClockView.FONT_SERIF to R.string.ichthys_ed2_font_serif,
-                DepthClockView.FONT_MONO to R.string.ichthys_ed2_font_mono)
+                DepthClockView.FONT_MONO to R.string.ichthys_ed2_font_mono,
+                DepthClockView.FONT_SQUARE to R.string.ichthys_ed2_font_square)
         ChipRow {
             fonts.forEach { (font, label) ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -289,7 +312,7 @@ private fun StyleTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
                         FontFamily(androidx.compose.ui.text.font.Typeface(DepthClockView.digitTypeface(font)))
                     }
                     TextChip("10", d.font == font, { onDraft(d.copy(font = font, look = "custom")) },
-                        family, big = true)
+                        family, big = true, square = font == DepthClockView.FONT_SQUARE)
                     Text(stringResource(label), fontSize = 10.sp, color = DIM,
                         modifier = Modifier.padding(top = 3.dp))
                 }
@@ -311,6 +334,18 @@ private fun ColourTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
     val d = state.draft
     val context = LocalContext.current
     val accent = remember { Color(context.getColor(android.R.color.system_accent1_100)) }
+    // IchthysOS: the Depth face's finish: solid, a gradient, or glass the picture shows through.
+    if (d.isDepthFace && d.fill != DepthClockView.FILL_HEAT) {
+        Label(stringResource(R.string.ichthys_ed2_finish))
+        val fills = listOf(DepthClockView.FILL_SOLID, DepthClockView.FILL_GRADIENT,
+            DepthClockView.FILL_GLASS)
+        Segmented(
+            listOf(stringResource(R.string.ichthys_ed2_finish_solid),
+                stringResource(R.string.ichthys_ed2_finish_gradient),
+                stringResource(R.string.ichthys_ed2_finish_glass)),
+            fills.indexOf(d.fill).coerceAtLeast(0),
+        ) { onDraft(d.copy(fill = fills[it], look = "custom")) }
+    }
     Label(stringResource(R.string.ichthys_ed2_colour_wallpaper))
     ChipRow {
         Swatch(Color.White, d.colorMode == LockKeys.MODE_DEFAULT,
@@ -342,14 +377,17 @@ private fun ColourTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
 private fun DepthTab(state: EditorState, geo: LockGeometry, onDraft: (LockDesign) -> Unit) {
     val d = state.draft
     Label(stringResource(R.string.ichthys_ed2_tab_depth))
+    // IchthysOS: the digits are never distorted any more (DepthClockView fits the whole clock
+    // evenly in every mode), so "Shape" is what Overlap does now; a saved Shape shows as Overlap.
     val modes =
         listOf(DepthClockView.DEPTH_OFF to R.string.ichthys_ed2_depth_off,
             DepthClockView.DEPTH_OVERLAP to R.string.ichthys_ed2_depth_overlap,
-            DepthClockView.DEPTH_XRAY to R.string.ichthys_ed2_depth_xray,
-            DepthClockView.DEPTH_SHAPE to R.string.ichthys_ed2_depth_shape)
+            DepthClockView.DEPTH_XRAY to R.string.ichthys_ed2_depth_xray)
     ChipRow {
         modes.forEach { (mode, label) ->
-            PictureChip(stringResource(label), d.depth == mode, { onDraft(withDepth(d, mode, state.picture, geo)) }) {
+            val on = d.depth == mode ||
+                (mode == DepthClockView.DEPTH_OVERLAP && d.depth == DepthClockView.DEPTH_SHAPE)
+            PictureChip(stringResource(label), on, { onDraft(withDepth(d, mode, state.picture, geo)) }) {
                 MiniLock(withDepth(d, mode, state.picture, geo), state.picture, Modifier.fillMaxSize())
             }
         }
@@ -357,23 +395,6 @@ private fun DepthTab(state: EditorState, geo: LockGeometry, onDraft: (LockDesign
     if (state.picture.cutout == null) {
         Text(stringResource(R.string.ichthys_ed2_depth_no_subject), fontSize = 11.sp, color = DIM,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
-    }
-    if (d.depth == DepthClockView.DEPTH_SHAPE) {
-        Label(stringResource(R.string.ichthys_ed2_shape))
-        Segmented(
-            listOf(stringResource(R.string.ichthys_ed2_shape_stretch),
-                stringResource(R.string.ichthys_ed2_shape_tuck),
-                stringResource(R.string.ichthys_ed2_shape_follow)),
-            d.shape,
-        ) { onDraft(d.copy(shape = it, look = "custom")) }
-        Text(
-            stringResource(
-                when (d.shape) {
-                    DepthClockView.SHAPE_TUCK -> R.string.ichthys_ed2_shape_tuck_summary
-                    DepthClockView.SHAPE_FOLLOW -> R.string.ichthys_ed2_shape_follow_summary
-                    else -> R.string.ichthys_ed2_shape_stretch_summary
-                }),
-            fontSize = 11.sp, color = DIM, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
     }
     Spacer(Modifier.size(6.dp))
 }
@@ -656,7 +677,12 @@ private fun ShortcutSheet(start: Boolean, d: LockDesign, catalog: LockShortcuts.
 // ---- wallpaper and looks --------------------------------------------------------------------
 
 @Composable
-private fun WallpaperSheet(state: EditorState, onWallpaper: (WallpaperDraft) -> Unit) {
+private fun WallpaperSheet(
+    state: EditorState,
+    onWallpaper: (WallpaperDraft) -> Unit,
+    onDraft: (LockDesign) -> Unit,
+    onSkyMinute: (Float?) -> Unit,
+) {
     var picked by remember { mutableStateOf<Uri?>(null) }
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { picked = it }
     picked?.let { uri ->
@@ -702,6 +728,125 @@ private fun WallpaperSheet(state: EditorState, onWallpaper: (WallpaperDraft) -> 
     }
     Text(stringResource(R.string.ichthys_ed2_wallpaper_note), fontSize = 11.sp, color = DIM,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+    LivingSkySection(state, onDraft, onSkyMinute)
+}
+
+/**
+ * IchthysOS Living Sky: the photo's sky follows the time and the weather. Only for a photo with a
+ * sky (else the switch is off, with why); the scrub shows any time of today in the preview (not
+ * saved).
+ */
+@Composable
+private fun LivingSkySection(
+    state: EditorState,
+    onDraft: (LockDesign) -> Unit,
+    onSkyMinute: (Float?) -> Unit,
+) {
+    val context = LocalContext.current
+    val d = state.draft
+    val pic = state.picture
+    val usable = pic.livingSky
+    fun edit(n: LockDesign) = onDraft(n.copy(look = "custom"))
+    Label(stringResource(R.string.ichthys_ed2_sky))
+    SkySwitchRow(stringResource(R.string.ichthys_ed2_sky_follow), d.livingSky && usable, usable) {
+        edit(d.copy(livingSky = it))
+        if (!it) onSkyMinute(null)
+    }
+    if (!usable) {
+        val reason =
+            when {
+                pic.backdrop == null -> R.string.ichthys_ed2_sky_no_photo
+                pic.skyInfo == null -> R.string.ichthys_ed2_sky_looking
+                pic.skyInfo.reason == LivingSky.REASON_DARK -> R.string.ichthys_ed2_sky_dark
+                else -> R.string.ichthys_ed2_sky_none
+            }
+        Text(stringResource(reason), fontSize = 11.sp, color = DIM,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
+        Spacer(Modifier.size(8.dp))
+        return
+    }
+    if (!d.livingSky) {
+        Text(stringResource(R.string.ichthys_ed2_sky_note), fontSize = 11.sp, color = DIM,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
+        Spacer(Modifier.size(8.dp))
+        return
+    }
+    SkySwitchRow(stringResource(R.string.ichthys_ed2_sky_weather), d.skyWeather, true) {
+        edit(d.copy(skyWeather = it))
+    }
+    SliderRow(stringResource(R.string.ichthys_ed2_sky_intensity), d.skyIntensity.toFloat(), 10f..100f,
+        "${d.skyIntensity}%") { edit(d.copy(skyIntensity = it.toInt())) }
+
+    // Preview the day: any minute of today, with the sky's colour across the day under it.
+    val times = remember { LivingSky.sunTimes(context) }
+    val today = remember { java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR) }
+    val minute = state.skyMinute
+    val nowMinute = remember {
+        val c = java.util.Calendar.getInstance()
+        c.get(java.util.Calendar.HOUR_OF_DAY) * 60f + c.get(java.util.Calendar.MINUTE)
+    }
+    val shown = minute ?: nowMinute
+    val sun = LivingSky.sun(times, shown, today)
+    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.ichthys_ed2_sky_day), fontSize = 12.sp, color = DIM,
+            modifier = Modifier.weight(1f))
+        Text(
+            (if (minute == null) stringResource(R.string.ichthys_ed2_sky_now) + " · " else "") +
+                hhmm(shown) + " · " +
+                stringResource(
+                    if (sun.elevation >= 0f) R.string.ichthys_ed2_sky_sun_up
+                    else R.string.ichthys_ed2_sky_sun_down,
+                    kotlin.math.abs(sun.elevation).toInt()),
+            fontSize = 12.sp, color = INK)
+    }
+    val bar = remember(times) {
+        List(48) { i ->
+            val g = LivingSky.grade(LivingSky.sun(times, i * 30f + 15f, today), null, 0.6f, 0.5f)
+            Color(
+                kotlin.math.sqrt((g.top[0] + g.hor[0]) / 2f),
+                kotlin.math.sqrt((g.top[1] + g.hor[1]) / 2f),
+                kotlin.math.sqrt((g.top[2] + g.hor[2]) / 2f),
+            )
+        }
+    }
+    Box(Modifier.fillMaxWidth().padding(horizontal = 24.dp).height(8.dp)
+        .clip(RoundedCornerShape(4.dp)).background(Brush.horizontalGradient(bar)))
+    Slider(
+        value = shown,
+        onValueChange = { onSkyMinute(it) },
+        valueRange = 0f..1439f,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+    )
+    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(R.string.ichthys_ed2_sky_times, hhmm(times.sunrise), hhmm(times.sunset)),
+            fontSize = 11.sp, color = DIM, modifier = Modifier.weight(1f))
+        if (minute != null) {
+            TextButton(onClick = { onSkyMinute(null) }) {
+                Text(stringResource(R.string.ichthys_ed2_sky_now), color = POND)
+            }
+        }
+    }
+    Spacer(Modifier.size(6.dp))
+}
+
+private fun hhmm(minutes: Float): String {
+    val m = minutes.toInt().coerceIn(0, 1439)
+    return String.format(java.util.Locale.ROOT, "%02d:%02d", m / 60, m % 60)
+}
+
+@Composable
+private fun SkySwitchRow(label: String, on: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth()
+            .then(if (enabled) Modifier.clickable { onChange(!on) } else Modifier)
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, fontSize = 14.sp, color = if (enabled) INK else DIM, modifier = Modifier.weight(1f))
+        Switch(checked = on, onCheckedChange = onChange, enabled = enabled)
+    }
 }
 
 /** Whole looks: built in, then the user's own (deletable), then "save this one". */
@@ -756,8 +901,9 @@ private fun builtinLooks(d: LockDesign): List<Pair<Int, LockDesign>> {
         R.string.ichthys_ed2_look_pond to plain.copy(depth = DepthClockView.DEPTH_OVERLAP, look = "pond"),
         R.string.ichthys_ed2_look_heat to
             plain.copy(depth = DepthClockView.DEPTH_XRAY, fill = DepthClockView.FILL_HEAT, look = "depth_heat"),
-        R.string.ichthys_ed2_look_stretch to
-            plain.copy(depth = DepthClockView.DEPTH_SHAPE, scale = 0.6f, look = "stretch"),
+        R.string.ichthys_ed2_look_glass to
+            plain.copy(depth = DepthClockView.DEPTH_OVERLAP, fill = DepthClockView.FILL_GLASS,
+                look = "glass"),
         R.string.ichthys_ed2_look_shoal to plain.copy(style = 68, depth = DepthClockView.DEPTH_OVERLAP, look = "shoal"),
         R.string.ichthys_ed2_look_oneui to plain.copy(style = 79, depth = DepthClockView.DEPTH_OVERLAP, look = "oneui"),
         R.string.ichthys_ed2_look_typo to plain.copy(style = 78, depth = DepthClockView.DEPTH_OVERLAP, look = "typo"),

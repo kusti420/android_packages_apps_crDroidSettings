@@ -116,13 +116,11 @@
             settings:min="0"
             settings:interval="1" />
 
-        <!-- IchthysOS: the four gesture pill rows are hidden. Only SystemUI's NavigationHandle
-             reads them, and SystemUI's navigation bar is not created on this phone: the
-             Launcher3 taskbar draws the pill (enable_taskbar_on_phones) and does not read these
-             keys. Show them again once StashedHandleViewController honours them. -->
+        <!-- IchthysOS: the gesture pill rows. The Launcher3 taskbar draws the pill on this phone
+             (SystemUI's navigation bar is not created), and StashedHandleViewController applies
+             these keys live, as SystemUI's NavigationHandle does. -->
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="ichthys_nav_handle_hide"
-            settings:isPreferenceVisible="false"
             android:icon="@drawable/ic_navigation"
             android:disableDependentsState="true"
             android:title="@string/ichthys_nav_handle_hide_title"
@@ -130,7 +128,6 @@
             android:defaultValue="false" />
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_nav_handle_width"
-            settings:isPreferenceVisible="false"
             android:title="@string/ichthys_nav_handle_width_title"
             android:defaultValue="100"
             android:max="150"
@@ -139,7 +136,6 @@
             android:dependency="ichthys_nav_handle_hide" />
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_nav_handle_thickness"
-            settings:isPreferenceVisible="false"
             android:dependency="ichthys_nav_handle_hide"
             android:title="@string/ichthys_nav_handle_thickness_title"
             android:defaultValue="100"
@@ -148,7 +144,6 @@
             settings:units="%" />
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_nav_handle_opacity"
-            settings:isPreferenceVisible="false"
             android:dependency="ichthys_nav_handle_hide"
             android:title="@string/ichthys_nav_handle_opacity_title"
             android:defaultValue="100"
@@ -202,13 +197,16 @@
             android:summary="@string/power_end_call_summary"
             android:persistent="false"/>
 
+        <!-- IchthysOS: no requiresConfig on config_supportLongPressPowerWhenNonInteractive.
+             PhoneWindowManager arms and handles the torch long press itself, ahead of that
+             config check, and the config is false on this phone, so the gate hid a working
+             switch and left its timeout row greyed out on its own. -->
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="torch_long_press_power_gesture"
             android:icon="@drawable/ic_flashlight"
             android:title="@string/torch_long_press_power_gesture_title"
             android:summary="@string/torch_long_press_power_gesture_desc"
-            android:defaultValue="false"
-            lineage:requiresConfig="@*android:bool/config_supportLongPressPowerWhenNonInteractive" />
+            android:defaultValue="false" />
 
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="torch_long_press_power_timeout"
@@ -220,8 +218,7 @@
             android:max="600"
             settings:min="0"
             settings:interval="10"
-            settings:units="@string/unit_seconds"
-            lineage:requiresConfig="@*android:bool/config_supportLongPressPowerWhenNonInteractive" />
+            settings:units="@string/unit_seconds" />
 
     </PreferenceCategory>
 

@@ -21,9 +21,13 @@
     <string name="ichthys_hub_look_title">Look</string>
     <string name="ichthys_hub_look_summary">Theme, status bar, quick settings, navigation bar, lock screen and volume</string>
     <string name="ichthys_hub_privacy_title">Privacy</string>
-    <string name="ichthys_hub_privacy_summary">Guard: firewall, data access, trackers and activity</string>
+    <!-- IchthysOS: Guard finds and shows trackers but doesn't block them (HostRules.ENFORCED =
+         false); the per-app firewall and data shields do work. Don't imply tracker blocking. -->
+    <string name="ichthys_hub_privacy_summary">Guard: per-app firewall, data access, tracker scan and network activity</string>
     <string name="ichthys_hub_apps_title">Apps</string>
-    <string name="ichthys_hub_apps_summary">Ichthys Apps, background limits and integrity</string>
+    <!-- IchthysOS: the Apps page holds Ichthys Apps, Background (mostly lifts limits:
+         unrestricted apps, Backstage), Installing (downgrades) and Integrity. -->
+    <string name="ichthys_hub_apps_summary">Ichthys Apps, background, installing and integrity</string>
     <string name="ichthys_hub_system_title">System</string>
     <!-- IchthysOS: what the System page holds now; buttons, notifications and sound have their own hub rows. -->
     <string name="ichthys_hub_system_summary">Charging, Smart Pixels, screenshot preview, duress PIN, ichthys.nix import and export, about</string>

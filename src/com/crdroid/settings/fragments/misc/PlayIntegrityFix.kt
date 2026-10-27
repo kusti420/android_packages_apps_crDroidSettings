@@ -24,6 +24,7 @@ import com.android.settings.R
 import com.android.settings.SettingsPreferenceFragment
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -228,11 +229,18 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
+            } catch (e: CancellationException) {
+                // IchthysOS: the page was left (onDestroy cancels the scope). The generic catch
+                // below then called getString() on a detached fragment, and that uncaught
+                // IllegalStateException killed Settings.
+                throw e
             } catch (e: Exception) {
                 toast(getString(R.string.pif_failed, e.message ?: ""))
             } finally {
-                fetchPref.summary = getString(R.string.pif_fetch_pixel_beta_summary)
-                fetchPref.isEnabled = true
+                if (isAdded) {
+                    fetchPref.summary = getString(R.string.pif_fetch_pixel_beta_summary)
+                    fetchPref.isEnabled = true
+                }
             }
         }
     }
@@ -265,11 +273,15 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
                         toast(getString(R.string.pif_failed, result.message))
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e // IchthysOS: page left, see fetchDevicesForChannel().
             } catch (e: Exception) {
                 toast(getString(R.string.pif_failed, e.message ?: ""))
             } finally {
-                fetchPref?.summary = getString(R.string.pif_fetch_pixel_beta_summary)
-                fetchPref?.isEnabled = true
+                if (isAdded) {
+                    fetchPref?.summary = getString(R.string.pif_fetch_pixel_beta_summary)
+                    fetchPref?.isEnabled = true
+                }
             }
         }
     }

@@ -179,6 +179,8 @@ class EditorState(
     val draft: LockDesign,
     val wallpaper: WallpaperDraft,
     val picture: LockPicture,
+    /** IchthysOS Living Sky: the minute the preview shows (null: now); never saved. */
+    val skyMinute: Float? = null,
 )
 
 @Composable
@@ -212,6 +214,8 @@ fun LockEditor2(
             presetWallpaper?.let { WallpaperDraft.Builtin(it) } ?: WallpaperDraft.Current)
     }
     var picture by remember { mutableStateOf(LockPicture.EMPTY) }
+    // IchthysOS Living Sky: the preview's "preview the day" minute (null: now).
+    var skyMinute by remember { mutableStateOf<Float?>(null) }
     var catalog by remember { mutableStateOf<LockShortcuts.Catalog?>(null) }
     var sheet by remember { mutableStateOf(startSheet) }
     var ideas by remember { mutableStateOf(false) }
@@ -241,9 +245,14 @@ fun LockEditor2(
         }
     }
 
+    // IchthysOS Living Sky: a scrubbed time is only for while the Wallpaper sheet is open.
+    LaunchedEffect(sheet) { if (sheet != EditorSheet.WALLPAPER) skyMinute = null }
+
     // The draft's wallpaper, off the main thread; again when IchthysDepth has made a mask.
     LaunchedEffect(wallpaper, reload) {
         val w = wallpaper
+        // IchthysOS Living Sky: the Wallpaper sheet says whether the photo has a sky.
+        LockPictures.wantSky = true
         picture =
             withContext(Dispatchers.IO) {
                 when (w) {
@@ -271,6 +280,10 @@ fun LockEditor2(
         try {
             context.contentResolver.registerContentObserver(
                 Uri.parse("content://org.ichthys.depth/mask"), true, observer, UserHandle.USER_ALL)
+            // IchthysOS Living Sky: and its sky.
+            context.contentResolver.registerContentObserver(
+                Uri.parse(com.android.settingslib.ichthys.sky.LivingSky.SKY_URI), true, observer,
+                UserHandle.USER_ALL)
         } catch (e: Exception) {
             // IchthysDepth is missing: no cut-outs.
         }
@@ -450,6 +463,7 @@ fun LockEditor2(
                         onLayout = { layoutRef[0] = it },
                         selected = selected,
                         zoom = { zoom.value },
+                        skyMinute = skyMinute,
                         input = { k ->
                             Modifier.pointerInput(k) {
                                 awaitEachGesture {
@@ -624,12 +638,13 @@ fun LockEditor2(
                     ) {
                         EditorSheetHost(
                             sheet = shownSheet[0],
-                            state = EditorState(original, draft, wallpaper, picture),
+                            state = EditorState(original, draft, wallpaper, picture, skyMinute),
                             catalog = catalog,
                             geo = geo,
                             onDraft = { draft = it },
                             onWallpaper = { wallpaper = it },
                             onClose = { sheet = EditorSheet.NONE },
+                            onSkyMinute = { skyMinute = it },
                         )
                     }
                     AnimatedVisibility(

@@ -124,7 +124,9 @@ public class Clock extends SettingsPreferenceFragment
             parseClockDateFormats();
             return true;
       } else if (preference == mClockDateStyle) {
-          parseClockDateFormats();
+          // IchthysOS: the new style, not the stored one (not saved yet when this runs), or
+          // the format list showed the previous letter case.
+          parseClockDateFormats(Integer.parseInt((String) newValue));
           return true;
       } else if (preference == mClockDateFormat) {
           int index = mClockDateFormat.findIndexOfValue((String) newValue);
@@ -176,6 +178,11 @@ public class Clock extends SettingsPreferenceFragment
     }
 
     private void parseClockDateFormats() {
+        parseClockDateFormats(Settings.System.getIntForUser(getActivity().getContentResolver(),
+                Settings.System.STATUS_BAR_CLOCK_DATE_STYLE, 0, UserHandle.USER_CURRENT));
+    }
+
+    private void parseClockDateFormats(int dateFormat) {
         String[] dateEntries = getResources().getStringArray(
                 R.array.status_bar_date_format_entries_values);
         CharSequence parsedDateEntries[];
@@ -183,8 +190,6 @@ public class Clock extends SettingsPreferenceFragment
         Date now = new Date();
 
         int lastEntry = dateEntries.length - 1;
-        int dateFormat = Settings.System.getIntForUser(getActivity()
-                .getContentResolver(), Settings.System.STATUS_BAR_CLOCK_DATE_STYLE, 0, UserHandle.USER_CURRENT);
         for (int i = 0; i < dateEntries.length; i++) {
             if (i == lastEntry) {
                 parsedDateEntries[i] = dateEntries[i];

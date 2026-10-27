@@ -18,7 +18,11 @@
     <!-- IchthysOS: Backstage (kusti420/ichthysos-tracker#38) -->
     <string name="backstage_title">Backstage</string>
     <string name="backstage_summary">Keep apps running as if they were open, on a hidden screen</string>
-    <string name="backstage_intro">Apps in Backstage keep running as if they were open on screen, for example to finish an upload that stops when you leave the app. You can use the phone and lock it as usual; the apps are never shown anywhere. Add the Backstage tile to Quick Settings to send the app on screen with one tap; open the app again, or tap its notification, to bring it back. Backstage uses more battery and is cleared when the phone restarts. Up to 3 apps at a time.</string>
+    <!-- IchthysOS: matches IchthysBackstageService today: an app opened again stays in Backstage
+         and goes back to its hidden screen when you leave it; switching it off here brings it
+         back to the screen; hidden tasks still show in recents (services.md B11), so not
+         "never shown anywhere"; a hidden app keeps the whole phone awake. -->
+    <string name="backstage_intro">Apps in Backstage keep running as if they were open on screen, for example to finish an upload that stops when you leave the app. You can use the phone and lock it as usual. Open an app from its icon, recents or its notification to use it; when you leave it, it goes back to running out of sight. To take an app out, switch it off here (it comes back on screen) or tap Stop in its notification (it closes). Add the Backstage tile to Quick Settings to send the app on screen with one tap. While an app runs out of sight the phone doesn\'t go into deep sleep, so Backstage uses a lot more battery. It is cleared when the phone restarts. Up to 3 apps at a time.</string>
     <string name="backstage_apps_category">Apps</string>
     <string name="backstage_app_running">In Backstage</string>
     <string name="backstage_full">Backstage is full (3 apps)</string>

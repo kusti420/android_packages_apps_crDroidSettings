@@ -151,8 +151,10 @@ object SuggestionEngine {
                 dateAlign = DepthClockView.ALIGN_CENTRE, look = "idea",
             )
         val out = ArrayList<Idea>()
+        // IchthysOS: sized to sit above the subject. The face fits itself evenly and never
+        // distorts its digits, so this just picks the size that fills the room.
         fun shape(title: Int, d: LockDesign) {
-            val sized = d.copy(depth = DepthClockView.DEPTH_SHAPE)
+            val sized = d.copy(depth = DepthClockView.DEPTH_OVERLAP, shape = DepthClockView.SHAPE_STRETCH)
             out.add(Idea(s(title), sized.copy(scale = g.sizeForShape(p, sized))))
         }
 
@@ -160,12 +162,19 @@ object SuggestionEngine {
             // No subject: plain clocks in the picture's colours, depth off.
             val flat = plain.copy(depth = DepthClockView.DEPTH_OFF)
             out.add(Idea(s(R.string.ichthys_ed2_idea_classic), flat))
+            // IchthysOS Living Sky: a landscape's sky, alive.
+            if (pic.livingSky) {
+                out.add(Idea(s(R.string.ichthys_ed2_idea_sky), flat.copy(livingSky = true)))
+            }
             out.add(Idea(s(R.string.ichthys_ed2_idea_gradient),
                 flat.copy(fill = DepthClockView.FILL_GRADIENT, color = ink(1))))
             out.add(Idea(s(R.string.ichthys_ed2_idea_thin),
                 flat.copy(font = DepthClockView.FONT_THIN, color = ink(2), scale = 0.8f)))
             out.add(Idea(s(R.string.ichthys_ed2_idea_serif),
                 flat.copy(font = DepthClockView.FONT_SERIF, color = ink(1), scale = 0.75f)))
+            // IchthysOS: the bold Square block, a little smaller so it doesn't crowd the picture.
+            out.add(Idea(s(R.string.ichthys_ed2_idea_square),
+                flat.copy(font = DepthClockView.FONT_SQUARE, color = ink(2), scale = 0.8f)))
             out.add(Idea(s(R.string.ichthys_ed2_idea_heat),
                 flat.copy(fill = DepthClockView.FILL_HEAT, details = true)))
             // IchthysOS lock screen weather: today's forecast under the clock.
@@ -186,8 +195,20 @@ object SuggestionEngine {
         val peek = ((head - g.top0) / (b.top + 0.65f * b.height)).coerceIn(0.5f, 1f)
 
         shape(R.string.ichthys_ed2_idea_stretch, plain)
-        shape(R.string.ichthys_ed2_idea_tuck, plain.copy(shape = DepthClockView.SHAPE_TUCK, color = ink(1)))
-        shape(R.string.ichthys_ed2_idea_follow, plain.copy(shape = DepthClockView.SHAPE_FOLLOW))
+        // IchthysOS: One UI's look: a smaller clock beside the subject, on the side with room.
+        run {
+            val margin = LockKeys.SIDE_DP * g.density
+            val small = 0.72f
+            val reach = (g.width / 2f - margin - b.halfWidth * small).coerceAtLeast(0f)
+            val right = p.minTop(0.55f, 1f) >= p.minTop(0f, 0.45f)
+            val side = plain.copy(dx = if (right) reach else -reach, scale = small,
+                dateAlign = if (right) DepthClockView.ALIGN_END else DepthClockView.ALIGN_START,
+                color = ink(1))
+            out.add(Idea(s(R.string.ichthys_ed2_idea_beside),
+                side.copy(scale = g.sizeForShape(p, side).coerceAtMost(0.85f))))
+        }
+        // IchthysOS Living Sky: the subject in front of a sky that follows the day.
+        if (pic.livingSky) shape(R.string.ichthys_ed2_idea_sky, plain.copy(livingSky = true))
         out.add(Idea(s(R.string.ichthys_ed2_idea_behind), plain.copy(scale = peek)))
         out.add(Idea(s(R.string.ichthys_ed2_idea_xray),
             plain.copy(depth = DepthClockView.DEPTH_XRAY, fill = DepthClockView.FILL_HEAT,
@@ -196,15 +217,16 @@ object SuggestionEngine {
             plain.copy(fill = DepthClockView.FILL_GRADIENT, color = ink(1)))
         shape(R.string.ichthys_ed2_idea_thin, plain.copy(font = DepthClockView.FONT_THIN, color = ink(2)))
         shape(R.string.ichthys_ed2_idea_serif,
-            plain.copy(font = DepthClockView.FONT_SERIF, shape = DepthClockView.SHAPE_FOLLOW,
-                color = ink(3)))
+            plain.copy(font = DepthClockView.FONT_SERIF, color = ink(3)))
         // The deep look: full size, the subject over most of the minutes, X-ray to see through.
         if (head < g.screenY(plain, b.top + b.height)) {
             out.add(Idea(s(R.string.ichthys_ed2_idea_deep),
                 plain.copy(depth = DepthClockView.DEPTH_XRAY)))
         }
         shape(R.string.ichthys_ed2_idea_mono,
-            plain.copy(font = DepthClockView.FONT_MONO, shape = DepthClockView.SHAPE_TUCK, color = ink(2)))
+            plain.copy(font = DepthClockView.FONT_MONO, color = ink(2)))
+        shape(R.string.ichthys_ed2_idea_square,
+            plain.copy(font = DepthClockView.FONT_SQUARE, color = ink(1)))
         out.add(Idea(s(R.string.ichthys_ed2_idea_wide),
             plain.copy(font = DepthClockView.FONT_WIDE, color = ink(3), scale = peek * 0.9f)))
         shape(R.string.ichthys_ed2_idea_date_below, plain.copy(datePos = DepthClockView.DATE_BELOW))
@@ -215,7 +237,7 @@ object SuggestionEngine {
             plain.copy(weather = true, weatherPos = LockWeather.POS_DATE, weatherTemp = true,
                 weatherCondition = false, weatherHighLow = false))
         shape(R.string.ichthys_ed2_idea_forecast,
-            plain.copy(shape = DepthClockView.SHAPE_TUCK, color = ink(2), weather = true,
+            plain.copy(color = ink(2), weather = true,
                 weatherPos = LockWeather.POS_TOP_START, weatherTemp = true, weatherCondition = true,
                 weatherHighLow = true))
 

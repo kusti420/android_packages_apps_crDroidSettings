@@ -312,8 +312,11 @@ public class QuickSettings extends SettingsPreferenceFragment implements
                 break;
             case PULLDOWN_DIR_LEFT:
             case PULLDOWN_DIR_RIGHT:
+                // SystemUI mirrors the two edges under RTL (1 = end, 2 = start).
+                final boolean rtl = getResources().getConfiguration().getLayoutDirection()
+                        == android.view.View.LAYOUT_DIRECTION_RTL;
                 summary = getString(R.string.status_bar_quick_qs_pulldown_summary,
-                        getString(value == PULLDOWN_DIR_LEFT
+                        getString((value == PULLDOWN_DIR_LEFT) != rtl
                                 ? R.string.status_bar_quick_qs_pulldown_summary_left
                                 : R.string.status_bar_quick_qs_pulldown_summary_right));
                 break;
