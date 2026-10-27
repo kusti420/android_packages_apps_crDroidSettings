@@ -217,7 +217,7 @@ public class Clock extends SettingsPreferenceFragment
         Settings.System.putString(resolver,
                 Settings.System.STATUS_BAR_CLOCK_DATE_FORMAT, "");
         Settings.System.putIntForUser(resolver,
-                Settings.System.STATUS_BAR_CLOCK_SECONDS, 0, UserHandle.USER_CURRENT);
+                Settings.System.STATUS_BAR_CLOCK_SECONDS, 1, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
                 Settings.System.STATUSBAR_CLOCK_CHIP, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,

@@ -150,22 +150,38 @@ public final class NixConfigActions {
         });
     }
 
+    /**
+     * IchthysOS: the text of a failure, never "null" (an exception without a message names its
+     * type instead).
+     */
+    static String reason(Throwable e) {
+        final String m = e.getMessage();
+        return m != null && !m.isEmpty() ? m : e.getClass().getSimpleName();
+    }
+
     private void applyAsync(String config, boolean merge, String source) {
         final Context app = ctx().getApplicationContext();
         mExecutor.execute(() -> {
             String message;
+            boolean applied = false;
             try {
                 final int gen = mService.apply(config, merge, source, UserHandle.USER_CURRENT);
                 message = app.getString(R.string.theme_studio_applied, gen);
+                applied = true;
             } catch (RemoteException | RuntimeException e) {
-                message = app.getString(R.string.theme_studio_error, e.getMessage());
+                message = app.getString(R.string.theme_studio_error, reason(e));
             }
             final String toast = message;
+            final boolean restart = applied;
             mMain.post(() -> {
                 Toast.makeText(app, toast, Toast.LENGTH_LONG).show();
                 if (mFragment.isAdded()) {
                     refreshSummary();
-                    SystemUtils.INSTANCE.showSystemUiRestartDialog(ctx());
+                    // IchthysOS: a restart only helps after something was applied. Callers rule
+                    // out a no-op apply (the review diff says "no changes").
+                    if (restart) {
+                        SystemUtils.INSTANCE.showSystemUiRestartDialog(ctx());
+                    }
                 }
             });
         });
@@ -191,7 +207,8 @@ public final class NixConfigActions {
                 replaceDiff = mService.diff(text, false, UserHandle.USER_CURRENT);
                 mergeDiff = mService.diff(text, true, UserHandle.USER_CURRENT);
             } catch (Exception e) {
-                final String msg = app.getString(R.string.theme_studio_error, e.getMessage());
+                // IchthysOS: reading or parsing the file failed; nothing was applied.
+                final String msg = app.getString(R.string.theme_studio_read_error, reason(e));
                 mMain.post(() -> Toast.makeText(app, msg, Toast.LENGTH_LONG).show());
                 return;
             }
@@ -203,8 +220,15 @@ public final class NixConfigActions {
                         .setTitle(R.string.theme_studio_review_title)
                         .setMessage(mFragment.getString(R.string.theme_studio_review_hint)
                                 + "\n\n" + replaceDiff)
-                        .setPositiveButton(R.string.theme_studio_apply, (d, w) ->
-                                applyAsync(text, false, "import"))
+                        .setPositiveButton(R.string.theme_studio_apply, (d, w) -> {
+                            // IchthysOS: like Merge, a Replace that changes nothing is no apply.
+                            if (replaceDiff.startsWith("no changes")) {
+                                Toast.makeText(app, R.string.theme_studio_no_changes,
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                applyAsync(text, false, "import");
+                            }
+                        })
                         .setNeutralButton(R.string.theme_studio_merge, (d, w) -> {
                             if (mergeDiff.startsWith("no changes")) {
                                 Toast.makeText(app, R.string.theme_studio_no_changes,
@@ -228,7 +252,7 @@ public final class NixConfigActions {
                         .getBytes(StandardCharsets.UTF_8));
                 msg = app.getString(R.string.theme_studio_exported);
             } catch (Exception e) {
-                msg = app.getString(R.string.theme_studio_error, e.getMessage());
+                msg = app.getString(R.string.theme_studio_export_error, reason(e));
             }
             final String toast = msg;
             mMain.post(() -> Toast.makeText(app, toast, Toast.LENGTH_LONG).show());
@@ -241,7 +265,7 @@ public final class NixConfigActions {
         try {
             gens = mService.listGenerations(UserHandle.USER_CURRENT);
         } catch (RemoteException | RuntimeException e) {
-            Toast.makeText(ctx, mFragment.getString(R.string.theme_studio_error, e.getMessage()),
+            Toast.makeText(ctx, mFragment.getString(R.string.theme_studio_error, reason(e)),
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -284,18 +308,24 @@ public final class NixConfigActions {
         final Context app = ctx().getApplicationContext();
         mExecutor.execute(() -> {
             String msg;
+            boolean rolledBack = false;
             try {
                 final int now = mService.rollback(gen, UserHandle.USER_CURRENT);
                 msg = app.getString(R.string.theme_studio_applied, now);
+                rolledBack = true;
             } catch (RemoteException | RuntimeException e) {
-                msg = app.getString(R.string.theme_studio_error, e.getMessage());
+                msg = app.getString(R.string.theme_studio_error, reason(e));
             }
             final String toast = msg;
+            final boolean restart = rolledBack;
             mMain.post(() -> {
                 Toast.makeText(app, toast, Toast.LENGTH_LONG).show();
                 if (mFragment.isAdded()) {
                     refreshSummary();
-                    SystemUtils.INSTANCE.showSystemUiRestartDialog(ctx());
+                    // IchthysOS: no restart offer after a failed rollback.
+                    if (restart) {
+                        SystemUtils.INSTANCE.showSystemUiRestartDialog(ctx());
+                    }
                 }
             });
         });

@@ -108,6 +108,17 @@ public class PowerMenuActions extends SettingsPreferenceFragment {
             mPowerMenuItemsCategory.removePreference(mEmergencyPref);
             mEmergencyPref = null;
         }
+        // IchthysOS: same for On-the-go and Device controls. SystemUI's GlobalActionType has no
+        // entry for either, so GlobalActionsDialogLite skips the stored keys and the switches
+        // did nothing.
+        if (mOnTheGoPref != null) {
+            mPowerMenuItemsCategory.removePreference(mOnTheGoPref);
+            mOnTheGoPref = null;
+        }
+        if (mDeviceControlsPref != null) {
+            mPowerMenuItemsCategory.removePreference(mDeviceControlsPref);
+            mDeviceControlsPref = null;
+        }
     }
 
     @Override

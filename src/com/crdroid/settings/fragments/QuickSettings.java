@@ -18,7 +18,10 @@ package com.crdroid.settings.fragments;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 
@@ -64,6 +67,27 @@ public class QuickSettings extends SettingsPreferenceFragment implements
     /** qs_panel_style: 0 = card, 1 = classic. */
     private static final int PANEL_STYLE_CLASSIC = 1;
 
+    /**
+     * IchthysOS: Settings.Secure key of the tiles' style (ichthys.nix quickSettings.style). Unset
+     * means "shoal"; only "grid" uses the tile look rows below (SystemUI ShoalQsTheme.kt).
+     */
+    private static final String KEY_ICHTHYS_QS_STYLE = "ichthys_qs_style";
+    /** IchthysOS: rows read only by the Grid tiles; ShoalTileGrid draws its own tiles. */
+    private static final String[] GRID_ONLY_KEYS = {
+            KEY_QS_PANEL_STYLE,
+            "qs_accent_icon_bg",
+            "qs_tile_label_size",
+            "qs_tile_animation_style",
+    };
+
+    private final ContentObserver mQsStyleObserver =
+            new ContentObserver(new Handler(Looper.getMainLooper())) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    updateTileLookPrefs();
+                }
+            };
+
     private ListPreference mShowBrightnessSlider;
     private ListPreference mBrightnessSliderPosition;
     private SwitchPreferenceCompat mBrightnessSliderHaptic;
@@ -87,8 +111,7 @@ public class QuickSettings extends SettingsPreferenceFragment implements
         if (panelStyle != null) {
             panelStyle.setOnPreferenceChangeListener(this);
         }
-        updatePanelStylePrefs(Settings.System.getIntForUser(resolver,
-                Settings.System.QS_PANEL_STYLE, 0, UserHandle.USER_CURRENT));
+        updateTileLookPrefs();
 
         mShowBrightnessSlider = findPreference(KEY_SHOW_BRIGHTNESS_SLIDER);
         mShowBrightnessSlider.setOnPreferenceChangeListener(this);
@@ -118,12 +141,43 @@ public class QuickSettings extends SettingsPreferenceFragment implements
         }
     }
 
-    /** The card style has tile shapes; the classic style has icon shapes and optional labels. */
+    @Override
+    public void onResume() {
+        super.onResume();
+        getContext().getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(KEY_ICHTHYS_QS_STYLE), false, mQsStyleObserver,
+                UserHandle.USER_ALL);
+        updateTileLookPrefs();
+    }
+
+    @Override
+    public void onPause() {
+        getContext().getContentResolver().unregisterContentObserver(mQsStyleObserver);
+        super.onPause();
+    }
+
+    private void updateTileLookPrefs() {
+        updatePanelStylePrefs(Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.QS_PANEL_STYLE, 0, UserHandle.USER_CURRENT));
+    }
+
+    /**
+     * IchthysOS: which tile look rows do something. Only the Grid tiles read them, so they are
+     * hidden under the Shoal style. In the Grid tiles, the Classic style paints the tile container
+     * (tile shape) and draws no icon bubble, while the Card style draws only the icon bubble (icon
+     * shape) on a transparent container (SystemUI Tile.kt / CommonTile.kt). Labels can be hidden
+     * in both.
+     */
     private void updatePanelStylePrefs(int panelStyle) {
+        final boolean isGrid = "grid".equals(Settings.Secure.getStringForUser(
+                getContext().getContentResolver(), KEY_ICHTHYS_QS_STYLE, UserHandle.USER_CURRENT));
         final boolean isClassic = panelStyle == PANEL_STYLE_CLASSIC;
-        setVisible(KEY_QS_TILE_SHAPE, !isClassic);
-        setVisible(KEY_QS_TILE_ICON_SHAPE, isClassic);
-        setVisible(KEY_QS_TILE_LABEL_HIDE, isClassic);
+        for (String key : GRID_ONLY_KEYS) {
+            setVisible(key, isGrid);
+        }
+        setVisible(KEY_QS_TILE_SHAPE, isGrid && isClassic);
+        setVisible(KEY_QS_TILE_ICON_SHAPE, isGrid && !isClassic);
+        setVisible(KEY_QS_TILE_LABEL_HIDE, isGrid);
     }
 
     private void setVisible(String key, boolean visible) {

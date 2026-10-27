@@ -28,7 +28,9 @@
     android:title="@string/ichthys_hub_quicksettings_title">
 
     <!-- Tiles. Panel style, tile shape, labels and animation apply to the Grid tile layout; the
-         Shoal honeycomb (Theme Studio > Quick settings tiles) draws its own circles. -->
+         Shoal honeycomb (Theme Studio > Quick settings tiles) draws its own circles.
+         IchthysOS: QuickSettings.updatePanelStylePrefs() hides those rows unless the Grid style
+         is on, and shows only the shape row the chosen panel style draws. -->
     <PreferenceCategory
         android:key="look_qs_tiles_category"
         android:title="@string/qs_layout_category_title">
@@ -61,7 +63,7 @@
         <com.crdroid.settings.preferences.QSTileIconShapePreference
             android:key="qs_tile_icon_shape"
             android:icon="@drawable/ic_shapes"
-            android:title="@string/qs_tile_shape_title" />
+            android:title="@string/qs_tile_icon_shape_title" />
 
         <!-- Accent-tinted QS tile icon backgrounds (8.1-style circle behind active tiles).
              Backend: Settings.Secure "qs_accent_icon_bg", observed by SystemUI CommonTile.kt. -->

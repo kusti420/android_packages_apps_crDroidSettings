@@ -68,7 +68,8 @@
             android:summary="@string/navbar_invert_layout_summary"
             android:defaultValue="true" />
 
-        <!-- Rotation button -->
+        <!-- Rotation button. IchthysOS: SystemUI TaskbarDelegate also honours it now, so it works
+             while the Launcher3 taskbar draws the navigation bar. -->
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="enable_rotation_button"
             android:icon="@drawable/ic_rotation"
@@ -115,8 +116,13 @@
             settings:min="0"
             settings:interval="1" />
 
+        <!-- IchthysOS: the four gesture pill rows are hidden. Only SystemUI's NavigationHandle
+             reads them, and SystemUI's navigation bar is not created on this phone: the
+             Launcher3 taskbar draws the pill (enable_taskbar_on_phones) and does not read these
+             keys. Show them again once StashedHandleViewController honours them. -->
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="ichthys_nav_handle_hide"
+            settings:isPreferenceVisible="false"
             android:icon="@drawable/ic_navigation"
             android:disableDependentsState="true"
             android:title="@string/ichthys_nav_handle_hide_title"
@@ -124,6 +130,7 @@
             android:defaultValue="false" />
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_nav_handle_width"
+            settings:isPreferenceVisible="false"
             android:title="@string/ichthys_nav_handle_width_title"
             android:defaultValue="100"
             android:max="150"
@@ -132,6 +139,7 @@
             android:dependency="ichthys_nav_handle_hide" />
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_nav_handle_thickness"
+            settings:isPreferenceVisible="false"
             android:dependency="ichthys_nav_handle_hide"
             android:title="@string/ichthys_nav_handle_thickness_title"
             android:defaultValue="100"
@@ -140,6 +148,7 @@
             settings:units="%" />
         <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
             android:key="ichthys_nav_handle_opacity"
+            settings:isPreferenceVisible="false"
             android:dependency="ichthys_nav_handle_hide"
             android:title="@string/ichthys_nav_handle_opacity_title"
             android:defaultValue="100"
@@ -164,7 +173,7 @@
             android:entryValues="@array/recents_type_values"
             android:defaultValue="0" />
         <!-- Options of the Slim style (frameworks/opt/slimrecent, compiled into Launcher3, which
-             observes these keys). ThemeStudio.java enables the row while that style is
+             observes these keys). Buttons.java enables the row while that style is
              selected. -->
         <Preference
             android:key="slim_recents"
@@ -337,8 +346,8 @@
             android:icon="@drawable/ic_three_finger_gesture"
             android:dialogTitle="@string/three_fingers_swipe_title"
             android:title="@string/three_fingers_swipe_title"
-            android:entries="@array/hardware_keys_action_entries"
-            android:entryValues="@array/hardware_keys_action_values"
+            android:entries="@array/three_fingers_swipe_action_entries"
+            android:entryValues="@array/three_fingers_swipe_action_values"
             android:persistent="false" />
     </PreferenceCategory>
 

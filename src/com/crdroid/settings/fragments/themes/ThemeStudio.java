@@ -245,9 +245,16 @@ public class ThemeStudio extends SettingsPreferenceFragment
         }
         mExecutor.execute(() -> {
             final Map<String, Object> live;
+            final Map<String, Object> changed;
             try {
-                live = OptionSchema.create().evaluate(NixParser.parse(
+                final OptionSchema schema = OptionSchema.create();
+                live = schema.evaluate(NixParser.parse(
                         mService.exportConfig(true, UserHandle.USER_CURRENT)));
+                // IchthysOS: the full export fills in defaults, so an unset radius came back as
+                // "22" and the Default row could never be shown. Rows with a Default entry read
+                // only what differs from the defaults and presets.
+                changed = schema.evaluate(NixParser.parse(
+                        mService.exportConfig(false, UserHandle.USER_CURRENT)));
             } catch (Exception e) {
                 Log.w(TAG, "refresh", e);
                 return;
@@ -263,7 +270,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 if (badges != null) {
                     badges.setChecked(!Boolean.FALSE.equals(live.get("theme.iconBadges")));
                 }
-                setValue(KEY_RADIUS, live.get("theme.shape.radius"), NULL);
+                setValue(KEY_RADIUS, changed.get("theme.shape.radius"), NULL);
                 setValue(KEY_SHAPE, live.get("theme.shape.style"), "pill");
                 setValue(KEY_FONT, live.get("theme.font.body"), NULL);
 
@@ -347,18 +354,29 @@ public class ThemeStudio extends SettingsPreferenceFragment
         final Context ctx = getContext().getApplicationContext();
         mExecutor.execute(() -> {
             String message;
+            boolean applied = false;
             try {
-                final int gen = mService.apply(config, merge, source, UserHandle.USER_CURRENT);
-                message = ctx.getString(R.string.theme_studio_applied, gen);
+                // IchthysOS: picking the value that is already set changes nothing; say so
+                // instead of recording an apply and offering a SystemUI restart.
+                final String diff = mService.diff(config, merge, UserHandle.USER_CURRENT);
+                if (diff.startsWith("no changes")) {
+                    message = ctx.getString(R.string.theme_studio_no_changes);
+                } else {
+                    final int gen =
+                            mService.apply(config, merge, source, UserHandle.USER_CURRENT);
+                    message = ctx.getString(R.string.theme_studio_applied, gen);
+                    applied = true;
+                }
             } catch (RemoteException | RuntimeException e) {
-                message = ctx.getString(R.string.theme_studio_error, e.getMessage());
+                message = ctx.getString(R.string.theme_studio_error, NixConfigActions.reason(e));
             }
             final String toast = message;
+            final boolean restart = restartHint && applied;
             mMain.post(() -> {
                 Toast.makeText(ctx, toast, Toast.LENGTH_LONG).show();
                 if (isAdded()) {
                     refresh();
-                    if (restartHint) {
+                    if (restart) {
                         SystemUtils.INSTANCE.showSystemUiRestartDialog(getContext());
                     }
                 }

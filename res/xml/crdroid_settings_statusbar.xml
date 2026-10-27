@@ -330,7 +330,7 @@
             android:title="@string/statusbar_extra_padding_start_title"
             android:defaultValue="0"
             settings:interval="1"
-            settings:units="@string/unit_pixels"
+            settings:units="@string/unit_dp"
             android:max="30"
             settings:min="-30" />
 
@@ -340,7 +340,7 @@
             android:title="@string/statusbar_extra_padding_top_title"
             android:defaultValue="0"
             settings:interval="1"
-            settings:units="@string/unit_pixels"
+            settings:units="@string/unit_dp"
             android:max="30"
             settings:min="-30" />
 
@@ -350,7 +350,7 @@
             android:title="@string/statusbar_extra_padding_end_title"
             android:defaultValue="0"
             settings:interval="1"
-            settings:units="@string/unit_pixels"
+            settings:units="@string/unit_dp"
             android:max="30"
             settings:min="-30" />
     </PreferenceCategory>

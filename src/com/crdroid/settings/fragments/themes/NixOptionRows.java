@@ -72,17 +72,25 @@ public final class NixOptionRows {
             final Context ctx = fragment.getContext().getApplicationContext();
             EXECUTOR.execute(() -> {
                 String message;
+                boolean failed = false;
                 try {
                     final int gen = service.apply(config, true, "Settings: " + path,
                             UserHandle.USER_CURRENT);
                     message = ctx.getString(R.string.theme_studio_applied, gen);
                 } catch (RemoteException | RuntimeException e) {
-                    message = ctx.getString(R.string.theme_studio_error, e.getMessage());
+                    message = ctx.getString(R.string.theme_studio_error,
+                            NixConfigActions.reason(e));
+                    failed = true;
                 }
                 final String toast = message;
                 // No SystemUI restart: both rows bound here (status bar layout, tiles style) are
                 // watched live by SystemUI (StatusIconContainer, rememberShoalQsEnabled).
                 MAIN.post(() -> Toast.makeText(ctx, toast, Toast.LENGTH_SHORT).show());
+                // IchthysOS: the row already shows the new value; after a failed apply, read the
+                // live one back instead of leaving a value that isn't in effect.
+                if (failed) {
+                    refresh(fragment, row, service, path, fallback);
+                }
             });
             return true;
         });

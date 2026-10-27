@@ -35,7 +35,7 @@ class EdgeLightSettings : SettingsPreferenceFragment() {
             Settings.System.putStringForUser(resolver,
                     Settings.System.EDGE_LIGHT_CUSTOM_COLOR, null, UserHandle.USER_CURRENT)
             Settings.System.putIntForUser(resolver,
-                    Settings.System.EDGE_LIGHT_PULSE_COUNT, 1, UserHandle.USER_CURRENT)
+                    Settings.System.EDGE_LIGHT_PULSE_COUNT, 3, UserHandle.USER_CURRENT)
             Settings.System.putIntForUser(resolver,
                     Settings.System.EDGE_LIGHT_STROKE_WIDTH, 8, UserHandle.USER_CURRENT)
             Settings.System.putStringForUser(resolver,

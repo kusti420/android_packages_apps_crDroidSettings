@@ -23,6 +23,9 @@
     <string name="backstage_app_running">In Backstage</string>
     <string name="backstage_full">Backstage is full (3 apps)</string>
     <string name="backstage_max_hours_title">Stop automatically after</string>
+    <!-- IchthysOS: the service reads the limit when an app is added, so a change doesn't reach
+         apps already in Backstage. %s is the chosen entry (ListPreference summary). -->
+    <string name="backstage_max_hours_summary">%s, for apps sent to Backstage from now on</string>
     <string-array name="backstage_max_hours_entries" translatable="false">
         <item>Never</item>
         <item>1 hour</item>

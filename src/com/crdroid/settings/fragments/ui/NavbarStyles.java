@@ -81,9 +81,10 @@ public class NavbarStyles extends SettingsPreferenceFragment {
         return MetricsEvent.VIEW_UNKNOWN;
     }
 
-    /** Restores the default style. */
+    /** Restores the default style. IchthysOS: and drops the icon pack, which only stock uses. */
     public static void reset(Context context) {
         Settings.Secure.putString(context.getContentResolver(), KEY_ICHTHYS_STYLE, null);
+        Settings.Secure.putString(context.getContentResolver(), KEY_ICONS, null);
     }
 
     /** crDroid's navbar icon packs (IchthysNavIcons), each a variant of the stock style. */

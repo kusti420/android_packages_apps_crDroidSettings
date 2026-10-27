@@ -219,6 +219,12 @@ public class Buttons extends SettingsPreferenceFragment implements
             });
             updateSlimRecents(Settings.System.getIntForUser(resolver, "recents_type", 0,
                     UserHandle.USER_CURRENT));
+            // IchthysOS: in gesture navigation the custom styles open from swipe-up-and-hold
+            // over an app (AbsSwipeUpHandler), but the home screen's own swipe-up-and-hold is
+            // launcher state handling and still shows the stock overview. Say so.
+            if (isGesturalMode(context)) {
+                recentsType.setSummary(getString(R.string.recents_type_summary_gestures));
+            }
         }
         // Three fingers swipe.
         mThreeFingersSwipeAction = initList(KEY_THREE_FINGERS_SWIPE, Action.fromSettings(resolver,

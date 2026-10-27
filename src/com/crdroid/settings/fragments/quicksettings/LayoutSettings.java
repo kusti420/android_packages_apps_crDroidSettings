@@ -38,7 +38,22 @@ public class LayoutSettings extends SettingsPreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.qs_layout_settings);
+        // IchthysOS: the Shoal tiles (the default style) page by their own capacity and ignore
+        // the column/row counts; only the collapsed panel's row count applies to them.
+        final boolean isGrid = "grid".equals(Settings.Secure.getStringForUser(
+                getContext().getContentResolver(), "ichthys_qs_style", UserHandle.USER_CURRENT));
+        for (String key : GRID_ONLY_KEYS) {
+            final androidx.preference.Preference pref = findPreference(key);
+            if (pref != null) {
+                pref.setVisible(isGrid);
+            }
+        }
     }
+
+    private static final String[] GRID_ONLY_KEYS = {
+            "qs_tiles_columns", "qs_tiles_columns_landscape", "qs_tiles_rows",
+            "qs_tiles_rows_landscape",
+    };
 
     public static void reset(Context mContext) {
         ContentResolver resolver = mContext.getContentResolver();
@@ -51,7 +66,7 @@ public class LayoutSettings extends SettingsPreferenceFragment {
         Settings.System.putIntForUser(resolver,
                 Settings.System.QS_TILES_ROWS_LANDSCAPE, 2, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
-                Settings.System.QQS_TILES_ROWS, 2, UserHandle.USER_CURRENT);
+                Settings.System.QQS_TILES_ROWS, 1, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver,
                 Settings.System.QQS_TILES_ROWS_LANDSCAPE, 1, UserHandle.USER_CURRENT);
     }

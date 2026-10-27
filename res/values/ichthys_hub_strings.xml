@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 <!-- Strings of the IchthysOS settings entry (ichthys_hub.xml) and the pages it opens. -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Homepage entry and hub -->
     <string name="ichthys_hub_summary">Look, privacy, apps and system</string>
     <string name="ichthys_hub_look_title">Look</string>
@@ -25,7 +25,10 @@
     <string name="ichthys_hub_apps_title">Apps</string>
     <string name="ichthys_hub_apps_summary">Ichthys Apps, background limits and integrity</string>
     <string name="ichthys_hub_system_title">System</string>
-    <string name="ichthys_hub_system_summary">Buttons and gestures, notifications, sound, charging and about</string>
+    <!-- IchthysOS: what the System page holds now; buttons, notifications and sound have their own hub rows. -->
+    <string name="ichthys_hub_system_summary">Charging, Smart Pixels, screenshot preview, duress PIN, ichthys.nix import and export, about</string>
+    <!-- IchthysOS: toast when a link row is tapped and no browser is enabled. -->
+    <string name="ichthys_no_browser">No browser is enabled. Link: <xliff:g id="url">%1$s</xliff:g></string>
 
     <!-- Apps -->
     <string name="ichthys_apps_store_title">Ichthys Apps</string>

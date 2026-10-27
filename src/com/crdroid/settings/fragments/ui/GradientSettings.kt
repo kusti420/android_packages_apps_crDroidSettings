@@ -41,6 +41,19 @@ class GradientSettings : SettingsPreferenceFragment() {
         }
 
         syncCustomColorPrefsFromSetting()
+
+        // IchthysOS: only the Grid tiles draw the gradient; the Shoal tiles (the default style)
+        // ignore it, so the switch is disabled with a summary saying so.
+        val isGrid =
+            "grid" == Settings.Secure.getStringForUser(
+                resolver, "ichthys_qs_style", UserHandle.USER_CURRENT
+            )
+        if (!isGrid) {
+            findPreference<Preference>(KEY_QS_TILE_GRADIENT)?.apply {
+                isEnabled = false
+                setSummary(R.string.qs_grid_style_only_summary)
+            }
+        }
     }
 
     override fun onResume() {
@@ -66,6 +79,7 @@ class GradientSettings : SettingsPreferenceFragment() {
     }
 
     companion object {
+        private const val KEY_QS_TILE_GRADIENT = "qs_tile_gradient"
         private const val KEY_CUSTOM_GRADIENT_COLOR_MODE = "custom_gradient_color_mode"
         private const val KEY_CUSTOM_GRADIENT_START_COLOR = "custom_gradient_start_color"
         private const val KEY_CUSTOM_GRADIENT_END_COLOR = "custom_gradient_end_color"

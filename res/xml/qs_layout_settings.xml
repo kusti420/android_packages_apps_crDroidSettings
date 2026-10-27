@@ -19,13 +19,18 @@
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
     android:title="@string/qs_layout_columns_rows_title">
 
+    <!-- IchthysOS: defaults match SystemUI's unset values (config.xml
+         quick_settings_infinite_grid_num_columns 6 / land 8, paginated_grid_num_rows 3 / land 2).
+         Columns and rows only apply to the Grid tiles; LayoutSettings hides them under Shoal,
+         which sizes its own pages. qqs_tiles_rows applies to both. -->
+
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_columns"
         android:title="@string/qs_columns_portrait_title"
         android:max="10"
         settings:min="2"
         settings:interval="1"
-        android:defaultValue="4" />
+        android:defaultValue="6" />
 
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_columns_landscape"
@@ -33,7 +38,7 @@
         android:max="10"
         settings:min="2"
         settings:interval="1"
-        android:defaultValue="4" />
+        android:defaultValue="8" />
 
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_rows"
@@ -41,7 +46,7 @@
         android:max="8"
         settings:min="2"
         settings:interval="1"
-        android:defaultValue="4" />
+        android:defaultValue="3" />
 
     <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
         android:key="qs_tiles_rows_landscape"

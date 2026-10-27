@@ -36,7 +36,8 @@
         <item>Vertical wipe</item>
         <item>Horizontal wipe</item>
         <item>Circle from the centre</item>
-        <item>Close from both sides</item>
+        <!-- IchthysOS: LinearSideLightRevealEffect(horizontal) grows from the top edge. -->
+        <item>From the top</item>
     </string-array>
     <string-array name="ichthys_screen_reveal_style_values" translatable="false">
         <item>0</item>
@@ -106,7 +107,8 @@
         <item>2</item>
     </string-array>
     <string name="ichthys_notif_dot_replace_icons_title">Dot instead of notification icons</string>
-    <string name="ichthys_notif_dot_replace_icons_summary">Hide the notification icons in the status bar and show only the dot</string>
+    <!-- IchthysOS: SystemUI only replaces the icons while the dot logic is "any unseen". -->
+    <string name="ichthys_notif_dot_replace_icons_summary">Hide the notification icons in the status bar and show only the dot. Only while the dot lights for any unseen notification</string>
     <string name="ichthys_privacy_indicator_style_title">Camera, microphone and location indicator</string>
     <string name="ichthys_privacy_indicator_style_ring">Ring around the camera</string>
     <string name="ichthys_privacy_indicator_style_dot">Dot in the corner</string>

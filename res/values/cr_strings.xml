@@ -20,6 +20,8 @@
     <string name="disable_all_vibration_title">Disable all vibration</string>
     <string name="disable_all_vibration_summary">Turn off the vibration motor completely \u2014 no haptics, ringtone, notification, alarm or system vibration</string>
     <string name="recents_type_title">Recents style</string>
+    <!-- IchthysOS: Recents style summary in gesture navigation; %s is the selected style. -->
+    <string name="recents_type_summary_gestures">%s\nSwipe up and hold from an app opens this style. On the home screen, swipe up and hold still opens the stock overview</string>
     <string name="recents_type_stock">Stock (Launcher overview)</string>
     <string name="recents_type_classic">Classic (vertical task list)</string>
     <string name="recents_type_slim">Omni Slim (side panel)</string>
@@ -1340,6 +1342,10 @@
 
     <!-- QS Tiles Style -->
     <string name="qs_tile_shape_title">QS tiles shape</string>
+    <!-- IchthysOS: summary of a QS row that only the Grid tile style reads. -->
+    <string name="qs_grid_style_only_summary">Not used by the Shoal tile style. Switch Quick settings tiles to Grid to use it</string>
+    <!-- IchthysOS: the icon bubble shape (Grid tiles, Card style) has its own title. -->
+    <string name="qs_tile_icon_shape_title">QS tile icon shape</string>
     <string name="qs_tile_shape_dynamic">Dynamic</string>
     <string name="qs_tile_shape_circle">Circle</string>
     <string name="qs_tile_shape_rounded_square_smooth">Rounded square (smooth)</string>
@@ -1396,6 +1402,11 @@
     <string name="pulse_bass_haptics_none">No subtle vibration on sharp bass spikes</string>
     <string name="pulse_bass_haptics_running">Only when pulse is showing</string>
     <string name="pulse_bass_haptics_always">Whenever media playback is active</string>
+    <!-- IchthysOS: Pulse only listens while it is showing, never with the screen off, so the two
+         modes are "lock screen" and "lock screen and always-on display" (new names, so the old
+         translations of the two strings above are not shown for them). -->
+    <string name="pulse_bass_haptics_lockscreen">While Pulse shows on the lock screen</string>
+    <string name="pulse_bass_haptics_lockscreen_aod">While Pulse shows, also on the always-on display</string>
     <string name="pulse_rounded_bars_title">Rounded bars</string>
     <string name="pulse_rounded_bars_summary">Display visualizer bars with rounded corners</string>
     <string name="pulse_color">Visualizer color</string>

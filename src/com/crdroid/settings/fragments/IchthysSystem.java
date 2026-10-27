@@ -15,6 +15,7 @@
  */
 package com.crdroid.settings.fragments;
 
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.preference.Preference;
 
@@ -35,6 +37,7 @@ import com.android.settingslib.search.SearchIndexable;
 
 import lineageos.health.HealthInterface;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -50,6 +53,9 @@ public class IchthysSystem extends SettingsPreferenceFragment {
     private static final String KEY_CHARGING_CONTROL = "charging_control";
     private static final String KEY_SOURCE = "crdroid_source";
     private static final String KEY_TELEGRAM = "crdroid_telegram";
+    private static final String KEY_CHANGELOG = "crdroid_changelog";
+    /** What ChangelogFragment shows. IchthysOS: nothing in the build installs it yet. */
+    private static final String CHANGELOG_PATH = "/system/etc/Changelog.txt";
 
     private com.crdroid.settings.fragments.themes.NixConfigActions mNix;
 
@@ -84,6 +90,20 @@ public class IchthysSystem extends SettingsPreferenceFragment {
                 chargingControl.getParent().removePreference(chargingControl);
             }
         }
+
+        // IchthysOS: the changelog page reads CHANGELOG_PATH and is empty without it, so the row
+        // only shows when the build ships the file.
+        if (!hasChangelog()) {
+            final Preference changelog = findPreference(KEY_CHANGELOG);
+            if (changelog != null && changelog.getParent() != null) {
+                changelog.getParent().removePreference(changelog);
+            }
+        }
+    }
+
+    private static boolean hasChangelog() {
+        final File f = new File(CHANGELOG_PATH);
+        return f.isFile() && f.length() > 0;
     }
 
     @Override
@@ -99,7 +119,13 @@ public class IchthysSystem extends SettingsPreferenceFragment {
     }
 
     private void launchUrl(String url) {
-        getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        // IchthysOS: the browser (Jelly) can be disabled; don't crash Settings then.
+        try {
+            getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(getContext(), getString(R.string.ichthys_no_browser, url),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -132,6 +158,9 @@ public class IchthysSystem extends SettingsPreferenceFragment {
                     // Do not let search surface charging control when the backend is absent.
                     if (!HealthInterface.isChargingControlSupported(context)) {
                         keys.add(KEY_CHARGING_CONTROL);
+                    }
+                    if (!hasChangelog()) {
+                        keys.add(KEY_CHANGELOG);
                     }
                     return keys;
                 }

@@ -47,7 +47,9 @@
     <string name="theme_studio_export_title">Export config</string>
     <string name="theme_studio_export_summary">Save the current setup as ichthys.nix</string>
     <string name="theme_studio_generations_title">Generations</string>
-    <string name="theme_studio_generations_summary">Every change is a generation. Roll back to any of them</string>
+    <!-- IchthysOS: accent, palette, navigation bar and plain switches write their settings
+         directly and record no generation, so not every change is one. -->
+    <string name="theme_studio_generations_summary">Imports and config applies are generations. Rolling back to one also undoes accent, palette, navigation bar and switch changes made since</string>
     <string name="theme_studio_generations_current">Generation %1$d is current</string>
     <string name="theme_studio_unavailable">The configuration service isn\'t running</string>
     <string name="theme_studio_review_title">Review changes</string>
@@ -57,6 +59,9 @@
     <string name="theme_studio_no_changes">The config matches the current setup</string>
     <string name="theme_studio_applied">Applied as generation %1$d</string>
     <string name="theme_studio_error">Couldn\'t apply: %1$s</string>
+    <!-- IchthysOS: import and export failures are not apply failures. -->
+    <string name="theme_studio_read_error">Couldn\'t read the file: %1$s</string>
+    <string name="theme_studio_export_error">Couldn\'t export: %1$s</string>
     <string name="theme_studio_exported">Config exported</string>
     <string name="theme_studio_rollback_title">Roll back to generation %1$d?</string>
     <string name="theme_studio_rollback">Roll back</string>
@@ -123,13 +128,17 @@
     </string-array>
     <!-- Shoal: surfaces and icon badges (theme.surface, theme.iconBadges) -->
     <string name="theme_studio_surface_title">Surfaces</string>
+    <!-- IchthysOS: "stock" (theme.surface's third value) was missing, so it could be neither
+         shown nor picked here. -->
     <string-array name="theme_studio_surface_entries" translatable="false">
         <item>Hairline outlines (Koi)</item>
         <item>Tonal fills (Abyss)</item>
+        <item>Stock (plain Monet, no Shoal)</item>
     </string-array>
     <string-array name="theme_studio_surface_values" translatable="false">
         <item>hairline</item>
         <item>tonal</item>
+        <item>stock</item>
     </string-array>
     <string name="theme_studio_badges_title">Icon badges</string>
     <string name="theme_studio_badges_summary">Draw Settings icons on badge tiles</string>

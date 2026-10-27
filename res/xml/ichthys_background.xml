@@ -74,7 +74,7 @@
             android:key="ichthys_backstage_max_hours"
             android:icon="@drawable/ic_timer_outline"
             android:title="@string/backstage_max_hours_title"
-            android:summary="%s"
+            android:summary="@string/backstage_max_hours_summary"
             android:entries="@array/backstage_max_hours_entries"
             android:entryValues="@array/backstage_max_hours_values"
             android:defaultValue="0" />
