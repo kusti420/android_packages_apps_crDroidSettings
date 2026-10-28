@@ -58,8 +58,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -83,13 +81,31 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.android.settings.R
 import com.android.settingslib.ichthys.clock.DepthClockView
 import com.android.settingslib.ichthys.clock.LockWeather
-import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settings.ichthys.guard.ui.theme.Guard
+import com.android.settings.ichthys.guard.ui.theme.GuardTheme
 import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -132,7 +148,9 @@ class LockscreenEditor2Activity : ComponentActivity() {
         overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
         overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, android.R.anim.fade_out)
         setContent {
-            SettingsTheme { LockEditor2(preset, startSheet, animateIn = fresh, onDone = { finish() }) }
+            // IchthysOS Shoal: the editor's chrome follows the theme's tokens (accent, surfaces,
+            // fonts), as Guard's screens do.
+            GuardTheme { LockEditor2(preset, startSheet, animateIn = fresh, onDone = { finish() }) }
         }
     }
 
@@ -150,7 +168,9 @@ class LockscreenEditor2Activity : ComponentActivity() {
 }
 
 /** Which sheet is docked at the bottom. */
-enum class EditorSheet { NONE, CLOCK, DATE, WEATHER, NOTIFICATIONS, SHORTCUT_START, SHORTCUT_END, WALLPAPER, LOOKS }
+enum class EditorSheet {
+    NONE, CLOCK, LAYOUT, DATE, WEATHER, NOTIFICATIONS, SHORTCUT_START, SHORTCUT_END, WALLPAPER, LOOKS
+}
 
 private fun sheetFor(e: LockElement): EditorSheet =
     when (e) {
@@ -164,7 +184,7 @@ private fun sheetFor(e: LockElement): EditorSheet =
 
 private fun elementFor(s: EditorSheet): LockElement? =
     when (s) {
-        EditorSheet.CLOCK -> LockElement.CLOCK
+        EditorSheet.CLOCK, EditorSheet.LAYOUT -> LockElement.CLOCK
         EditorSheet.DATE -> LockElement.DATE
         EditorSheet.WEATHER -> LockElement.WEATHER
         EditorSheet.NOTIFICATIONS -> LockElement.NOTIFICATIONS
@@ -372,6 +392,7 @@ fun LockEditor2(
                 },
             )
         } else {
+            val tk = Guard.tokens
             val draftNow by rememberUpdatedState(draft)
             val sheetNow by rememberUpdatedState(sheet)
             val selected = elementFor(sheet)
@@ -410,7 +431,7 @@ fun LockEditor2(
             }
 
             Column(
-                Modifier.fillMaxSize().background(Color(0xFF0C0A0D)).statusBarsPadding().navigationBarsPadding()
+                Modifier.fillMaxSize().background(tk.ink).statusBarsPadding().navigationBarsPadding()
             ) {
                 // Cancel · Ideas · Apply
                 Row(
@@ -419,29 +440,48 @@ fun LockEditor2(
                             alpha = 1f - zoom.value
                             translationY = -24 * density * zoom.value
                         }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                        .height(56.dp)
+                        .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    TextButton(onClick = { cancel() }) { Text(stringResource(android.R.string.cancel)) }
+                    // Back (cancel) with the screen's name, in the theme's display face.
+                    Row(
+                        Modifier.clip(RoundedCornerShape(10.dp)).clickable { cancel() }
+                            .heightIn(min = 44.dp).padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Canvas(Modifier.size(18.dp)) {
+                            val u = size.width / 24f
+                            val chevron = Path().apply {
+                                moveTo(15 * u, 5 * u)
+                                lineTo(8 * u, 12 * u)
+                                lineTo(15 * u, 19 * u)
+                            }
+                            drawPath(chevron, tk.text, style = Stroke(1.6.dp.toPx(), cap = StrokeCap.Round,
+                                join = StrokeJoin.Round))
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.ichthys_editor_title), fontFamily = tk.display,
+                            fontWeight = FontWeight.Bold, fontSize = 19.sp, color = tk.text, maxLines = 1)
+                    }
+                    Spacer(Modifier.weight(1f))
                     if (ideaTitle != null && sheet != EditorSheet.NONE) {
-                        Text(stringResource(R.string.ichthys_ed2_idea_open, ideaTitle!!), fontSize = 13.sp,
-                            color = Color(0xFF9FE7DD), maxLines = 1)
+                        Text(stringResource(R.string.ichthys_ed2_idea_open, ideaTitle!!), fontFamily = tk.mono,
+                            fontSize = 11.sp, color = tk.muted, maxLines = 1,
+                            overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 120.dp))
                     } else {
-                        FilledTonalButton(onClick = { ideas = true }) {
-                            Text("✦  " + stringResource(R.string.ichthys_ed2_ideas))
+                        BarAction("✦ " + stringResource(R.string.ichthys_ed2_ideas), tk.outline, tk.text) {
+                            ideas = true
                         }
                     }
-                    Button(
-                        enabled = !leaving,
-                        onClick = {
+                    Spacer(Modifier.width(8.dp))
+                    BarAction(stringResource(R.string.apply), tk.accent, tk.accent) {
+                        if (!leaving) {
                             val d = draft
                             val o = original
                             val w = wallpaper
                             leave { LockStore.apply(context, d, o, w) }
-                        },
-                    ) {
-                        Text(stringResource(R.string.apply))
+                        }
                     }
                 }
 
@@ -477,7 +517,7 @@ fun LockEditor2(
                                     // A corner handle of the selected clock resizes it (the corners of
                                     // the turned frame).
                                     val onHandle =
-                                        sheetNow == EditorSheet.CLOCK &&
+                                        (sheetNow == EditorSheet.CLOCK || sheetNow == EditorSheet.LAYOUT) &&
                                             lay.clockCorners(FRAME_PAD_DP * dens)
                                                 .any { (it - p0).getDistance() < 28 * dens }
                                     val target = if (onHandle) LockElement.CLOCK else hit(lay, p0)
@@ -601,34 +641,35 @@ fun LockEditor2(
                             val dens = geo.density
                             if (dragging != null) guardRails(dens)
                             if (snapped) {
-                                drawLine(Color(0xFF9FE7DD), Offset(lay.clockCentreX, 0f),
+                                drawLine(tk.accent, Offset(lay.clockCentreX, 0f),
                                     Offset(lay.clockCentreX, size.height), strokeWidth = 2f,
                                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 12f)))
                             }
                             if (dragging == LockElement.DATE) {
                                 lay.rects[LockElement.CLOCK]?.let { c ->
                                     for (spot in dateSpots(c)) {
-                                        drawCircle(Color(0x999FE7DD), 9 * dens, spot)
+                                        drawCircle(tk.accent.copy(alpha = 0.6f), 9 * dens, spot)
                                     }
                                 }
-                                dateFinger?.let { drawCircle(Color(0xFF9FE7DD), 12 * dens, it) }
+                                dateFinger?.let { drawCircle(tk.accent, 12 * dens, it) }
                             }
                             if (dragging == LockElement.WEATHER) {
                                 weatherSpots(draftNow, lay, geo).forEachIndexed { i, (_, spot) ->
                                     val near = i == weatherSpot
-                                    drawCircle(Color(if (near) 0xFF9FE7DD else 0x999FE7DD),
+                                    drawCircle(if (near) tk.accent else tk.accent.copy(alpha = 0.6f),
                                         (if (near) 13f else 9f) * dens, spot)
                                 }
-                                dateFinger?.let { drawCircle(Color(0x669FE7DD), 18 * dens, it) }
+                                dateFinger?.let { drawCircle(tk.accent.copy(alpha = 0.4f), 18 * dens, it) }
                             }
                         },
                     )
                 }
 
-                // The docked sheet for the selection, or the bottom bar. IchthysOS polish: both come and
-                // go on springs (the preview resizes along with them, no jump), and the sheet's content
+                // The tabs, and the docked sheet for the open one. IchthysOS polish: the sheet comes
+                // and goes on a spring (the preview resizes along with it, no jump), and its content
                 // changes in place with a short cross-fade.
                 Column(Modifier.graphicsLayer { alpha = 1f - zoom.value }) {
+                    EditorTabs(sheet) { sheet = it }
                     AnimatedVisibility(
                         visible = sheet != EditorSheet.NONE,
                         enter = expandVertically(spring(dampingRatio = 0.86f, stiffness = 420f),
@@ -643,38 +684,27 @@ fun LockEditor2(
                             geo = geo,
                             onDraft = { draft = it },
                             onWallpaper = { wallpaper = it },
-                            onClose = { sheet = EditorSheet.NONE },
+                            onSheet = { sheet = it },
                             onSkyMinute = { skyMinute = it },
                         )
-                    }
-                    AnimatedVisibility(
-                        visible = sheet == EditorSheet.NONE,
-                        enter = expandVertically(spring(dampingRatio = 1f, stiffness = 420f)) +
-                            fadeIn(tween(180, delayMillis = 80)),
-                        exit = shrinkVertically(spring(dampingRatio = 1f, stiffness = 520f)) +
-                            fadeOut(tween(90)),
-                    ) {
-                        Row(
-                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                        ) {
-                            TextButton(onClick = { sheet = EditorSheet.WALLPAPER }) {
-                                Text(stringResource(R.string.ichthys_ed2_wallpaper))
-                            }
-                            TextButton(onClick = { sheet = EditorSheet.CLOCK }) {
-                                Text(stringResource(R.string.ichthys_ed2_clock))
-                            }
-                            TextButton(onClick = { sheet = EditorSheet.WEATHER }) {
-                                Text(stringResource(R.string.ichthys_ed2_weather))
-                            }
-                            TextButton(onClick = { sheet = EditorSheet.LOOKS }) {
-                                Text(stringResource(R.string.ichthys_ed2_looks))
-                            }
-                        }
                     }
                 }
             }
         }
+    }
+}
+
+/** A top bar action: an outlined mono caps button ([line] its outline, [ink] its text). */
+@Composable
+private fun BarAction(label: String, line: Color, ink: Color, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(10.dp)
+    Box(
+        Modifier.height(36.dp).clip(shape).border(1.dp, line, shape).clickable(onClick = onClick)
+            .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label.uppercase(), fontFamily = Guard.tokens.mono, fontSize = 12.sp, letterSpacing = 1.sp,
+            fontWeight = FontWeight.SemiBold, color = ink, maxLines = 1)
     }
 }
 

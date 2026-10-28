@@ -21,6 +21,16 @@
     <string name="ichthys_ed2_wallpaper">Wallpaper</string>
     <string name="ichthys_ed2_clock">Clock</string>
     <string name="ichthys_ed2_looks">Looks</string>
+    <!-- IchthysOS Shoal editor: the tabs under the preview -->
+    <string name="ichthys_ed2_layout">Layout</string>
+    <string name="ichthys_ed2_extras">Extras</string>
+    <string name="ichthys_ed2_date_line">Date line</string>
+    <string name="ichthys_ed2_move">Move the clock</string>
+    <string name="ichthys_ed2_move_hint">Drag it on the preview, pinch to resize, twist to turn</string>
+    <string name="ichthys_ed2_auto">Auto</string>
+    <string name="ichthys_ed2_glass_smoky">Smoky</string>
+    <string name="ichthys_ed2_glass_milky">Milky</string>
+    <string name="ichthys_ed2_glass_auto_note">Auto picks how milky the glass is from the picture behind it.</string>
     <string name="ichthys_ed2_discard_title">Discard your changes?</string>
     <string name="ichthys_ed2_discard">Discard</string>
     <string name="ichthys_ed2_keep_editing">Keep editing</string>

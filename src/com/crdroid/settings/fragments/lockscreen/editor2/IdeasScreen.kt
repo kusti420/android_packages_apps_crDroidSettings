@@ -42,7 +42,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,6 +59,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.layout.height
+import com.android.settings.ichthys.guard.ui.theme.Guard
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.settings.R
@@ -123,8 +126,9 @@ fun IdeasScreen(
         phase = IdeasPhase.GRID
     }
 
+    val tk = Guard.tokens
     Column(
-        Modifier.fillMaxSize().background(Color(0xFF121014)).statusBarsPadding().navigationBarsPadding()
+        Modifier.fillMaxSize().background(tk.ink).statusBarsPadding().navigationBarsPadding()
     ) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -137,7 +141,7 @@ fun IdeasScreen(
                 if (phase == IdeasPhase.GRID)
                     stringResource(R.string.ichthys_ed2_ideas_count, ideas.size)
                 else stringResource(R.string.ichthys_ed2_ideas),
-                fontSize = 16.sp, color = Color(0xFFF4EDE6),
+                fontFamily = tk.display, fontWeight = FontWeight.Bold, fontSize = 19.sp, color = tk.text,
                 modifier = Modifier.weight(1f).padding(start = 8.dp),
             )
         }
@@ -147,7 +151,7 @@ fun IdeasScreen(
                     contentAlignment = Alignment.Center) {
                     Box(Modifier.aspectRatio(screen.width.toFloat() / screen.height)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF0B1418))) {
+                        .background(tk.card)) {
                         preview.backdrop?.let {
                             Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                         }
@@ -155,9 +159,9 @@ fun IdeasScreen(
                             Column(Modifier.fillMaxSize().background(Color(0x88000000)),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally) {
-                                CircularProgressIndicator(color = Color(0xFF9FE7DD))
+                                CircularProgressIndicator(color = tk.accent)
                                 Text(stringResource(R.string.ichthys_ed2_ideas_working), fontSize = 13.sp,
-                                    color = Color(0xFFF4EDE6), modifier = Modifier.padding(top = 12.dp))
+                                    color = Color.White, modifier = Modifier.padding(top = 12.dp))
                             }
                         }
                     }
@@ -171,18 +175,26 @@ fun IdeasScreen(
                     }
                 }
                 Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                    Button(
-                        enabled = phase == IdeasPhase.PICK && preview.source != null,
-                        onClick = { phase = IdeasPhase.WORKING },
+                    // The one action here: outlined in the accent (Shoal), faded while it can't run.
+                    val ready = phase == IdeasPhase.PICK && preview.source != null
+                    val shape = RoundedCornerShape(10.dp)
+                    Box(
+                        Modifier.height(44.dp).alpha(if (ready) 1f else 0.4f).clip(shape)
+                            .border(1.dp, tk.accent, shape)
+                            .clickable(enabled = ready) { phase = IdeasPhase.WORKING }
+                            .padding(horizontal = 20.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Text("✦  " + stringResource(R.string.ichthys_ed2_ideas_make), fontSize = 15.sp)
+                        Text(("✦  " + stringResource(R.string.ichthys_ed2_ideas_make)).uppercase(),
+                            fontFamily = tk.mono, fontSize = 12.sp, letterSpacing = 1.sp,
+                            fontWeight = FontWeight.SemiBold, color = tk.accent)
                     }
                 }
             }
             IdeasPhase.GRID -> {
                 if (analysed.cutout == null) {
                     Text(stringResource(R.string.ichthys_ed2_ideas_no_subject), fontSize = 12.sp,
-                        color = Color(0xFFA59EA0), modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                        color = tk.muted, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
                 }
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(104.dp),
@@ -215,7 +227,7 @@ fun IdeasScreen(
                         ) {
                             MiniLock(idea.design, analysed,
                                 Modifier.fillMaxWidth().aspectRatio(screen.width.toFloat() / screen.height))
-                            Text(idea.title, fontSize = 11.sp, color = Color(0xFFA59EA0), maxLines = 1,
+                            Text(idea.title, fontFamily = tk.mono, fontSize = 10.sp, color = tk.muted, maxLines = 1,
                                 modifier = Modifier.padding(top = 4.dp))
                         }
                     }
@@ -227,13 +239,15 @@ fun IdeasScreen(
 
 @Composable
 private fun SourceCard(label: String, on: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(14.dp)
+    val tk = Guard.tokens
+    val shape = RoundedCornerShape(12.dp)
     Box(
-        modifier.clip(shape).background(Color(0xFF1C1A1F))
-            .border(if (on) BorderStroke(2.dp, Color(0xFF9FE7DD)) else BorderStroke(1.dp, Color(0xFF3A363D)), shape)
+        modifier.clip(shape)
+            .then(if (tk.hairlineSurfaces) Modifier else Modifier.background(tk.card))
+            .border(if (on) BorderStroke(1.5.dp, tk.accent) else BorderStroke(1.dp, tk.hairline), shape)
             .clickable(onClick = onClick)
             .padding(14.dp),
     ) {
-        Text(label, fontSize = 13.sp, color = Color(0xFFF4EDE6))
+        Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = if (on) tk.accent else tk.text)
     }
 }

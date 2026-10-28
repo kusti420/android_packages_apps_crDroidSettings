@@ -28,7 +28,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -49,12 +48,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -78,6 +76,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import com.android.settings.ichthys.guard.ui.theme.Guard
+import com.android.settings.ichthys.guard.ui.theme.GuardTokens
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.settings.R
@@ -87,14 +103,78 @@ import com.android.settingslib.ichthys.clock.SquareDigits
 import com.android.settingslib.ichthys.sky.LivingSky
 import com.crdroid.settings.fragments.lockscreen.ClockUtils
 
-private val SHEET_BG = Color(0xFF18161A)
-private val CHIP_BG = Color(0xFF252228)
-private val LINE = Color(0xFF3A363D)
-private val INK = Color(0xFFF4EDE6)
-private val DIM = Color(0xFFA59EA0)
-private val POND = Color(0xFF9FE7DD)
+/**
+ * IchthysOS Shoal: the editor's colours, fonts and corners, all from the theme (GuardTheme around
+ * the editor reads the framework's ichthys_* tokens). Nothing in the editor's own chrome is a hex.
+ */
+private val t: GuardTokens
+    @Composable get() = Guard.tokens
 
-/** The sheet docked under the preview for [sheet]. Every change goes into the draft only. */
+/** The editor's parts, as the tabs under the preview. */
+enum class EditorTab(val label: Int) {
+    CLOCK(R.string.ichthys_ed2_clock),
+    LAYOUT(R.string.ichthys_ed2_layout),
+    WALL(R.string.ichthys_ed2_wallpaper),
+    EXTRAS(R.string.ichthys_ed2_extras),
+    LOOKS(R.string.ichthys_ed2_looks),
+}
+
+fun tabFor(s: EditorSheet): EditorTab? =
+    when (s) {
+        EditorSheet.CLOCK -> EditorTab.CLOCK
+        EditorSheet.LAYOUT, EditorSheet.DATE -> EditorTab.LAYOUT
+        EditorSheet.WALLPAPER -> EditorTab.WALL
+        EditorSheet.WEATHER, EditorSheet.NOTIFICATIONS, EditorSheet.SHORTCUT_START,
+        EditorSheet.SHORTCUT_END -> EditorTab.EXTRAS
+        EditorSheet.LOOKS -> EditorTab.LOOKS
+        EditorSheet.NONE -> null
+    }
+
+private fun EditorTab.sheet(): EditorSheet =
+    when (this) {
+        EditorTab.CLOCK -> EditorSheet.CLOCK
+        EditorTab.LAYOUT -> EditorSheet.LAYOUT
+        EditorTab.WALL -> EditorSheet.WALLPAPER
+        EditorTab.EXTRAS -> EditorSheet.WEATHER
+        EditorTab.LOOKS -> EditorSheet.LOOKS
+    }
+
+/** Mono caps tabs with the accent under the open one; the open one again folds the sheet away. */
+@Composable
+fun EditorTabs(sheet: EditorSheet, onSheet: (EditorSheet) -> Unit) {
+    val tk = t
+    val open = tabFor(sheet)
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            EditorTab.entries.forEach { tab ->
+                val on = tab == open
+                Text(
+                    stringResource(tab.label).uppercase(),
+                    fontFamily = tk.mono, fontSize = 11.sp, letterSpacing = 1.1.sp,
+                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Medium,
+                    color = if (on) tk.text else tk.muted,
+                    modifier = Modifier
+                        .clickable { onSheet(if (on) EditorSheet.NONE else tab.sheet()) }
+                        .padding(horizontal = 6.dp)
+                        .padding(top = 14.dp, bottom = 12.dp)
+                        .drawBehind {
+                            if (on) {
+                                val h = 2.dp.toPx()
+                                drawRect(tk.accent, Offset(0f, size.height + 12.dp.toPx() - h),
+                                    Size(size.width, h))
+                            }
+                        },
+                )
+            }
+        }
+        Box(Modifier.fillMaxWidth().height(tk.hairlineWidth).background(tk.hairline))
+    }
+}
+
+/** The sheet docked under the tabs for [sheet]. Every change goes into the draft only. */
 @Composable
 fun EditorSheetHost(
     sheet: EditorSheet,
@@ -103,20 +183,29 @@ fun EditorSheetHost(
     geo: LockGeometry,
     onDraft: (LockDesign) -> Unit,
     onWallpaper: (WallpaperDraft) -> Unit,
-    onClose: () -> Unit,
+    onSheet: (EditorSheet) -> Unit,
     onSkyMinute: (Float?) -> Unit = {},
 ) {
     Column(
         Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
-            .background(SHEET_BG)
-            .heightIn(max = 380.dp)
-            .padding(top = 8.dp, bottom = 10.dp)
+            .background(t.ink)
+            .heightIn(max = 400.dp)
+            .padding(bottom = 10.dp)
     ) {
-        Box(
-            Modifier.align(Alignment.CenterHorizontally).size(36.dp, 4.dp).clip(CircleShape)
-                .background(LINE).clickable(onClick = onClose)
-        )
+        // Extras: which of them, as chips above the sheet (they stay while its content changes).
+        if (tabFor(sheet) == EditorTab.EXTRAS) {
+            val extras =
+                listOf(EditorSheet.WEATHER to R.string.ichthys_ed2_weather,
+                    EditorSheet.NOTIFICATIONS to R.string.ichthys_ed2_notifications,
+                    EditorSheet.SHORTCUT_START to R.string.ichthys_ed2_shortcut_left,
+                    EditorSheet.SHORTCUT_END to R.string.ichthys_ed2_shortcut_right)
+            Spacer(Modifier.size(12.dp))
+            ChipRow {
+                extras.forEach { (s, label) ->
+                    MonoChip(stringResource(label), sheet == s, { onSheet(s) })
+                }
+            }
+        }
         // IchthysOS polish: another sheet's content cross-fades in while the sheet's height
         // springs to fit it (no jump in the preview above).
         AnimatedContent(
@@ -129,10 +218,10 @@ fun EditorSheetHost(
             },
             label = "sheet",
         ) { shown ->
-            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(top = 6.dp)) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(top = 2.dp)) {
                 when (shown) {
-                    EditorSheet.CLOCK -> ClockSheet(state, geo, onDraft)
-                    EditorSheet.DATE -> DateSheet(state.draft, onDraft)
+                    EditorSheet.CLOCK -> ClockSheet(state, onDraft)
+                    EditorSheet.LAYOUT, EditorSheet.DATE -> LayoutSheet(state, geo, onDraft)
                     EditorSheet.WEATHER -> WeatherSheet(state.draft, onDraft)
                     EditorSheet.NOTIFICATIONS -> NotificationSheet(state.draft, onDraft)
                     EditorSheet.SHORTCUT_START ->
@@ -150,144 +239,275 @@ fun EditorSheetHost(
 
 // ---- building blocks -------------------------------------------------------------------------
 
+/** A group's name, mono caps; [trailing] sits at its end (a value, an Auto chip). */
 @Composable
-private fun Label(text: String) {
-    Text(
-        text.uppercase(),
-        fontSize = 10.sp,
-        letterSpacing = 1.4.sp,
-        color = DIM,
-        modifier = Modifier.padding(start = 16.dp, top = 10.dp, bottom = 6.dp),
-    )
+private fun Label(text: String, trailing: (@Composable () -> Unit)? = null) {
+    Row(
+        Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text.uppercase(), fontFamily = t.mono, fontSize = 10.sp, letterSpacing = 1.2.sp,
+            color = t.muted, modifier = Modifier.weight(1f))
+        trailing?.invoke()
+    }
 }
 
 @Composable
 private fun ChipRow(content: @Composable () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 14.dp),
-        horizontalArrangement = Arrangement.spacedBy(9.dp),
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 18.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Top,
     ) {
         content()
     }
 }
 
+/**
+ * A Shoal card: outlined by a hairline (filled instead on tonal surfaces); the accent outlines the
+ * chosen one.
+ */
+@Composable
+private fun Modifier.shoalCard(on: Boolean, shape: Shape): Modifier {
+    val tk = t
+    return clip(shape)
+        .then(if (tk.hairlineSurfaces) Modifier else Modifier.background(tk.card))
+        .then(
+            when {
+                on -> Modifier.border(1.5.dp, tk.accent, shape)
+                tk.hairlineSurfaces -> Modifier.border(tk.hairlineWidth, tk.hairline, shape)
+                else -> Modifier
+            })
+}
+
 /** A choice shown as a picture of itself (a small lock screen) with its name under it. */
 @Composable
 private fun PictureChip(label: String, on: Boolean, onClick: () -> Unit, thumb: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(10.dp)
-    Column(Modifier.width(58.dp).clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            Modifier.size(58.dp, 128.dp).clip(shape)
-                .border(if (on) BorderStroke(2.dp, POND) else BorderStroke(1.dp, LINE), shape)
-        ) {
-            thumb()
-        }
-        Text(label, fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.Center,
-            color = if (on) INK else DIM, modifier = Modifier.padding(top = 4.dp))
+    Column(
+        Modifier.width(64.dp).shoalCard(on, RoundedCornerShape(12.dp)).clickable(onClick = onClick)
+            .padding(3.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(Modifier.fillMaxWidth().height(128.dp).clip(RoundedCornerShape(9.dp))) { thumb() }
+        Text(label, fontFamily = t.mono, fontSize = 10.sp, letterSpacing = 0.4.sp, maxLines = 1,
+            overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+            color = if (on) t.accent else t.muted, modifier = Modifier.padding(top = 5.dp, bottom = 3.dp))
     }
 }
 
+/** Some digits in a face's own type, with its name: the font picker's card. */
 @Composable
-private fun TextChip(label: String, on: Boolean, onClick: () -> Unit, family: FontFamily? = null,
-    big: Boolean = false, square: Boolean = false) {
-    val shape = RoundedCornerShape(10.dp)
-    Box(
-        Modifier.clip(shape).background(CHIP_BG)
-            .border(if (on) BorderStroke(2.dp, POND) else BorderStroke(1.dp, LINE), shape)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = if (big) 6.dp else 8.dp),
-        contentAlignment = Alignment.Center,
+private fun TypeCard(label: String, sample: String, on: Boolean, onClick: () -> Unit,
+    family: FontFamily?, square: Boolean = false, style: TextStyle = TextStyle()) {
+    val tk = t
+    Column(
+        Modifier.width(78.dp).shoalCard(on, RoundedCornerShape(12.dp)).clickable(onClick = onClick)
+            .padding(top = 10.dp, bottom = 7.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // IchthysOS: the Square font has no typeface; the text keeps the chip its size (unseen)
-        // and the digits are drawn over it as the Depth face draws them.
-        Text(label, fontSize = if (big) 20.sp else 12.sp, color = if (square) Color.Transparent else INK,
-            fontFamily = family)
-        if (square) {
-            Box(
-                Modifier.matchParentSize().drawWithCache {
-                    val textSize = (if (big) 20.sp else 12.sp).toPx()
-                    val path = android.graphics.Path()
-                    val w = SquareDigits.advance(textSize) * label.length
-                    SquareDigits.textPath(label, 0, label.length, (size.width - w) / 2f,
-                        (size.height + SquareDigits.capHeight(textSize)) / 2f, textSize, path)
-                    val glyphs = path.asComposePath()
-                    onDrawBehind { drawPath(glyphs, INK) }
-                }
-            )
-        }
-    }
-}
-
-/** A row of mutually exclusive options. */
-@Composable
-private fun Segmented(options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 14.dp).clip(RoundedCornerShape(12.dp))
-            .background(CHIP_BG).padding(3.dp)
-    ) {
-        options.forEachIndexed { i, label ->
-            Box(
-                Modifier.weight(1f).clip(RoundedCornerShape(9.dp))
-                    .background(if (i == selected) INK else Color.Transparent)
-                    .clickable { onSelect(i) }
-                    .padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(label, fontSize = 12.sp, color = if (i == selected) Color(0xFF111111) else DIM)
+        Box(Modifier.height(40.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
+            // IchthysOS: the Square font has no typeface; the text keeps the card its size (unseen)
+            // and the digits are drawn over it as the Depth face draws them.
+            Text(sample, fontSize = 30.sp, fontFamily = family, maxLines = 1,
+                color = if (square) Color.Transparent else tk.text,
+                style = if (square) TextStyle() else style)
+            if (square) {
+                val ink = tk.text
+                Box(
+                    Modifier.matchParentSize().drawWithCache {
+                        val textSize = 26.sp.toPx()
+                        val path = android.graphics.Path()
+                        val w = SquareDigits.advance(textSize) * sample.length
+                        SquareDigits.textPath(sample, 0, sample.length, (size.width - w) / 2f,
+                            (size.height + SquareDigits.capHeight(textSize)) / 2f, textSize, path)
+                        val glyphs = path.asComposePath()
+                        onDrawBehind { drawPath(glyphs, ink) }
+                    }
+                )
             }
         }
+        Text(label, fontFamily = tk.mono, fontSize = 10.sp, letterSpacing = 0.4.sp, maxLines = 1,
+            overflow = TextOverflow.Ellipsis, color = if (on) tk.accent else tk.muted,
+            modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp))
     }
 }
 
+/**
+ * A mono caps chip: the chosen one is filled with the accent. [glyph] draws a small picture before
+ * the label (in the label's colour).
+ */
+@Composable
+private fun MonoChip(label: String, on: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier,
+    height: Dp = 36.dp, glyph: (DrawScope.(Color) -> Unit)? = null) {
+    val tk = t
+    val shape = RoundedCornerShape(9.dp)
+    val ink = if (on) tk.onAccent else tk.text
+    Row(
+        modifier.height(height).clip(shape)
+            .background(if (on) tk.accent else Color.Transparent)
+            .border(1.dp, if (on) tk.accent else tk.hairline, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    ) {
+        if (glyph != null) Canvas(Modifier.size(22.dp, 16.dp)) { glyph(ink) }
+        Text(label.uppercase(), fontFamily = tk.mono, fontSize = 10.sp, letterSpacing = 0.8.sp,
+            fontWeight = FontWeight.SemiBold, color = ink, maxLines = 1)
+    }
+}
+
+/** A row of mutually exclusive options (more than three scroll, at their own widths). */
+@Composable
+private fun Segmented(options: List<String>, selected: Int,
+    glyphs: List<DrawScope.(Color) -> Unit>? = null, onSelect: (Int) -> Unit) {
+    if (options.size > 3) {
+        ChipRow {
+            options.forEachIndexed { i, label -> MonoChip(label, i == selected, { onSelect(i) }) }
+        }
+        return
+    }
+    Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.forEachIndexed { i, label ->
+            MonoChip(label, i == selected, { onSelect(i) }, Modifier.weight(1f),
+                height = if (glyphs != null) 44.dp else 38.dp, glyph = glyphs?.get(i))
+        }
+    }
+}
+
+/** Three lines of text, ragged the way [align] lines them up (left, centre, right on screen). */
+private fun alignGlyph(align: Int): DrawScope.(Color) -> Unit = { c ->
+    val u = size.width / 22f
+    val stroke = 1.6.dp.toPx()
+    listOf(3f to 18f, 8f to 11f, 13f to 15f).forEach { (y, w) ->
+        val x0 = when (align) {
+            0 -> 2f
+            1 -> (22f - w) / 2f
+            else -> 20f - w
+        }
+        drawLine(c, Offset(x0 * u, y * u), Offset((x0 + w) * u, y * u), stroke, StrokeCap.Round)
+    }
+}
+
+/** A colour as a rounded square; the chosen one gets an accent ring. */
 @Composable
 private fun Swatch(color: Color, on: Boolean, onClick: () -> Unit, brush: Brush? = null) {
+    val tk = t
+    val outer = RoundedCornerShape(13.dp)
+    val inner = RoundedCornerShape(10.dp)
     Box(
-        Modifier.size(34.dp).clip(CircleShape)
-            .then(if (brush != null) Modifier.background(brush) else Modifier.background(color))
-            .border(if (on) BorderStroke(2.5.dp, POND) else BorderStroke(1.dp, LINE), CircleShape)
+        Modifier.size(44.dp)
+            .then(if (on) Modifier.border(2.dp, tk.accent, outer) else Modifier)
             .clickable(onClick = onClick)
+            .padding(5.dp)
+            .clip(inner)
+            .then(if (brush != null) Modifier.background(brush) else Modifier.background(color))
+            .border(1.dp, tk.hairline, inner)
     )
 }
 
 @Composable
+private fun ShoalSlider(value: Float, onChange: (Float) -> Unit, range: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier) {
+    val tk = t
+    Slider(
+        value = value, onValueChange = onChange, valueRange = range, modifier = modifier.fillMaxWidth(),
+        colors = SliderDefaults.colors(thumbColor = tk.accent, activeTrackColor = tk.accent,
+            inactiveTrackColor = tk.track, activeTickColor = Color.Transparent,
+            inactiveTickColor = Color.Transparent),
+    )
+}
+
+/** A mono caps name with its value at the end, and the slider under them. */
+@Composable
 private fun SliderRow(label: String, value: Float, range: ClosedFloatingPointRange<Float>,
     shown: String, onChange: (Float) -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, fontSize = 12.sp, color = DIM, modifier = Modifier.width(70.dp))
-        Slider(value = value, onValueChange = onChange, valueRange = range, modifier = Modifier.weight(1f))
-        Text(shown, fontSize = 12.sp, color = INK, modifier = Modifier.width(48.dp), textAlign = TextAlign.End)
+    Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp)) {
+        Row(Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(label.uppercase(), fontFamily = t.mono, fontSize = 10.sp, letterSpacing = 1.2.sp,
+                color = t.muted, modifier = Modifier.weight(1f))
+            Text(shown, fontFamily = t.mono, fontSize = 11.sp, color = t.text)
+        }
+        ShoalSlider(value, onChange, range)
     }
+}
+
+/** Shoal's switch: a rounded square track, filled with the accent when on, a square knob. */
+@Composable
+private fun ShoalToggle(on: Boolean, enabled: Boolean) {
+    val tk = t
+    val x by animateDpAsState(if (on) 23.dp else 3.dp, spring(dampingRatio = 0.8f, stiffness = 700f),
+        label = "knob")
+    val shape = RoundedCornerShape(8.dp)
+    Box(
+        Modifier.size(46.dp, 26.dp).alpha(if (enabled) 1f else 0.38f).clip(shape)
+            .background(if (on) tk.accent else Color.Transparent)
+            .border(1.dp, if (on) tk.accent else tk.outline, shape)
+    ) {
+        Box(Modifier.offset(x = x, y = 3.dp).size(18.dp).clip(RoundedCornerShape(5.dp))
+            .background(if (on) tk.onAccent else tk.text))
+    }
+}
+
+/** An on/off row: a name (and what it does) and the switch, under a hairline. */
+@Composable
+private fun SwitchRow(label: String, on: Boolean, enabled: Boolean = true, hint: String? = null,
+    onChange: (Boolean) -> Unit) {
+    val tk = t
+    Box(Modifier.fillMaxWidth().padding(horizontal = 18.dp).height(tk.hairlineWidth).background(tk.hairline))
+    Row(
+        Modifier.fillMaxWidth()
+            .then(if (enabled) Modifier.clickable { onChange(!on) } else Modifier)
+            .heightIn(min = 54.dp)
+            .padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+            Text(label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+                color = if (enabled) tk.text else tk.muted)
+            if (hint != null) {
+                Text(hint, fontSize = 11.sp, color = tk.muted, modifier = Modifier.padding(top = 2.dp))
+            }
+        }
+        Spacer(Modifier.width(12.dp))
+        ShoalToggle(on, enabled)
+    }
+}
+
+/** A small outlined action (Reset, Save, Now); [accent] for the one that matters. */
+@Composable
+private fun OutlineAction(label: String, onClick: () -> Unit, accent: Boolean = false) {
+    val tk = t
+    val shape = RoundedCornerShape(9.dp)
+    Box(
+        Modifier.height(34.dp).clip(shape).border(1.dp, if (accent) tk.accent else tk.outline, shape)
+            .clickable(onClick = onClick).padding(horizontal = 12.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label.uppercase(), fontFamily = tk.mono, fontSize = 10.sp, letterSpacing = 1.sp,
+            fontWeight = FontWeight.SemiBold, color = if (accent) tk.accent else tk.text)
+    }
+}
+
+/** A line of explanation under a group. */
+@Composable
+private fun Note(text: String) {
+    Text(text, fontSize = 11.sp, color = t.muted,
+        modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp))
 }
 
 // ---- the clock ------------------------------------------------------------------------------
 
+/** The clock: its face, type and finish, the glass, its colour. */
 @Composable
-private fun ClockSheet(state: EditorState, geo: LockGeometry, onDraft: (LockDesign) -> Unit) {
-    var tab by remember { mutableIntStateOf(0) }
+private fun ClockSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
     val d = state.draft
-    Segmented(
-        listOf(stringResource(R.string.ichthys_ed2_tab_style), stringResource(R.string.ichthys_ed2_tab_colour),
-            stringResource(R.string.ichthys_ed2_tab_depth), stringResource(R.string.ichthys_ed2_tab_size)),
-        tab,
-    ) { tab = it }
-    when (tab) {
-        0 -> StyleTab(state, onDraft)
-        1 -> ColourTab(state, onDraft)
-        2 -> DepthTab(state, geo, onDraft)
-        else -> SizeTab(d, onDraft)
-    }
-}
-
-@Composable
-private fun StyleTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
-    val d = state.draft
+    val tk = t
     val names = remember { ClockUtils.getClockNames() }
     // Newest faces first (Depth, One UI, …); built only as they scroll into view.
     val faces = remember { ClockUtils.CLOCK_LAYOUTS.indices.reversed().toList() }
     Label(stringResource(R.string.ichthys_ed2_faces))
-    LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+    LazyRow(contentPadding = PaddingValues(horizontal = 18.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         items(faces.size, key = { faces[it] }) { i ->
             val style = faces[i]
             PictureChip(names[style], style == d.style, { onDraft(d.copy(style = style, look = "custom")) }) {
@@ -298,81 +518,107 @@ private fun StyleTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
     if (d.isDepthFace) {
         Label(stringResource(R.string.ichthys_ed2_font))
         val fonts =
-            listOf(DepthClockView.FONT_TALL to R.string.ichthys_ed2_font_tall,
-                DepthClockView.FONT_FLEX to R.string.ichthys_ed2_font_flex,
-                DepthClockView.FONT_WIDE to R.string.ichthys_ed2_font_wide,
-                DepthClockView.FONT_THIN to R.string.ichthys_ed2_font_thin,
-                DepthClockView.FONT_SERIF to R.string.ichthys_ed2_font_serif,
-                DepthClockView.FONT_MONO to R.string.ichthys_ed2_font_mono,
-                DepthClockView.FONT_SQUARE to R.string.ichthys_ed2_font_square,
-                DepthClockView.FONT_ROUNDED to R.string.ichthys_ed2_font_rounded,
+            listOf(DepthClockView.FONT_ROUNDED to R.string.ichthys_ed2_font_rounded,
                 DepthClockView.FONT_SOFT to R.string.ichthys_ed2_font_soft,
                 DepthClockView.FONT_TEKO to R.string.ichthys_ed2_font_teko,
                 DepthClockView.FONT_CONDENSED to R.string.ichthys_ed2_font_condensed,
                 DepthClockView.FONT_POSTER to R.string.ichthys_ed2_font_poster,
                 DepthClockView.FONT_COMPACT to R.string.ichthys_ed2_font_compact,
                 DepthClockView.FONT_GROTESK to R.string.ichthys_ed2_font_grotesk,
-                DepthClockView.FONT_HEAVY to R.string.ichthys_ed2_font_heavy)
+                DepthClockView.FONT_HEAVY to R.string.ichthys_ed2_font_heavy,
+                DepthClockView.FONT_TALL to R.string.ichthys_ed2_font_tall,
+                DepthClockView.FONT_FLEX to R.string.ichthys_ed2_font_flex,
+                DepthClockView.FONT_WIDE to R.string.ichthys_ed2_font_wide,
+                DepthClockView.FONT_THIN to R.string.ichthys_ed2_font_thin,
+                DepthClockView.FONT_SERIF to R.string.ichthys_ed2_font_serif,
+                DepthClockView.FONT_MONO to R.string.ichthys_ed2_font_mono,
+                DepthClockView.FONT_SQUARE to R.string.ichthys_ed2_font_square)
         ChipRow {
             fonts.forEach { (font, label) ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val family = remember(font) {
-                        FontFamily(androidx.compose.ui.text.font.Typeface(DepthClockView.digitTypeface(font)))
-                    }
-                    TextChip("10", d.font == font, { onDraft(d.copy(font = font, look = "custom")) },
-                        family, big = true, square = font == DepthClockView.FONT_SQUARE)
-                    Text(stringResource(label), fontSize = 10.sp, color = DIM,
-                        modifier = Modifier.padding(top = 3.dp))
-                }
+                val family = remember(font) { digitFamily(font) }
+                TypeCard(stringResource(label), "12", d.font == font,
+                    { onDraft(d.copy(font = font, look = "custom")) }, family,
+                    square = font == DepthClockView.FONT_SQUARE)
             }
         }
-        Label(stringResource(R.string.ichthys_ed2_digits))
-        Segmented(
-            listOf(stringResource(R.string.ichthys_depth_fill_solid),
-                stringResource(R.string.ichthys_depth_fill_gradient),
-                stringResource(R.string.ichthys_depth_fill_live)),
-            d.fill,
-        ) { onDraft(d.copy(fill = it, look = "custom")) }
+
+        // IchthysOS: the Depth face's finish: solid, a gradient, glass the picture shows through,
+        // or the heat a touch leaves.
+        Label(stringResource(R.string.ichthys_ed2_finish))
+        val family = remember(d.font) {
+            digitFamily(if (d.font == DepthClockView.FONT_SQUARE) DepthClockView.FONT_ROUNDED else d.font)
+        }
+        val finishes =
+            listOf(DepthClockView.FILL_SOLID to R.string.ichthys_ed2_finish_solid,
+                DepthClockView.FILL_GRADIENT to R.string.ichthys_ed2_finish_gradient,
+                DepthClockView.FILL_GLASS to R.string.ichthys_ed2_finish_glass,
+                DepthClockView.FILL_HEAT to R.string.ichthys_depth_fill_live)
+        ChipRow {
+            finishes.forEach { (fill, label) ->
+                val look = when (fill) {
+                    DepthClockView.FILL_GRADIENT ->
+                        TextStyle(brush = Brush.verticalGradient(listOf(tk.text, tk.accent)))
+                    DepthClockView.FILL_GLASS ->
+                        TextStyle(color = tk.text.copy(alpha = 0.9f), drawStyle = Stroke(width = 2.2f))
+                    DepthClockView.FILL_HEAT ->
+                        TextStyle(brush = Brush.radialGradient(listOf(tk.accent, tk.text.copy(alpha = 0.35f))))
+                    else -> TextStyle(color = tk.text)
+                }
+                TypeCard(stringResource(label), "10", d.fill == fill,
+                    { onDraft(d.copy(fill = fill, look = "custom")) }, family, style = look)
+            }
+        }
+
+        // IchthysOS: the glass: clear or frosted (each as a picture of itself), and how milky it
+        // is, from smoky to milky, or Auto, which picks it from the picture.
+        if (d.fill == DepthClockView.FILL_GLASS) {
+            Label(stringResource(R.string.ichthys_ed2_finish_glass))
+            ChipRow {
+                listOf(0 to R.string.ichthys_ed2_glass_clear, 1 to R.string.ichthys_ed2_glass_frosted)
+                    .forEach { (frost, label) ->
+                        val glass = d.copy(glassFrost = frost)
+                        PictureChip(stringResource(label), d.glassFrost.coerceIn(0, 1) == frost,
+                            { onDraft(glass.copy(look = "custom")) }) {
+                            MiniLock(glass, state.picture, Modifier.fillMaxSize())
+                        }
+                    }
+            }
+            val auto = d.glassOpacity < 0
+            Label(stringResource(R.string.ichthys_ed2_glass_opacity)) {
+                MonoChip(stringResource(R.string.ichthys_ed2_auto), auto,
+                    { onDraft(d.copy(glassOpacity = if (auto) 50 else -1, look = "custom")) },
+                    height = 28.dp)
+            }
+            if (!auto) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp)) {
+                    ShoalSlider(d.glassOpacity.toFloat(),
+                        { onDraft(d.copy(glassOpacity = it.toInt(), look = "custom")) }, 0f..100f)
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.ichthys_ed2_glass_smoky).uppercase(), fontFamily = tk.mono,
+                            fontSize = 10.sp, letterSpacing = 1.sp, color = tk.muted, modifier = Modifier.weight(1f))
+                        Text("${d.glassOpacity}", fontFamily = tk.mono, fontSize = 11.sp, color = tk.text)
+                        Text(stringResource(R.string.ichthys_ed2_glass_milky).uppercase(), fontFamily = tk.mono,
+                            fontSize = 10.sp, letterSpacing = 1.sp, color = tk.muted, textAlign = TextAlign.End,
+                            modifier = Modifier.weight(1f))
+                    }
+                }
+            } else {
+                Note(stringResource(R.string.ichthys_ed2_glass_auto_note))
+            }
+        }
     }
-    Spacer(Modifier.size(6.dp))
+    ColourGroup(state, onDraft)
+    Spacer(Modifier.size(8.dp))
 }
 
+private fun digitFamily(font: Int): FontFamily =
+    FontFamily(androidx.compose.ui.text.font.Typeface(DepthClockView.digitTypeface(font)))
+
 @Composable
-private fun ColourTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
+private fun ColourGroup(state: EditorState, onDraft: (LockDesign) -> Unit) {
     val d = state.draft
     val context = LocalContext.current
     val accent = remember { Color(context.getColor(android.R.color.system_accent1_100)) }
-    // IchthysOS: the Depth face's finish: solid, a gradient, or glass the picture shows through.
-    if (d.isDepthFace && d.fill != DepthClockView.FILL_HEAT) {
-        Label(stringResource(R.string.ichthys_ed2_finish))
-        val fills = listOf(DepthClockView.FILL_SOLID, DepthClockView.FILL_GRADIENT,
-            DepthClockView.FILL_GLASS)
-        Segmented(
-            listOf(stringResource(R.string.ichthys_ed2_finish_solid),
-                stringResource(R.string.ichthys_ed2_finish_gradient),
-                stringResource(R.string.ichthys_ed2_finish_glass)),
-            fills.indexOf(d.fill).coerceAtLeast(0),
-        ) { onDraft(d.copy(fill = fills[it], look = "custom")) }
-        // IchthysOS: Apple's Glass clock options: clear or frosted, and the opacity slider
-        // (smoky .. milky), or Auto, which picks it from the picture.
-        if (d.fill == DepthClockView.FILL_GLASS) {
-            Segmented(
-                listOf(stringResource(R.string.ichthys_ed2_glass_clear),
-                    stringResource(R.string.ichthys_ed2_glass_frosted)),
-                d.glassFrost.coerceIn(0, 1),
-            ) { onDraft(d.copy(glassFrost = it, look = "custom")) }
-            ChipRow {
-                TextChip(stringResource(R.string.ichthys_ed2_glass_auto), d.glassOpacity < 0,
-                    { onDraft(d.copy(glassOpacity = if (d.glassOpacity < 0) 50 else -1, look = "custom")) })
-            }
-            if (d.glassOpacity >= 0) {
-                SliderRow(stringResource(R.string.ichthys_ed2_glass_opacity), d.glassOpacity.toFloat(),
-                    0f..100f, "${d.glassOpacity}") {
-                    onDraft(d.copy(glassOpacity = it.toInt(), look = "custom"))
-                }
-            }
-        }
-    }
     Label(stringResource(R.string.ichthys_ed2_colour_wallpaper))
     ChipRow {
         Swatch(Color.White, d.colorMode == LockKeys.MODE_DEFAULT,
@@ -400,9 +646,18 @@ private fun ColourTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
     }
 }
 
+// ---- layout: size, depth, the date line ------------------------------------------------------
+
 @Composable
-private fun DepthTab(state: EditorState, geo: LockGeometry, onDraft: (LockDesign) -> Unit) {
+private fun LayoutSheet(state: EditorState, geo: LockGeometry, onDraft: (LockDesign) -> Unit) {
     val d = state.draft
+    SliderRow(stringResource(R.string.ichthys_ed2_size), d.scale, 0.5f..1.5f, "${(d.scale * 100).toInt()} %") {
+        onDraft(d.copy(scale = it, look = "custom"))
+    }
+    SliderRow(stringResource(R.string.ichthys_ed2_rotation), d.rot, -90f..90f, "${d.rot.toInt()}°") {
+        onDraft(d.copy(rot = if (kotlin.math.abs(it) < 3f) 0f else it, look = "custom"))
+    }
+
     Label(stringResource(R.string.ichthys_ed2_tab_depth))
     // IchthysOS: the digits are never distorted any more (DepthClockView fits the whole clock
     // evenly in every mode), so "Shape" is what Overlap does now; a saved Shape shows as Overlap.
@@ -419,11 +674,69 @@ private fun DepthTab(state: EditorState, geo: LockGeometry, onDraft: (LockDesign
             }
         }
     }
-    if (state.picture.cutout == null) {
-        Text(stringResource(R.string.ichthys_ed2_depth_no_subject), fontSize = 11.sp, color = DIM,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+    if (state.picture.cutout == null) Note(stringResource(R.string.ichthys_ed2_depth_no_subject))
+
+    val line = stringResource(R.string.ichthys_ed2_date_line)
+    Label(line + " · " + stringResource(R.string.ichthys_ed2_date_shows))
+    Segmented(
+        listOf(stringResource(R.string.ichthys_ed2_date), stringResource(R.string.ichthys_ed2_details),
+            stringResource(R.string.ichthys_ed2_hidden)),
+        when {
+            !d.showDate -> 2
+            d.details -> 1
+            else -> 0
+        },
+    ) {
+        onDraft(d.copy(showDate = it != 2, details = it == 1, look = "custom"))
+    }
+    if (d.showDate) {
+        Label(line + " · " + stringResource(R.string.ichthys_ed2_position))
+        Segmented(listOf(stringResource(R.string.ichthys_ed2_above), stringResource(R.string.ichthys_ed2_below)),
+            d.datePos) { onDraft(d.copy(datePos = it, look = "custom")) }
+        Label(line + " · " + stringResource(R.string.ichthys_ed2_align))
+        AlignChoice(d) { onDraft(d.copy(dateAlign = it, look = "custom")) }
+    }
+
+    Spacer(Modifier.size(14.dp))
+    Box(Modifier.fillMaxWidth().padding(horizontal = 18.dp).height(t.hairlineWidth).background(t.hairline))
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+            Text(stringResource(R.string.ichthys_ed2_move), fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+                color = t.text)
+            Text(stringResource(R.string.ichthys_ed2_move_hint), fontSize = 11.sp, color = t.muted,
+                modifier = Modifier.padding(top = 2.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        OutlineAction(stringResource(R.string.ichthys_editor_reset),
+            { onDraft(d.copy(dx = 0f, dy = 0f, scale = 1f, rot = 0f, look = "custom")) })
     }
     Spacer(Modifier.size(6.dp))
+}
+
+/** Left, centre or right, each with a picture of its ragged lines (the settings' order differs). */
+@Composable
+private fun AlignChoice(d: LockDesign, onAlign: (Int) -> Unit) {
+    val shown = when (d.dateAlign) {
+        DepthClockView.ALIGN_START -> 0
+        DepthClockView.ALIGN_END -> 2
+        else -> 1
+    }
+    Segmented(
+        listOf(stringResource(R.string.ichthys_ed2_left), stringResource(R.string.ichthys_ed2_centre),
+            stringResource(R.string.ichthys_ed2_right)),
+        shown,
+        glyphs = listOf(alignGlyph(0), alignGlyph(1), alignGlyph(2)),
+    ) {
+        onAlign(
+            when (it) {
+                0 -> DepthClockView.ALIGN_START
+                2 -> DepthClockView.ALIGN_END
+                else -> DepthClockView.ALIGN_CENTRE
+            })
+    }
 }
 
 /**
@@ -438,60 +751,6 @@ fun withDepth(d: LockDesign, mode: Int, picture: LockPicture, geo: LockGeometry)
         s = s.copy(scale = geo.sizeForShape(picture.outline, s))
     }
     return s
-}
-
-@Composable
-private fun SizeTab(d: LockDesign, onDraft: (LockDesign) -> Unit) {
-    Label(stringResource(R.string.ichthys_ed2_tab_size))
-    SliderRow(stringResource(R.string.ichthys_ed2_size), d.scale, 0.5f..1.5f, "${(d.scale * 100).toInt()} %") {
-        onDraft(d.copy(scale = it, look = "custom"))
-    }
-    SliderRow(stringResource(R.string.ichthys_ed2_rotation), d.rot, -90f..90f, "${d.rot.toInt()}°") {
-        onDraft(d.copy(rot = if (kotlin.math.abs(it) < 3f) 0f else it, look = "custom"))
-    }
-    Row(Modifier.padding(horizontal = 10.dp)) {
-        TextButton(onClick = { onDraft(d.copy(dx = 0f, dy = 0f, scale = 1f, rot = 0f, look = "custom")) }) {
-            Text(stringResource(R.string.ichthys_editor_reset))
-        }
-    }
-}
-
-// ---- date, notifications, shortcuts ---------------------------------------------------------
-
-@Composable
-private fun DateSheet(d: LockDesign, onDraft: (LockDesign) -> Unit) {
-    Label(stringResource(R.string.ichthys_ed2_date_shows))
-    Segmented(
-        listOf(stringResource(R.string.ichthys_ed2_date), stringResource(R.string.ichthys_ed2_details),
-            stringResource(R.string.ichthys_ed2_hidden)),
-        when {
-            !d.showDate -> 2
-            d.details -> 1
-            else -> 0
-        },
-    ) {
-        onDraft(d.copy(showDate = it != 2, details = it == 1, look = "custom"))
-    }
-    Label(stringResource(R.string.ichthys_ed2_position))
-    Segmented(listOf(stringResource(R.string.ichthys_ed2_above), stringResource(R.string.ichthys_ed2_below)),
-        d.datePos) { onDraft(d.copy(datePos = it, look = "custom")) }
-    Label(stringResource(R.string.ichthys_ed2_align))
-    // Left, centre, right on screen; the settings' order is centre, start, end.
-    val shown = when (d.dateAlign) {
-        DepthClockView.ALIGN_START -> 0
-        DepthClockView.ALIGN_END -> 2
-        else -> 1
-    }
-    Segmented(listOf(stringResource(R.string.ichthys_ed2_left), stringResource(R.string.ichthys_ed2_centre),
-        stringResource(R.string.ichthys_ed2_right)), shown) {
-        val a = when (it) {
-            0 -> DepthClockView.ALIGN_START
-            2 -> DepthClockView.ALIGN_END
-            else -> DepthClockView.ALIGN_CENTRE
-        }
-        onDraft(d.copy(dateAlign = a, look = "custom"))
-    }
-    Spacer(Modifier.size(8.dp))
 }
 
 // ---- weather ---------------------------------------------------------------------------------
@@ -515,10 +774,9 @@ private fun WeatherSheet(d: LockDesign, onDraft: (LockDesign) -> Unit) {
 
     SwitchRow(stringResource(R.string.ichthys_ed2_weather_show), d.weather) { edit(d.copy(weather = it)) }
     if (real == null) {
-        Text(stringResource(R.string.ichthys_ed2_weather_no_data), fontSize = 11.sp, color = DIM,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-        Row(Modifier.padding(horizontal = 10.dp)) {
-            TextButton(onClick = {
+        Note(stringResource(R.string.ichthys_ed2_weather_no_data))
+        Row(Modifier.padding(horizontal = 18.dp, vertical = 4.dp)) {
+            OutlineAction(stringResource(R.string.ichthys_ed2_weather_settings), {
                 try {
                     context.startActivity(
                         com.android.internal.util.crdroid.OmniJawsClient.get().getSettingsIntent()
@@ -526,7 +784,7 @@ private fun WeatherSheet(d: LockDesign, onDraft: (LockDesign) -> Unit) {
                 } catch (e: Exception) {
                     // OmniJaws is not installed.
                 }
-            }) { Text(stringResource(R.string.ichthys_ed2_weather_settings)) }
+            })
         }
     }
     if (!d.weather) {
@@ -536,13 +794,13 @@ private fun WeatherSheet(d: LockDesign, onDraft: (LockDesign) -> Unit) {
 
     Label(stringResource(R.string.ichthys_ed2_date_shows))
     ChipRow {
-        TextChip(stringResource(R.string.ichthys_ed2_weather_temp), d.weatherTemp,
+        MonoChip(stringResource(R.string.ichthys_ed2_weather_temp), d.weatherTemp,
             { edit(d.copy(weatherTemp = !d.weatherTemp)) })
-        TextChip(stringResource(R.string.ichthys_ed2_weather_condition), d.weatherCondition,
+        MonoChip(stringResource(R.string.ichthys_ed2_weather_condition), d.weatherCondition,
             { edit(d.copy(weatherCondition = !d.weatherCondition)) })
-        TextChip(stringResource(R.string.ichthys_ed2_weather_highlow), d.weatherHighLow,
+        MonoChip(stringResource(R.string.ichthys_ed2_weather_highlow), d.weatherHighLow,
             { edit(d.copy(weatherHighLow = !d.weatherHighLow)) })
-        TextChip(stringResource(R.string.ichthys_ed2_weather_location), d.weatherLocation,
+        MonoChip(stringResource(R.string.ichthys_ed2_weather_location), d.weatherLocation,
             { edit(d.copy(weatherLocation = !d.weatherLocation)) })
     }
 
@@ -562,20 +820,7 @@ private fun WeatherSheet(d: LockDesign, onDraft: (LockDesign) -> Unit) {
     if (place == LockWeather.POS_UNDER) {
         // Under the clock it lines up like the date line (one alignment for both).
         Label(stringResource(R.string.ichthys_ed2_align))
-        val shown = when (d.dateAlign) {
-            DepthClockView.ALIGN_START -> 0
-            DepthClockView.ALIGN_END -> 2
-            else -> 1
-        }
-        Segmented(listOf(stringResource(R.string.ichthys_ed2_left), stringResource(R.string.ichthys_ed2_centre),
-            stringResource(R.string.ichthys_ed2_right)), shown) {
-            val a = when (it) {
-                0 -> DepthClockView.ALIGN_START
-                2 -> DepthClockView.ALIGN_END
-                else -> DepthClockView.ALIGN_CENTRE
-            }
-            edit(d.copy(dateAlign = a))
-        }
+        AlignChoice(d) { edit(d.copy(dateAlign = it)) }
     }
 
     Label(stringResource(R.string.ichthys_ed2_weather_icons))
@@ -602,40 +847,33 @@ private fun WeatherSheet(d: LockDesign, onDraft: (LockDesign) -> Unit) {
 @Composable
 private fun WeatherIconChip(label: String, pack: String?, code: Int, on: Boolean, onClick: () -> Unit) {
     val context = LocalContext.current
-    val shape = RoundedCornerShape(12.dp)
+    val tk = t
+    val tint = tk.text.toArgb()
     val image =
-        remember(pack, code) {
+        remember(pack, code, tint) {
             pack?.let { p ->
                 LockWeather.icon(context, p, code)?.let { dr ->
                     val b = android.graphics.Bitmap.createBitmap(96, 96, android.graphics.Bitmap.Config.ARGB_8888)
                     val m = dr.mutate()
-                    if (LockWeather.isMono(p)) m.setTint(DepthClockView.POND_CREAM)
+                    if (LockWeather.isMono(p)) m.setTint(tint)
                     m.setBounds(0, 0, 96, 96)
                     m.draw(android.graphics.Canvas(b))
                     b.asImageBitmap()
                 }
             }
         }
-    Column(Modifier.width(62.dp).clickable(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            Modifier.size(54.dp).clip(shape).background(Color(0xFF0E1417))
-                .border(if (on) BorderStroke(2.dp, POND) else BorderStroke(1.dp, LINE), shape),
-            contentAlignment = Alignment.Center,
-        ) {
+    Column(
+        Modifier.width(72.dp).shoalCard(on, RoundedCornerShape(12.dp)).clickable(onClick = onClick)
+            .padding(top = 10.dp, bottom = 7.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
             if (image != null) Image(image, null, Modifier.size(30.dp))
-            else Text("∅", fontSize = 18.sp, color = INK)
+            else Text("∅", fontSize = 18.sp, color = tk.text)
         }
-        Text(label, fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.Center,
-            color = if (on) INK else DIM, modifier = Modifier.padding(top = 4.dp))
-    }
-}
-
-@Composable
-private fun SwitchRow(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().clickable { onChange(!on) }.padding(horizontal = 16.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically) {
-        Text(label, fontSize = 14.sp, color = INK, modifier = Modifier.weight(1f))
-        Switch(checked = on, onCheckedChange = onChange)
+        Text(label, fontFamily = tk.mono, fontSize = 10.sp, letterSpacing = 0.4.sp, maxLines = 1,
+            overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+            color = if (on) tk.accent else tk.muted, modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp))
     }
 }
 
@@ -648,8 +886,7 @@ private fun NotificationSheet(d: LockDesign, onDraft: (LockDesign) -> Unit) {
     SwitchRow(stringResource(R.string.ichthys_ed2_notif_content), d.privateNotifications) {
         onDraft(d.copy(privateNotifications = it))
     }
-    Text(stringResource(R.string.ichthys_ed2_notif_fixed), fontSize = 11.sp, color = DIM,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+    Note(stringResource(R.string.ichthys_ed2_notif_fixed))
 }
 
 @Composable
@@ -657,41 +894,42 @@ private fun ShortcutSheet(start: Boolean, d: LockDesign, catalog: LockShortcuts.
     onDraft: (LockDesign) -> Unit) {
     Label(stringResource(if (start) R.string.ichthys_ed2_shortcut_left else R.string.ichthys_ed2_shortcut_right))
     if (catalog == null) {
-        Text(stringResource(R.string.ichthys_ed2_shortcuts_unavailable), fontSize = 12.sp, color = DIM,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+        Note(stringResource(R.string.ichthys_ed2_shortcuts_unavailable))
         return
     }
     val current = if (start) d.shortcutStart else d.shortcutEnd
     fun pick(id: String) = onDraft(if (start) d.copy(shortcutStart = id) else d.copy(shortcutEnd = id))
+    val tk = t
+    val tint = tk.text.toArgb()
     val items = listOf<LockShortcuts.Affordance?>(null) + catalog.all
     // Rows of four.
     items.chunked(4).forEach { row ->
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+        Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 5.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             row.forEach { a ->
                 val id = a?.id ?: ""
                 val on = id == current
                 Column(
-                    Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
-                        .background(if (on) Color(0x339FE7DD) else CHIP_BG)
+                    Modifier.weight(1f).shoalCard(on, RoundedCornerShape(12.dp))
                         .clickable { pick(id) }
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    val icon = remember(a) {
+                    val icon = remember(a, tint) {
                         a?.icon?.let { dr ->
                             val b = android.graphics.Bitmap.createBitmap(72, 72, android.graphics.Bitmap.Config.ARGB_8888)
                             val m = dr.mutate()
-                            m.setTint(AColor.rgb(244, 237, 230))
+                            m.setTint(tint)
                             m.setBounds(0, 0, 72, 72)
                             m.draw(android.graphics.Canvas(b))
                             b.asImageBitmap()
                         }
                     }
                     if (icon != null) Image(icon, null, Modifier.size(24.dp))
-                    else Text("∅", fontSize = 18.sp, color = INK)
-                    Text(a?.name ?: stringResource(R.string.ichthys_ed2_none), fontSize = 10.sp,
-                        color = if (on) INK else DIM, maxLines = 1,
+                    else Text("∅", fontSize = 18.sp, color = tk.text)
+                    Text(a?.name ?: stringResource(R.string.ichthys_ed2_none), fontFamily = tk.mono,
+                        fontSize = 10.sp, letterSpacing = 0.4.sp, overflow = TextOverflow.Ellipsis,
+                        color = if (on) tk.accent else tk.muted, maxLines = 1,
                         modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp))
                 }
             }
@@ -734,15 +972,15 @@ private fun WallpaperSheet(
     ChipRow {
         PictureChip(stringResource(R.string.ichthys_ed2_wallpaper_current),
             state.wallpaper is WallpaperDraft.Current, { onWallpaper(WallpaperDraft.Current) }) {
-            Box(Modifier.fillMaxSize().background(Color(0xFF0E1417)), contentAlignment = Alignment.Center) {
-                Text("↺", fontSize = 26.sp, color = POND)
+            Box(Modifier.fillMaxSize().background(t.card), contentAlignment = Alignment.Center) {
+                Text("↺", fontSize = 26.sp, color = t.accent)
             }
         }
         PictureChip(stringResource(R.string.ichthys_wallpaper_photo), state.wallpaper is WallpaperDraft.Photo, {
             pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }) {
-            Box(Modifier.fillMaxSize().background(Color(0xFF0E1417)), contentAlignment = Alignment.Center) {
-                Text("+", fontSize = 32.sp, color = POND)
+            Box(Modifier.fillMaxSize().background(t.card), contentAlignment = Alignment.Center) {
+                Text("+", fontSize = 32.sp, color = t.accent)
             }
         }
         BUILTIN_WALLPAPERS.forEach { (id, res, label) ->
@@ -753,8 +991,7 @@ private fun WallpaperSheet(
             }
         }
     }
-    Text(stringResource(R.string.ichthys_ed2_wallpaper_note), fontSize = 11.sp, color = DIM,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+    Note(stringResource(R.string.ichthys_ed2_wallpaper_note))
     LivingSkySection(state, onDraft, onSkyMinute)
 }
 
@@ -775,7 +1012,7 @@ private fun LivingSkySection(
     val usable = pic.livingSky
     fun edit(n: LockDesign) = onDraft(n.copy(look = "custom"))
     Label(stringResource(R.string.ichthys_ed2_sky))
-    SkySwitchRow(stringResource(R.string.ichthys_ed2_sky_follow), d.livingSky && usable, usable) {
+    SwitchRow(stringResource(R.string.ichthys_ed2_sky_follow), d.livingSky && usable, usable) {
         edit(d.copy(livingSky = it))
         if (!it) onSkyMinute(null)
     }
@@ -787,18 +1024,16 @@ private fun LivingSkySection(
                 pic.skyInfo.reason == LivingSky.REASON_DARK -> R.string.ichthys_ed2_sky_dark
                 else -> R.string.ichthys_ed2_sky_none
             }
-        Text(stringResource(reason), fontSize = 11.sp, color = DIM,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
+        Note(stringResource(reason))
         Spacer(Modifier.size(8.dp))
         return
     }
     if (!d.livingSky) {
-        Text(stringResource(R.string.ichthys_ed2_sky_note), fontSize = 11.sp, color = DIM,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
+        Note(stringResource(R.string.ichthys_ed2_sky_note))
         Spacer(Modifier.size(8.dp))
         return
     }
-    SkySwitchRow(stringResource(R.string.ichthys_ed2_sky_weather), d.skyWeather, true) {
+    SwitchRow(stringResource(R.string.ichthys_ed2_sky_weather), d.skyWeather) {
         edit(d.copy(skyWeather = it))
     }
     SliderRow(stringResource(R.string.ichthys_ed2_sky_intensity), d.skyIntensity.toFloat(), 10f..100f,
@@ -814,10 +1049,10 @@ private fun LivingSkySection(
     }
     val shown = minute ?: nowMinute
     val sun = LivingSky.sun(times, shown, today)
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+    Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(R.string.ichthys_ed2_sky_day), fontSize = 12.sp, color = DIM,
-            modifier = Modifier.weight(1f))
+        Text(stringResource(R.string.ichthys_ed2_sky_day).uppercase(), fontFamily = t.mono, fontSize = 10.sp,
+            letterSpacing = 1.2.sp, color = t.muted, modifier = Modifier.weight(1f))
         Text(
             (if (minute == null) stringResource(R.string.ichthys_ed2_sky_now) + " · " else "") +
                 hhmm(shown) + " · " +
@@ -825,7 +1060,7 @@ private fun LivingSkySection(
                     if (sun.elevation >= 0f) R.string.ichthys_ed2_sky_sun_up
                     else R.string.ichthys_ed2_sky_sun_down,
                     kotlin.math.abs(sun.elevation).toInt()),
-            fontSize = 12.sp, color = INK)
+            fontFamily = t.mono, fontSize = 11.sp, color = t.text)
     }
     val bar = remember(times) {
         List(48) { i ->
@@ -837,22 +1072,16 @@ private fun LivingSkySection(
             )
         }
     }
-    Box(Modifier.fillMaxWidth().padding(horizontal = 24.dp).height(8.dp)
+    Box(Modifier.fillMaxWidth().padding(horizontal = 26.dp).height(8.dp)
         .clip(RoundedCornerShape(4.dp)).background(Brush.horizontalGradient(bar)))
-    Slider(
-        value = shown,
-        onValueChange = { onSkyMinute(it) },
-        valueRange = 0f..1439f,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-    )
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+    ShoalSlider(shown, { onSkyMinute(it) }, 0f..1439f, Modifier.padding(horizontal = 18.dp))
+    Row(Modifier.fillMaxWidth().heightIn(min = 40.dp).padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically) {
         Text(
             stringResource(R.string.ichthys_ed2_sky_times, hhmm(times.sunrise), hhmm(times.sunset)),
-            fontSize = 11.sp, color = DIM, modifier = Modifier.weight(1f))
+            fontSize = 11.sp, color = t.muted, modifier = Modifier.weight(1f))
         if (minute != null) {
-            TextButton(onClick = { onSkyMinute(null) }) {
-                Text(stringResource(R.string.ichthys_ed2_sky_now), color = POND)
-            }
+            OutlineAction(stringResource(R.string.ichthys_ed2_sky_now), { onSkyMinute(null) }, accent = true)
         }
     }
     Spacer(Modifier.size(6.dp))
@@ -861,19 +1090,6 @@ private fun LivingSkySection(
 private fun hhmm(minutes: Float): String {
     val m = minutes.toInt().coerceIn(0, 1439)
     return String.format(java.util.Locale.ROOT, "%02d:%02d", m / 60, m % 60)
-}
-
-@Composable
-private fun SkySwitchRow(label: String, on: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth()
-            .then(if (enabled) Modifier.clickable { onChange(!on) } else Modifier)
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, fontSize = 14.sp, color = if (enabled) INK else DIM, modifier = Modifier.weight(1f))
-        Switch(checked = on, onCheckedChange = onChange, enabled = enabled)
-    }
 }
 
 /** Whole looks: built in, then the user's own (deletable), then "save this one". */
@@ -895,7 +1111,8 @@ private fun LooksSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
                 PictureChip(s.label, d.look == s.id, { onDraft(look) }) {
                     MiniLock(look, state.picture, Modifier.fillMaxSize())
                 }
-                Text(stringResource(R.string.ichthys_ed2_delete), fontSize = 10.sp, color = POND,
+                Text(stringResource(R.string.ichthys_ed2_delete).uppercase(), fontFamily = t.mono,
+                    fontSize = 10.sp, letterSpacing = 0.8.sp, color = t.muted,
                     modifier = Modifier.clickable {
                         saved = saved.filter { it.id != s.id }
                         LockStore.writeLooks(context, saved)
@@ -903,8 +1120,8 @@ private fun LooksSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
             }
         }
     }
-    Row(Modifier.padding(horizontal = 10.dp)) {
-        TextButton(onClick = {
+    Row(Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
+        OutlineAction(stringResource(R.string.ichthys_editor_save_look), {
             var n = saved.size + 1
             while (saved.any { it.id == "mine$n" }) n++
             val id = "mine$n"
@@ -912,9 +1129,7 @@ private fun LooksSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
             saved = saved + SavedLook(id, label, d.toJson(id, label))
             LockStore.writeLooks(context, saved)
             onDraft(d.copy(look = id))
-        }) {
-            Text(stringResource(R.string.ichthys_editor_save_look))
-        }
+        }, accent = true)
     }
 }
 
