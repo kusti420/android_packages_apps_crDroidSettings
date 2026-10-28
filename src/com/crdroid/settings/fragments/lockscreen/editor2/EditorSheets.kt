@@ -297,8 +297,9 @@ private fun PictureChip(label: String, on: Boolean, onClick: () -> Unit, thumb: 
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(Modifier.fillMaxWidth().height(128.dp).clip(RoundedCornerShape(9.dp))) { thumb() }
-        Text(label, fontFamily = t.mono, fontSize = 10.sp, letterSpacing = 0.4.sp, maxLines = 1,
-            overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+        // Two lines, always (the cards stay one height): "Touch heat", "Shoal Lattice" fit whole.
+        Text(label, fontFamily = t.mono, fontSize = 10.sp, letterSpacing = 0.4.sp, lineHeight = 12.sp,
+            minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
             color = if (on) t.accent else t.muted, modifier = Modifier.padding(top = 5.dp, bottom = 3.dp))
     }
 }
