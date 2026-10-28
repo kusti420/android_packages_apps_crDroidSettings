@@ -1043,9 +1043,11 @@ private fun ShortcutSheet(start: Boolean, d: LockDesign, catalog: LockShortcuts.
                     }
                     if (icon != null) Image(icon, null, Modifier.size(24.dp))
                     else Text("∅", fontSize = 18.sp, color = tk.text)
+                    // Two lines, always ("Device controls", "Do Not Disturb" fit whole).
                     Text(a?.name ?: stringResource(R.string.ichthys_ed2_none), fontFamily = tk.mono,
-                        fontSize = 10.sp, letterSpacing = 0.4.sp, overflow = TextOverflow.Ellipsis,
-                        color = if (on) tk.accent else tk.muted, maxLines = 1,
+                        fontSize = 10.sp, letterSpacing = 0.4.sp, lineHeight = 12.sp,
+                        overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+                        color = if (on) tk.accent else tk.muted, minLines = 2, maxLines = 2,
                         modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp))
                     // IchthysOS: one SystemUI can't show yet (Device controls without a
                     // controls app, a wallet without cards): it says so.
