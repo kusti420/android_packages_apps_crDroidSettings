@@ -40,6 +40,7 @@
     <string name="ichthys_ed2_font_serif">Serif</string>
     <string name="ichthys_ed2_font_mono">Mono</string>
     <string name="ichthys_ed2_font_square">Square</string>
+    <string name="ichthys_ed2_font_rounded">Rounded</string>
     <string name="ichthys_ed2_digits">Digits</string>
     <string name="ichthys_ed2_colour_wallpaper">From the wallpaper</string>
     <string name="ichthys_ed2_colour_custom">Your own colour</string>

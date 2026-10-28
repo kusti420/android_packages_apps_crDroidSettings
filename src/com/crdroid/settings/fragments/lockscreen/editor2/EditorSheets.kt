@@ -304,7 +304,8 @@ private fun StyleTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
                 DepthClockView.FONT_THIN to R.string.ichthys_ed2_font_thin,
                 DepthClockView.FONT_SERIF to R.string.ichthys_ed2_font_serif,
                 DepthClockView.FONT_MONO to R.string.ichthys_ed2_font_mono,
-                DepthClockView.FONT_SQUARE to R.string.ichthys_ed2_font_square)
+                DepthClockView.FONT_SQUARE to R.string.ichthys_ed2_font_square,
+                DepthClockView.FONT_ROUNDED to R.string.ichthys_ed2_font_rounded)
         ChipRow {
             fonts.forEach { (font, label) ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
