@@ -60,6 +60,8 @@ object LockKeys {
     const val DEPTH = DepthClockView.KEY_DEPTH
     const val SHAPE_STYLE = DepthClockView.KEY_SHAPE_STYLE
     const val FONT = DepthClockView.KEY_FONT
+    const val GLASS_FROST = DepthClockView.KEY_GLASS_FROST
+    const val GLASS_OPACITY = DepthClockView.KEY_GLASS_OPACITY
     const val DATE_POS = DepthClockView.KEY_DATE_POS
     const val DATE_ALIGN = DepthClockView.KEY_DATE_ALIGN
     const val LOOK = "ichthys_lockscreen_look"
@@ -94,7 +96,10 @@ data class LockDesign(
     val fill: Int = DepthClockView.FILL_SOLID,
     val depth: Int = DepthClockView.DEPTH_OVERLAP,
     val shape: Int = DepthClockView.SHAPE_STRETCH,
-    val font: Int = DepthClockView.FONT_TALL,
+    val font: Int = DepthClockView.FONT_ROUNDED,
+    /** The glass finish: clear (0) or frosted (1), and Apple's opacity slider (-1 auto, 0..100). */
+    val glassFrost: Int = 0,
+    val glassOpacity: Int = -1,
     val colorMode: String = LockKeys.MODE_DEFAULT,
     val color: Int = Color.WHITE,
     val opacity: Int = 100,
@@ -169,6 +174,8 @@ data class LockDesign(
             .put("depth", depth)
             .put("shape", shape)
             .put("font", font)
+            .put("glassFrost", glassFrost)
+            .put("glassOpacity", glassOpacity)
             .put("colorMode", colorMode)
             .put("color", color)
             .put("opacity", opacity)
@@ -198,6 +205,8 @@ data class LockDesign(
             depth = o.optInt("depth", depth),
             shape = o.optInt("shape", DepthClockView.SHAPE_STRETCH),
             font = o.optInt("font", DepthClockView.FONT_TALL),
+            glassFrost = o.optInt("glassFrost", 0),
+            glassOpacity = o.optInt("glassOpacity", -1),
             colorMode = o.optString("colorMode", colorMode),
             color = o.optInt("color", color),
             opacity = o.optInt("opacity", 100),
@@ -275,7 +284,9 @@ object LockStore {
             fill = int(context, LockKeys.FILL, DepthClockView.FILL_SOLID),
             depth = int(context, LockKeys.DEPTH, DepthClockView.DEPTH_OFF),
             shape = int(context, LockKeys.SHAPE_STYLE, DepthClockView.SHAPE_STRETCH),
-            font = int(context, LockKeys.FONT, DepthClockView.FONT_TALL),
+            font = int(context, LockKeys.FONT, DepthClockView.FONT_ROUNDED),
+            glassFrost = int(context, LockKeys.GLASS_FROST, 0),
+            glassOpacity = int(context, LockKeys.GLASS_OPACITY, -1),
             colorMode = str(context, LockKeys.COLOR_MODE) ?: LockKeys.MODE_DEFAULT,
             color = int(context, LockKeys.CUSTOM_COLOR, Color.WHITE),
             opacity = int(context, LockKeys.OPACITY, 100),
@@ -322,6 +333,8 @@ object LockStore {
         i(LockKeys.FILL, draft.fill, original.fill)
         i(LockKeys.SHAPE_STYLE, draft.shape, original.shape)
         i(LockKeys.FONT, draft.font, original.font)
+        i(LockKeys.GLASS_FROST, draft.glassFrost, original.glassFrost)
+        i(LockKeys.GLASS_OPACITY, draft.glassOpacity, original.glassOpacity)
         i(LockKeys.DATE_POS, draft.datePos, original.datePos)
         i(LockKeys.DATE_ALIGN, draft.dateAlign, original.dateAlign)
         i(LockKeys.DETAILS, if (draft.details) 1 else 0, if (original.details) 1 else 0)

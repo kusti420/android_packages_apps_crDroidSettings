@@ -773,6 +773,8 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
                     else d.depth
                 v.previewShapeStyle = d.shape
                 v.previewFont = d.font
+                v.previewGlassFrost = d.glassFrost
+                v.previewGlassOpacity = d.glassOpacity
                 v.previewDatePos = d.datePos
                 v.previewDateAlign = d.dateAlign
                 v.previewOutline = p.outline

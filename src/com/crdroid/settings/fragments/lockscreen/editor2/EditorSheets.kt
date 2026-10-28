@@ -305,7 +305,14 @@ private fun StyleTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
                 DepthClockView.FONT_SERIF to R.string.ichthys_ed2_font_serif,
                 DepthClockView.FONT_MONO to R.string.ichthys_ed2_font_mono,
                 DepthClockView.FONT_SQUARE to R.string.ichthys_ed2_font_square,
-                DepthClockView.FONT_ROUNDED to R.string.ichthys_ed2_font_rounded)
+                DepthClockView.FONT_ROUNDED to R.string.ichthys_ed2_font_rounded,
+                DepthClockView.FONT_SOFT to R.string.ichthys_ed2_font_soft,
+                DepthClockView.FONT_TEKO to R.string.ichthys_ed2_font_teko,
+                DepthClockView.FONT_CONDENSED to R.string.ichthys_ed2_font_condensed,
+                DepthClockView.FONT_POSTER to R.string.ichthys_ed2_font_poster,
+                DepthClockView.FONT_COMPACT to R.string.ichthys_ed2_font_compact,
+                DepthClockView.FONT_GROTESK to R.string.ichthys_ed2_font_grotesk,
+                DepthClockView.FONT_HEAVY to R.string.ichthys_ed2_font_heavy)
         ChipRow {
             fonts.forEach { (font, label) ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -346,6 +353,25 @@ private fun ColourTab(state: EditorState, onDraft: (LockDesign) -> Unit) {
                 stringResource(R.string.ichthys_ed2_finish_glass)),
             fills.indexOf(d.fill).coerceAtLeast(0),
         ) { onDraft(d.copy(fill = fills[it], look = "custom")) }
+        // IchthysOS: Apple's Glass clock options: clear or frosted, and the opacity slider
+        // (smoky .. milky), or Auto, which picks it from the picture.
+        if (d.fill == DepthClockView.FILL_GLASS) {
+            Segmented(
+                listOf(stringResource(R.string.ichthys_ed2_glass_clear),
+                    stringResource(R.string.ichthys_ed2_glass_frosted)),
+                d.glassFrost.coerceIn(0, 1),
+            ) { onDraft(d.copy(glassFrost = it, look = "custom")) }
+            ChipRow {
+                TextChip(stringResource(R.string.ichthys_ed2_glass_auto), d.glassOpacity < 0,
+                    { onDraft(d.copy(glassOpacity = if (d.glassOpacity < 0) 50 else -1, look = "custom")) })
+            }
+            if (d.glassOpacity >= 0) {
+                SliderRow(stringResource(R.string.ichthys_ed2_glass_opacity), d.glassOpacity.toFloat(),
+                    0f..100f, "${d.glassOpacity}") {
+                    onDraft(d.copy(glassOpacity = it.toInt(), look = "custom"))
+                }
+            }
+        }
     }
     Label(stringResource(R.string.ichthys_ed2_colour_wallpaper))
     ChipRow {

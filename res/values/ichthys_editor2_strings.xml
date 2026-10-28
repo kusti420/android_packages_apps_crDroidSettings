@@ -41,6 +41,17 @@
     <string name="ichthys_ed2_font_mono">Mono</string>
     <string name="ichthys_ed2_font_square">Square</string>
     <string name="ichthys_ed2_font_rounded">Rounded</string>
+    <string name="ichthys_ed2_font_soft">Soft</string>
+    <string name="ichthys_ed2_font_teko">Signage</string>
+    <string name="ichthys_ed2_font_condensed">Condensed</string>
+    <string name="ichthys_ed2_font_poster">Poster</string>
+    <string name="ichthys_ed2_font_compact">Compact</string>
+    <string name="ichthys_ed2_font_grotesk">Grotesk</string>
+    <string name="ichthys_ed2_font_heavy">Heavy</string>
+    <string name="ichthys_ed2_glass_clear">Clear</string>
+    <string name="ichthys_ed2_glass_frosted">Frosted</string>
+    <string name="ichthys_ed2_glass_auto">Auto opacity</string>
+    <string name="ichthys_ed2_glass_opacity">Opacity</string>
     <string name="ichthys_ed2_digits">Digits</string>
     <string name="ichthys_ed2_colour_wallpaper">From the wallpaper</string>
     <string name="ichthys_ed2_colour_custom">Your own colour</string>
