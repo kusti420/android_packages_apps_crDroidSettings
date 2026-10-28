@@ -31,6 +31,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.UserHandle
 import android.util.Log
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.android.settingslib.ichthys.clock.DepthSource
@@ -52,7 +53,11 @@ import kotlin.math.roundToInt
  * - IchthysOS Living Sky: [sky] (the sky's coverage in alpha, the backdrop's size), [land] (the
  *   rest, for the weather's far layers) and [skyInfo] (whether Living Sky can grade it, and how);
  *   null while IchthysDepth hasn't found the sky yet.
+ *
+ * Never changed once made (a new picture is a new object), so Compose can skip the previews that
+ * show it while only the design changes (the sheets' many small previews during a drag).
  */
+@Immutable
 class LockPicture(
     val backdrop: ImageBitmap?,
     val cutout: ImageBitmap?,

@@ -340,7 +340,8 @@ fun LockEditor2(
         }
     }
 
-    val changed = draft != original || wallpaper != WallpaperDraft.Current
+    // Any edit names the look "custom"; an edit undone by hand leaves nothing to discard.
+    val changed = draft.copy(look = original.look) != original || wallpaper != WallpaperDraft.Current
     fun cancel() {
         if (changed) confirmDiscard = true else leave()
     }
