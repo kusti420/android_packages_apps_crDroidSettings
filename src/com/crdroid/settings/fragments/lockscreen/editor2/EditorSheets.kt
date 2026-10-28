@@ -104,6 +104,10 @@ import com.android.settingslib.ichthys.clock.LockWeather
 import com.android.settingslib.ichthys.clock.SquareDigits
 import com.android.settingslib.ichthys.sky.LivingSky
 import com.crdroid.settings.fragments.lockscreen.ClockUtils
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 
 /**
  * IchthysOS Shoal: the editor's colours, fonts and corners, all from the theme (GuardTheme around
@@ -328,33 +332,62 @@ private fun FaceChip(label: String, on: Boolean, onClick: () -> Unit, thumb: @Co
 }
 
 /**
- * [design]'s clock alone, upright and in its home place, on nothing: the lock screen drawn whole
- * at the card's width and cut to the band the faces sit in (the top of the screen).
+ * [design]'s clock alone, upright, on nothing: the lock screen is drawn whole at the card's width
+ * (no weather, no wallpaper), then framed on what the face really shows (the preview's measured
+ * clock), centred and fitted into the card, so tall, wide and small faces all show whole.
  */
 @Composable
 private fun ClockOnly(design: LockDesign) {
     val screen = rememberScreen()
+    val pad = with(LocalDensity.current) { 8.dp.toPx() }
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+        val cardW = constraints.maxWidth.toFloat()
+        val cardH = constraints.maxHeight.toFloat()
         val fullH = maxWidth * (screen.height.toFloat() / screen.width)
+        val shown = remember(design) {
+            design.copy(depth = DepthClockView.DEPTH_OFF, weather = false)
+        }
+        var clock by remember(shown) { mutableStateOf<Rect?>(null) }
         Box(
             Modifier.fillMaxWidth()
                 .wrapContentHeight(Alignment.Top, unbounded = true)
                 .requiredHeight(fullH)
-                .offset(y = -fullH * CLOCK_BAND_TOP)
+                .graphicsLayer {
+                    val r = clock
+                    if (r == null || r.width <= 0f || r.height <= 0f) {
+                        alpha = 0f
+                        return@graphicsLayer
+                    }
+                    val s = minOf((cardW - 2 * pad) / r.width, (cardH - 2 * pad) / r.height,
+                        CLOCK_CARD_MAX_ZOOM)
+                    transformOrigin = TransformOrigin(0f, 0f)
+                    scaleX = s
+                    scaleY = s
+                    translationX = cardW / 2f - r.center.x * s
+                    translationY = cardH / 2f - r.center.y * s
+                }
         ) {
-            // A little smaller than at home, so the tall two-row faces fit the card whole.
-            val shown = remember(design) { design.copy(depth = DepthClockView.DEPTH_OFF, scale = 0.82f) }
             LockScreenPreview(shown, LockPicture.EMPTY, Modifier.fillMaxSize(), chrome = false,
-                rounded = false)
+                rounded = false, onLayout = { l ->
+                    // The face with its date line (the Depth face's is its own element). The
+                    // layout's rectangles are on the screen (px); the preview is k as big.
+                    val c = l.rects[LockElement.CLOCK]
+                    val dt = l.rects[LockElement.DATE]
+                    val u = if (c != null && dt != null) {
+                        Rect(minOf(c.left, dt.left), minOf(c.top, dt.top), maxOf(c.right, dt.right),
+                            maxOf(c.bottom, dt.bottom))
+                    } else c ?: dt
+                    val r = u?.let {
+                        Rect(it.left * l.k, it.top * l.k, it.right * l.k, it.bottom * l.k)
+                    }
+                    if (r != clock) clock = r
+                })
         }
     }
 }
 
-/**
- * The faces' band: from just under the status bar, tall enough for the two-row faces (Depth,
- * One UI Stacked) with their date: about the top half of the screen at the card's width.
- */
-private const val CLOCK_BAND_TOP = 0.06f
+/** How far a small face may be blown up to fill its card (the plain faces stay readable). */
+private const val CLOCK_CARD_MAX_ZOOM = 1.3f
 
 /** The docked sheet's height (all tabs): its content scrolls inside. */
 private val EDITOR_SHEET_H = 380.dp

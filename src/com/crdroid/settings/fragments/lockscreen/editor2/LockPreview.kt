@@ -844,7 +844,8 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
         }
         if (d.isDepthFace) return
         leafBounds.setEmpty()
-        for (i in 0 until childCount) collect(getChildAt(i), 0f, 0f)
+        val root = android.graphics.Matrix()
+        for (i in 0 until childCount) collect(getChildAt(i), root, null)
         if (leafBounds.isEmpty) {
             cb(FaceReport(d.style, null, null))
             return
@@ -852,32 +853,83 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
         val fw = width.toFloat()
         fun sx(x: Float) = LockKeys.SIDE_DP * g.density + d.dx + fw / 2f + (x - fw / 2f) * d.scale
         fun sy(y: Float) = g.top0 + d.dy + y * d.scale
-        cb(FaceReport(d.style,
-            Rect(sx(leafBounds.left), sy(leafBounds.top), sx(leafBounds.right), sy(leafBounds.bottom)),
-            null))
+        // What runs past the screen's sides isn't seen: the frame stays on the screen.
+        val sw = g.width.toFloat()
+        val l = sx(leafBounds.left).coerceIn(0f, sw)
+        val r = sx(leafBounds.right).coerceIn(0f, sw)
+        if (r <= l) {
+            cb(FaceReport(d.style, null, null))
+            return
+        }
+        cb(FaceReport(d.style, Rect(l, sy(leafBounds.top), r, sy(leafBounds.bottom)), null))
     }
 
-    private fun collect(v: View, ox: Float, oy: Float) {
+    private val collectRect = android.graphics.RectF()
+
+    /**
+     * Adds what [v] draws to [leafBounds], in this frame's px: [m] maps [v]'s parent to this frame,
+     * and each view's own turn and scale are applied (the Block face's turned digits). Text counts
+     * by its lines, a background or a picture by its whole box; a bare spacer counts for nothing.
+     * Anything a clipping parent cuts off is left out.
+     */
+    private fun collect(v: View, m: android.graphics.Matrix, clip: android.graphics.RectF?) {
         if (v.visibility != View.VISIBLE || v.alpha == 0f || v.width == 0 || v.height == 0) return
-        val x = ox + v.left + v.translationX
-        val y = oy + v.top + v.translationY
+        val vm = android.graphics.Matrix(m)
+        vm.preTranslate(v.left.toFloat(), v.top.toFloat())
+        if (!v.matrix.isIdentity) vm.preConcat(v.matrix)
+        fun add(l: Float, t: Float, r: Float, b: Float) {
+            collectRect.set(l, t, r, b)
+            vm.mapRect(collectRect)
+            if (clip != null && !collectRect.intersect(clip)) return
+            leafBounds.union(collectRect)
+        }
+        val bg = v.background
+        val hasBg = bg != null && bg.alpha != 0 &&
+            !(bg is android.graphics.drawable.ColorDrawable && AColor.alpha(bg.color) == 0)
+        if (hasBg) add(0f, 0f, v.width.toFloat(), v.height.toFloat())
         if (v is ViewGroup) {
-            for (i in 0 until v.childCount) collect(v.getChildAt(i), x, y)
+            var inner = clip
+            if (v.clipChildren) {
+                val c = android.graphics.RectF(0f, 0f, v.width.toFloat(), v.height.toFloat())
+                vm.mapRect(c)
+                if (inner != null && !c.intersect(inner)) return
+                inner = c
+            }
+            for (i in 0 until v.childCount) collect(v.getChildAt(i), vm, inner)
             return
         }
         val tl = (v as? TextView)?.layout
-        if (tl != null && tl.lineCount > 0 && !v.text.isNullOrEmpty()) {
+        if (v is TextView) {
+            if (tl == null || tl.lineCount == 0 || v.text.isNullOrEmpty()) return
             var l = Float.MAX_VALUE
             var r = -Float.MAX_VALUE
             for (i in 0 until tl.lineCount) {
                 l = minOf(l, tl.getLineLeft(i))
                 r = maxOf(r, tl.getLineRight(i))
             }
-            val px = x + v.totalPaddingLeft
-            val py = y + v.totalPaddingTop
-            leafBounds.union(px + l, py + tl.getLineTop(0), px + r, py + tl.getLineBottom(tl.lineCount - 1))
-        } else {
-            leafBounds.union(x, y, x + v.width, y + v.height)
+            // A single line is laid out very wide and scrolled back into view (scrollX); and the
+            // text never shows outside the view's content box.
+            val px = v.totalPaddingLeft.toFloat() - v.scrollX
+            val py = v.totalPaddingTop.toFloat() - v.scrollY
+            val cl = v.totalPaddingLeft.toFloat()
+            val cr = (v.width - v.totalPaddingRight).toFloat()
+            val lo = (px + l).coerceIn(cl, cr)
+            val hi = (px + r).coerceIn(cl, cr)
+            if (hi <= lo) return
+            add(lo, py + tl.getLineTop(0), hi, py + tl.getLineBottom(tl.lineCount - 1))
+        } else if (v is android.widget.ImageView) {
+            val dr = v.drawable ?: return
+            val b = android.graphics.RectF(0f, 0f, dr.intrinsicWidth.toFloat(), dr.intrinsicHeight.toFloat())
+            if (b.isEmpty) {
+                add(0f, 0f, v.width.toFloat(), v.height.toFloat())
+                return
+            }
+            v.imageMatrix.mapRect(b)
+            b.offset(v.paddingLeft.toFloat(), v.paddingTop.toFloat())
+            add(b.left, b.top, b.right, b.bottom)
+        } else if (v.javaClass != View::class.java) {
+            // A view that draws itself (the analog clock): its whole box.
+            add(0f, 0f, v.width.toFloat(), v.height.toFloat())
         }
     }
 

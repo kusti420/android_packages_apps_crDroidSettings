@@ -17,6 +17,6 @@
         android:layout_height="wrap_content"
         android:textAlignment="viewStart"
         android:format12Hour="hh:mm"
-        android:format24Hour="hh:mm" />
+        android:format24Hour="HH:mm" />
 </LinearLayout>
 

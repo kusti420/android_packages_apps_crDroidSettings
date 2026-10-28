@@ -9,13 +9,19 @@
     android:gravity="start|top"
     android:orientation="vertical">
 
+    <!-- The weekday shrinks to fit the width (WEDNESDAY, DONNERSTAG), sitting on the date. -->
     <TextClock
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
         android:tag="text1|nolineheight"
         android:fontFamily="sans-serif-light"
         android:includeFontPadding="false"
-        android:singleLine="true"
+        android:gravity="bottom|start"
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="30sp"
+        android:autoSizeMaxTextSize="54sp"
+        android:autoSizeStepGranularity="1sp"
         android:textAllCaps="true"
         android:letterSpacing="0.02"
         android:textColor="#FFFFFFFF"
