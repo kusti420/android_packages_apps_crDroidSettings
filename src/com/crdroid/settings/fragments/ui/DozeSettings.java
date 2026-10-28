@@ -56,6 +56,7 @@ public class DozeSettings extends SettingsPreferenceFragment implements
     public static final String TAG = "DozeSettings";
 
     private static final String KEY_DOZE_ALWAYS_ON_SCHEDULE = "always_on_display_schedule";
+    private static final String KEY_DOZE_WALLPAPER = "doze_always_on_wallpaper_enabled";
 
     private static final String CATEG_DOZE_SENSOR = "doze_sensor";
 
@@ -87,6 +88,15 @@ public class DozeSettings extends SettingsPreferenceFragment implements
                 (PreferenceCategory) getPreferenceScreen().findPreference(CATEG_DOZE_SENSOR);
 
         mDozeAlwaysOnSchedulePreference = findPreference(KEY_DOZE_ALWAYS_ON_SCHEDULE);
+
+        // IchthysOS: the always-on display shows the wallpaper only where the panel supports it
+        // (config_dozeSupportsAodWallpaper, false on the A52s); elsewhere the switch does nothing.
+        if (!aodWallpaperSupported(context)) {
+            final Preference wallpaper = findPreference(KEY_DOZE_WALLPAPER);
+            if (wallpaper != null && wallpaper.getParent() != null) {
+                wallpaper.getParent().removePreference(wallpaper);
+            }
+        }
 
         mTiltPreference = (SwitchPreferenceCompat) findPreference(KEY_DOZE_TILT_GESTURE);
         mHandwavePreference = (SwitchPreferenceCompat) findPreference(KEY_DOZE_HANDWAVE_GESTURE);
@@ -250,6 +260,11 @@ public class DozeSettings extends SettingsPreferenceFragment implements
     /**
      * For search
      */
+    private static boolean aodWallpaperSupported(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
+    }
+
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
             new BaseSearchIndexProvider(R.xml.doze_settings) {
 
@@ -262,6 +277,9 @@ public class DozeSettings extends SettingsPreferenceFragment implements
                     }
 
                     keys.add(KEY_DOZE_GESTURE_VIBRATE);
+                    if (!aodWallpaperSupported(context)) {
+                        keys.add(KEY_DOZE_WALLPAPER);
+                    }
                     if (!Utils.getTiltSensor(context)) {
                         keys.add(KEY_DOZE_TILT_GESTURE);
                     }

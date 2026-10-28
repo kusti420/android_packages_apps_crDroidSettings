@@ -71,8 +71,11 @@ public class StatusBar extends SettingsPreferenceFragment implements
     private static final int PRIVACY_INDICATOR_STYLE_RING = 0;
 
     /** Status bar icon slots shown as switches in the Indicators section. */
+    // IchthysOS: only sensors_off. The location, microphone and camera slots are never drawn
+    // (PhoneStatusBarPolicy leaves them off, as stock; the privacy chip shows that use), so
+    // switches for them would do nothing.
     private static final String[] PRIVACY_SLOTS = {
-        "location", "microphone", "camera", "sensors_off",
+        "sensors_off",
     };
 
     private StatusBarIcons.SlotSwitches mPrivacySlots;

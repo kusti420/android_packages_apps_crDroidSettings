@@ -48,7 +48,6 @@
             android:defaultValue="false" />
     </PreferenceCategory>
 
-
     <!-- Clock -->
     <PreferenceCategory
         android:key="look_status_bar_clock_category"
@@ -139,7 +138,6 @@
             android:summary="@string/network_traffic_settings_summary"
             android:fragment="com.crdroid.settings.fragments.statusbar.NetworkTrafficSettings" />
 
-
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="show_fourg_icon"
             android:icon="@drawable/ic_signal"
@@ -198,7 +196,6 @@
             android:summary="@string/ichthys_notif_dot_aod_summary"
             android:defaultValue="true"
             android:dependency="ichthys_notif_dot_enabled" />
-
 
         <com.crdroid.settings.preferences.SystemSettingListPreference
             android:key="ichthys_notif_dot_color"
@@ -293,23 +290,7 @@
             settings:min="1"
             settings:units="@string/unit_dp" />
 
-        <SwitchPreferenceCompat
-            android:key="location"
-            android:icon="@drawable/ic_map_marker"
-            android:title="@string/look_status_bar_slot_location_title"
-            android:persistent="false" />
 
-        <SwitchPreferenceCompat
-            android:key="microphone"
-            android:icon="@drawable/ic_mic"
-            android:title="@string/look_status_bar_slot_microphone_title"
-            android:persistent="false" />
-
-        <SwitchPreferenceCompat
-            android:key="camera"
-            android:icon="@drawable/ic_camera"
-            android:title="@string/look_status_bar_slot_camera_title"
-            android:persistent="false" />
 
         <SwitchPreferenceCompat
             android:key="sensors_off"
@@ -317,7 +298,6 @@
             android:title="@string/look_status_bar_slot_sensors_off_title"
             android:persistent="false" />
     </PreferenceCategory>
-
 
     <!-- Spacing -->
     <PreferenceCategory

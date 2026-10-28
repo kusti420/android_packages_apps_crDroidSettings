@@ -44,7 +44,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +62,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.height
 import com.android.settings.ichthys.guard.ui.theme.Guard
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.settings.R
@@ -130,13 +134,24 @@ fun IdeasScreen(
     Column(
         Modifier.fillMaxSize().background(tk.ink).statusBarsPadding().navigationBarsPadding()
     ) {
+        // Back with the screen's name, as the editor's own top bar.
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+            Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .clickable { if (phase == IdeasPhase.GRID) phase = IdeasPhase.PICK else onBack() }
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = {
-                if (phase == IdeasPhase.GRID) phase = IdeasPhase.PICK else onBack()
-            }) { Text(stringResource(android.R.string.cancel)) }
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.width / 24f
+                val chevron = Path().apply {
+                    moveTo(15 * u, 5 * u)
+                    lineTo(8 * u, 12 * u)
+                    lineTo(15 * u, 19 * u)
+                }
+                drawPath(chevron, tk.text, style = Stroke(1.6.dp.toPx(), cap = StrokeCap.Round,
+                    join = StrokeJoin.Round))
+            }
             Text(
                 if (phase == IdeasPhase.GRID)
                     stringResource(R.string.ichthys_ed2_ideas_count, ideas.size)
