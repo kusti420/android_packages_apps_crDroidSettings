@@ -241,7 +241,11 @@ fun LockScreenPreview(
         val weatherPlace = design.weatherPlace
         // The weather line under the clock: where the Depth face wants it (under the digits you
         // see), else under the face's scaled box, as SystemUI's LockWeatherView places it.
-        val underY = report?.underTop ?: whole.bottom
+        // IchthysOS: and under the turned clock's lowest point (a turn takes one side lower).
+        val turn = Math.toRadians(design.rot.toDouble())
+        val turnDrop = (clock.width / 2f * kotlin.math.abs(kotlin.math.sin(turn)) -
+            clock.height / 2f * (1 - kotlin.math.abs(kotlin.math.cos(turn)))).toFloat()
+        val underY = (report?.underTop ?: whole.bottom) + maxOf(0f, turnDrop)
         val weatherAtTop = weatherPlace == LockWeather.POS_TOP_START ||
             weatherPlace == LockWeather.POS_TOP_END
         val weatherY = if (weatherAtTop) (LockKeys.STATUS_BAR_DP + WEATHER_TOP_DP) * d else underY
@@ -328,7 +332,7 @@ fun LockScreenPreview(
                 picture.backdrop?.let {
                     if (sky != null) LivingSkyImage(sky, picture, null, Modifier.fillMaxSize())
                     else Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                } ?: Box(Modifier.fillMaxSize().background(Color(0xFF0B1418)))
+                } ?: if (chrome) Box(Modifier.fillMaxSize().background(Color(0xFF0B1418))) else Unit
 
                 // The face, as KeyguardCustomClockView lays it out: 40 dp in from the screen's
                 // sides, its top at 72 dp + margin under the status bar, scaled about its top
@@ -377,8 +381,10 @@ fun LockScreenPreview(
                 if (design.weather && weatherPlace != LockWeather.POS_DATE) {
                     val atTop = weatherAtTop
                     val y = weatherY
-                    val spanL = if (atTop) LockKeys.SIDE_DP * d else whole.left
-                    val spanR = if (atTop) w - LockKeys.SIDE_DP * d else whole.right
+                    // Inside the screen's side margins, however far the clock was moved or grown.
+                    val spanL = if (atTop) LockKeys.SIDE_DP * d else maxOf(LockKeys.SIDE_DP * d, whole.left)
+                    val spanR =
+                        if (atTop) w - LockKeys.SIDE_DP * d else minOf(w - LockKeys.SIDE_DP * d, whole.right)
                     key(atTop) {
                         AndroidView(
                             factory = {
@@ -729,10 +735,26 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
     private var depthUnder = Float.NaN
     private val leafBounds = android.graphics.RectF()
 
+    private var boundLook: LockDesign? = null
+    private var boundPicture: LockPicture? = null
+    private var boundAccent = 0
+
     fun bind(d: LockDesign, p: LockPicture, g: LockGeometry, accent: Int) {
         design = d
         picture = p
         geo = g
+        // IchthysOS: moving, sizing or turning the clock changes only where it is drawn (the
+        // preview's offset and scale, outside this view). Re-applying every option to the face's
+        // views on each frame of a drag made the editor stutter; only a real change does it.
+        val look = d.copy(dx = 0f, dy = 0f, scale = 1f, rot = if (d.rot != 0f) 1f else 0f)
+        if (look == boundLook && p === boundPicture && accent == boundAccent && tag == d.style) {
+            place()
+            if (!d.isDepthFace && onContent != null) post { emitContent() }
+            return
+        }
+        boundLook = look
+        boundPicture = p
+        boundAccent = accent
         if (tag != d.style) {
             tag = d.style
             removeAllViews()

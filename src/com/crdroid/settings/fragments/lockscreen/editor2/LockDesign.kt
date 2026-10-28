@@ -248,9 +248,68 @@ sealed class WallpaperDraft {
     data class Builtin(val id: String) : WallpaperDraft()
 }
 
-/** Wallpapers painted for the depth lock screen: id, picture, name. */
+/**
+ * Wallpapers that come with IchthysOS: id, picture (1080 x 2400), name. The koi pond is painted
+ * for the depth lock screen; the photos are the ones the lock screen concepts were made with.
+ */
 val BUILTIN_WALLPAPERS =
-    listOf(Triple("koi", R.drawable.ichthys_wallpaper_koi, R.string.ichthys_wallpaper_koi))
+    listOf(
+        Triple("koi", R.drawable.ichthys_wallpaper_koi, R.string.ichthys_wallpaper_koi),
+        Triple("peyto_lake", R.drawable.ichthys_wall_peyto_lake, R.string.ichthys_wall_peyto_lake),
+        Triple("dog_rock_sky", R.drawable.ichthys_wall_dog_rock_sky, R.string.ichthys_wall_dog_rock_sky),
+        Triple("lighthouse_white", R.drawable.ichthys_wall_lighthouse_white,
+            R.string.ichthys_wall_lighthouse_white),
+        Triple("woman_red_sky", R.drawable.ichthys_wall_woman_red_sky,
+            R.string.ichthys_wall_woman_red_sky),
+        Triple("man_white_shirt", R.drawable.ichthys_wall_man_white_shirt,
+            R.string.ichthys_wall_man_white_shirt),
+        Triple("sea_stack", R.drawable.ichthys_wall_sea_stack, R.string.ichthys_wall_sea_stack),
+        Triple("treeline_lake", R.drawable.ichthys_wall_treeline_lake,
+            R.string.ichthys_wall_treeline_lake),
+        Triple("ridge_haze", R.drawable.ichthys_wall_ridge_haze, R.string.ichthys_wall_ridge_haze),
+        Triple("sunset_paddy", R.drawable.ichthys_wall_sunset_paddy,
+            R.string.ichthys_wall_sunset_paddy),
+        Triple("quiraing", R.drawable.ichthys_wall_quiraing, R.string.ichthys_wall_quiraing),
+        Triple("green_hill", R.drawable.ichthys_wall_green_hill, R.string.ichthys_wall_green_hill),
+        Triple("sky_meadows", R.drawable.ichthys_wall_sky_meadows, R.string.ichthys_wall_sky_meadows),
+        Triple("light_cloud", R.drawable.ichthys_wall_light_cloud, R.string.ichthys_wall_light_cloud),
+        Triple("city_skyline", R.drawable.ichthys_wall_city_skyline,
+            R.string.ichthys_wall_city_skyline),
+        Triple("toronto_sunset", R.drawable.ichthys_wall_toronto_sunset,
+            R.string.ichthys_wall_toronto_sunset),
+        Triple("vintage_car_night", R.drawable.ichthys_wall_vintage_car_night,
+            R.string.ichthys_wall_vintage_car_night),
+        Triple("fluid_abstract", R.drawable.ichthys_wall_fluid_abstract,
+            R.string.ichthys_wall_fluid_abstract),
+        Triple("copper_lines", R.drawable.ichthys_wall_copper_lines,
+            R.string.ichthys_wall_copper_lines),
+    )
+
+/**
+ * The photos' credits (title, author, licence, source), shown by the Wallpaper sheet. The Creative
+ * Commons ones must be credited; the CC BY-SA crops are shared under the same licence. Names and
+ * licences stay untranslated.
+ */
+val WALLPAPER_CREDITS =
+    listOf(
+        "Peyto Lake in winter: Jakub Fry\u0161, CC BY-SA 4.0 (cropped). commons.wikimedia.org/wiki/File:Peyto_Lake_in_winter.jpg",
+        "Trees rising out of Cheow Lan Lake: Vyacheslav Argenberg, CC BY 4.0 (cropped). commons.wikimedia.org/wiki/File:Trees_rising_out_of_Cheow_Lan_Lake,_blue_sky,_eternal_summer_in_Surat_Thani.jpg",
+        "Hurricane Ridge, Olympic National Park: Andreas Geick, CC BY-SA 3.0 (cropped). commons.wikimedia.org/wiki/File:Hurricane_Ridge,_Olympic_National_Park._-_panoramio.jpg",
+        "Colorful sky over a paddy field, Vang Vieng: Basile Morin, CC BY-SA 4.0 (cropped). commons.wikimedia.org/wiki/File:Colorful_sky_with_orange_clouds_reflecting_in_the_water_of_a_paddy_field,_at_sunset,_Vang_Vieng,_Laos.jpg",
+        "A city skyline (DFC 2050): PattayaPatrol, CC BY-SA 4.0 (cropped). commons.wikimedia.org/wiki/File:DFC_2050_A_city_skyline_with_a_mix_of_low-rise_buildings_and_a_tall_modern_tower_rising_above_leafy_green_trees_under_a_partly_cloudy_sky.jpg",
+        "Light Breaking Thru over Piedmont: Virginia State Parks (vastateparksstaff), CC BY 2.0 (cropped). commons.wikimedia.org/wiki/File:Light_Breaking_Thru_over_Piedmont_(33113583426).jpg",
+        "Touch the Sky at Sky Meadows: Virginia State Parks (vastateparksstaff), CC BY 2.0 (cropped). commons.wikimedia.org/wiki/File:Touch_the_Sky_at_Sky_Meadows_(32708244180).jpg",
+        "Quiraing valley: Unsplash License. unsplash.com/photos/bCm0kpA5tm4",
+        "Green hill: Pexels License. pexels.com/photo/23383399",
+        "Toronto sunset: Pexels License. pexels.com/photo/19733715",
+        "Young woman against blue sky: Pexels License. pexels.com/photo/4946635",
+        "Man in white dress shirt: cottonbro studio, Pexels License. pexels.com/photo/4886787",
+        "An Australian shepherd under the blue sky: Jeanpaul Lienard, Pexels License. pexels.com/photo/9923868",
+        "Lighthouse under a blue sky: Pexels License. pexels.com/photo/11954484",
+        "Dun Briste sea stack, Co. Mayo: Pexels License. pexels.com/photo/12530564",
+        "Low angle shot of a vintage car: Erik Mclean, Pexels License. pexels.com/photo/9592414",
+        "Koi pond, Fluid and Copper lines: made for IchthysOS.",
+    )
 
 object LockStore {
     private const val TAG = "LockEditor2"
@@ -290,7 +349,7 @@ object LockStore {
             colorMode = str(context, LockKeys.COLOR_MODE) ?: LockKeys.MODE_DEFAULT,
             color = int(context, LockKeys.CUSTOM_COLOR, Color.WHITE),
             opacity = int(context, LockKeys.OPACITY, 100),
-            scale = int(context, LockKeys.SCALE, 100).coerceIn(50, 150) / 100f,
+            scale = int(context, LockKeys.SCALE, 100).coerceIn(40, 180) / 100f,
             dx = int(context, LockKeys.OFFSET_X, 0).toFloat(),
             dy = (margin - LockKeys.DEFAULT_MARGIN_TOP).toFloat(),
             rot = int(context, LockKeys.ROTATION, 0).toFloat(),

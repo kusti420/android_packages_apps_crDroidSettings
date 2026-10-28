@@ -46,6 +46,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,6 +60,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,7 +75,6 @@ import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -189,7 +191,9 @@ fun EditorSheetHost(
     Column(
         Modifier.fillMaxWidth()
             .background(t.ink)
-            .heightIn(max = 400.dp)
+            // IchthysOS: one height for every tab. Each sheet sized to its content made the
+            // preview grow and shrink as the tabs changed; now it stays put.
+            .height(EDITOR_SHEET_H)
             .padding(bottom = 10.dp)
     ) {
         // Extras: which of them, as chips above the sheet (they stay while its content changes).
@@ -294,6 +298,67 @@ private fun PictureChip(label: String, on: Boolean, onClick: () -> Unit, thumb: 
             color = if (on) t.accent else t.muted, modifier = Modifier.padding(top = 5.dp, bottom = 3.dp))
     }
 }
+
+/**
+ * [d] with the clock in its home place (no move, turn or size): what the sheets' thumbnails
+ * show. The same object while only the place changes, so dragging the clock doesn't rebuild
+ * every thumbnail on every frame (each is a whole lock screen with its clock view).
+ */
+@Composable
+private fun rememberAtHome(d: LockDesign): LockDesign {
+    val home = d.copy(dx = 0f, dy = 0f, scale = 1f, rot = 0f, look = "")
+    return remember(home) { home }
+}
+
+/** A clock face as just the clock (no wallpaper, no lock screen around it), with its name. */
+@Composable
+private fun FaceChip(label: String, on: Boolean, onClick: () -> Unit, thumb: @Composable () -> Unit) {
+    Column(
+        Modifier.width(112.dp).shoalCard(on, RoundedCornerShape(12.dp)).clickable(onClick = onClick)
+            .padding(3.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(Modifier.fillMaxWidth().height(FACE_CARD_H).clip(RoundedCornerShape(9.dp)).background(t.ink)) {
+            thumb()
+        }
+        Text(label, fontFamily = t.mono, fontSize = 10.sp, letterSpacing = 0.4.sp, maxLines = 1,
+            overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+            color = if (on) t.accent else t.muted, modifier = Modifier.padding(top = 5.dp, bottom = 3.dp))
+    }
+}
+
+/**
+ * [design]'s clock alone, upright and in its home place, on nothing: the lock screen drawn whole
+ * at the card's width and cut to the band the faces sit in (the top of the screen).
+ */
+@Composable
+private fun ClockOnly(design: LockDesign) {
+    val screen = rememberScreen()
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+        val fullH = maxWidth * (screen.height.toFloat() / screen.width)
+        Box(
+            Modifier.fillMaxWidth()
+                .wrapContentHeight(Alignment.Top, unbounded = true)
+                .requiredHeight(fullH)
+                .offset(y = -fullH * CLOCK_BAND_TOP)
+        ) {
+            // A little smaller than at home, so the tall two-row faces fit the card whole.
+            val shown = remember(design) { design.copy(depth = DepthClockView.DEPTH_OFF, scale = 0.82f) }
+            LockScreenPreview(shown, LockPicture.EMPTY, Modifier.fillMaxSize(), chrome = false,
+                rounded = false)
+        }
+    }
+}
+
+/**
+ * The faces' band: from just under the status bar, tall enough for the two-row faces (Depth,
+ * One UI Stacked) with their date: about the top half of the screen at the card's width.
+ */
+private const val CLOCK_BAND_TOP = 0.06f
+
+/** The docked sheet's height (all tabs): its content scrolls inside. */
+private val EDITOR_SHEET_H = 380.dp
+private val FACE_CARD_H = 124.dp
 
 /** Some digits in a face's own type, with its name: the font picker's card. */
 @Composable
@@ -507,11 +572,13 @@ private fun ClockSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
     // Newest faces first (Depth, One UI, …); built only as they scroll into view.
     val faces = remember { ClockUtils.CLOCK_LAYOUTS.indices.reversed().toList() }
     Label(stringResource(R.string.ichthys_ed2_faces))
+    val home = rememberAtHome(d)
     LazyRow(contentPadding = PaddingValues(horizontal = 18.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         items(faces.size, key = { faces[it] }) { i ->
             val style = faces[i]
-            PictureChip(names[style], style == d.style, { onDraft(d.copy(style = style, look = "custom")) }) {
-                MiniLock(d.copy(style = style), state.picture, Modifier.fillMaxSize())
+            val face = remember(home, style) { home.copy(style = style) }
+            FaceChip(names[style], style == d.style, { onDraft(d.copy(style = style, look = "custom")) }) {
+                ClockOnly(face)
             }
         }
     }
@@ -574,11 +641,12 @@ private fun ClockSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
         if (d.fill == DepthClockView.FILL_GLASS) {
             Label(stringResource(R.string.ichthys_ed2_finish_glass))
             ChipRow {
+                val home = rememberAtHome(d)
                 listOf(0 to R.string.ichthys_ed2_glass_clear, 1 to R.string.ichthys_ed2_glass_frosted)
                     .forEach { (frost, label) ->
-                        val glass = d.copy(glassFrost = frost)
+                        val glass = remember(home, frost) { home.copy(glassFrost = frost) }
                         PictureChip(stringResource(label), d.glassFrost.coerceIn(0, 1) == frost,
-                            { onDraft(glass.copy(look = "custom")) }) {
+                            { onDraft(d.copy(glassFrost = frost, look = "custom")) }) {
                             MiniLock(glass, state.picture, Modifier.fillMaxSize())
                         }
                     }
@@ -632,14 +700,25 @@ private fun ColourGroup(state: EditorState, onDraft: (LockDesign) -> Unit) {
     }
     Label(stringResource(R.string.ichthys_ed2_colour_custom))
     val hsv = remember(d.color) { FloatArray(3).also { AColor.colorToHSV(d.color, it) } }
-    SliderRow(stringResource(R.string.ichthys_ed2_hue), hsv[0], 0f..360f, "${hsv[0].toInt()}°") { h ->
-        onDraft(d.copy(colorMode = LockKeys.MODE_CUSTOM,
-            color = AColor.HSVToColor(floatArrayOf(h, hsv[1].coerceAtLeast(0.3f), hsv[2].coerceAtLeast(0.9f))),
-            look = "custom"))
+    // IchthysOS: the slider keeps its own hue. Read back from the colour, 360 came back as 0
+    // (the same red) and a pale colour lost its hue, so the thumb jumped to the start.
+    val hue = remember { mutableFloatStateOf(hsv[0]) }
+    val ownColor = remember { intArrayOf(d.color) }
+    if (d.color != ownColor[0]) {
+        ownColor[0] = d.color
+        hue.floatValue = hsv[0]
+    }
+    SliderRow(stringResource(R.string.ichthys_ed2_hue), hue.floatValue, 0f..360f,
+        "${hue.floatValue.toInt()}°") { h ->
+        val c = AColor.HSVToColor(floatArrayOf(h, hsv[1].coerceAtLeast(0.3f), hsv[2].coerceAtLeast(0.9f)))
+        hue.floatValue = h
+        ownColor[0] = c
+        onDraft(d.copy(colorMode = LockKeys.MODE_CUSTOM, color = c, look = "custom"))
     }
     SliderRow(stringResource(R.string.ichthys_ed2_saturation), hsv[1], 0f..1f, "${(hsv[1] * 100).toInt()} %") { sat ->
-        onDraft(d.copy(colorMode = LockKeys.MODE_CUSTOM,
-            color = AColor.HSVToColor(floatArrayOf(hsv[0], sat, hsv[2].coerceAtLeast(0.5f))), look = "custom"))
+        val c = AColor.HSVToColor(floatArrayOf(hue.floatValue, sat, hsv[2].coerceAtLeast(0.5f)))
+        ownColor[0] = c
+        onDraft(d.copy(colorMode = LockKeys.MODE_CUSTOM, color = c, look = "custom"))
     }
     SliderRow(stringResource(R.string.ichthys_ed2_opacity), d.opacity.toFloat(), 20f..100f, "${d.opacity} %") {
         onDraft(d.copy(opacity = it.toInt(), look = "custom"))
@@ -651,7 +730,7 @@ private fun ColourGroup(state: EditorState, onDraft: (LockDesign) -> Unit) {
 @Composable
 private fun LayoutSheet(state: EditorState, geo: LockGeometry, onDraft: (LockDesign) -> Unit) {
     val d = state.draft
-    SliderRow(stringResource(R.string.ichthys_ed2_size), d.scale, 0.5f..1.5f, "${(d.scale * 100).toInt()} %") {
+    SliderRow(stringResource(R.string.ichthys_ed2_size), d.scale, 0.4f..1.8f, "${(d.scale * 100).toInt()} %") {
         onDraft(d.copy(scale = it, look = "custom"))
     }
     SliderRow(stringResource(R.string.ichthys_ed2_rotation), d.rot, -90f..90f, "${d.rot.toInt()}°") {
@@ -665,12 +744,14 @@ private fun LayoutSheet(state: EditorState, geo: LockGeometry, onDraft: (LockDes
         listOf(DepthClockView.DEPTH_OFF to R.string.ichthys_ed2_depth_off,
             DepthClockView.DEPTH_OVERLAP to R.string.ichthys_ed2_depth_overlap,
             DepthClockView.DEPTH_XRAY to R.string.ichthys_ed2_depth_xray)
+    val home = rememberAtHome(d)
     ChipRow {
         modes.forEach { (mode, label) ->
             val on = d.depth == mode ||
                 (mode == DepthClockView.DEPTH_OVERLAP && d.depth == DepthClockView.DEPTH_SHAPE)
+            val shown = remember(home, mode, state.picture) { withDepth(home, mode, state.picture, geo) }
             PictureChip(stringResource(label), on, { onDraft(withDepth(d, mode, state.picture, geo)) }) {
-                MiniLock(withDepth(d, mode, state.picture, geo), state.picture, Modifier.fillMaxSize())
+                MiniLock(shown, state.picture, Modifier.fillMaxSize())
             }
         }
     }
@@ -987,11 +1068,31 @@ private fun WallpaperSheet(
             val w = state.wallpaper
             PictureChip(stringResource(label), w is WallpaperDraft.Builtin && w.id == id,
                 { onWallpaper(WallpaperDraft.Builtin(id)) }) {
-                Image(painterResource(res), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                WallpaperThumb(res)
             }
         }
     }
     Note(stringResource(R.string.ichthys_ed2_wallpaper_note))
+    var credits by remember { mutableStateOf(false) }
+    Row(Modifier.padding(horizontal = 18.dp, vertical = 2.dp)) {
+        OutlineAction(stringResource(R.string.ichthys_ed2_wallpaper_credits), { credits = true })
+    }
+    if (credits) {
+        AlertDialog(
+            onDismissRequest = { credits = false },
+            title = { Text(stringResource(R.string.ichthys_ed2_wallpaper_credits)) },
+            text = {
+                Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+                    WALLPAPER_CREDITS.forEach {
+                        Text(it, fontSize = 12.sp, modifier = Modifier.padding(bottom = 10.dp))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { credits = false }) { Text(stringResource(android.R.string.ok)) }
+            },
+        )
+    }
     LivingSkySection(state, onDraft, onSkyMinute)
 }
 
@@ -1135,8 +1236,10 @@ private fun LooksSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
 
 /** The built-in looks, over [d] (its shortcuts and notification options stay). */
 private fun builtinLooks(d: LockDesign): List<Pair<Int, LockDesign>> {
-    val plain = d.copy(style = DEPTH_STYLE, fill = DepthClockView.FILL_SOLID, font = DepthClockView.FONT_TALL,
-        colorMode = LockKeys.MODE_DEFAULT, opacity = 100, dx = 0f, dy = 0f, scale = 1f, rot = 0f,
+    // IchthysOS: a look changes how the clock looks, not where the owner put it or the font they
+    // chose (it used to move the clock back and swap the font to the old Tall face).
+    val plain = d.copy(style = DEPTH_STYLE, fill = DepthClockView.FILL_SOLID,
+        colorMode = LockKeys.MODE_DEFAULT, opacity = 100,
         showDate = true, details = false, datePos = DepthClockView.DATE_ABOVE,
         dateAlign = DepthClockView.ALIGN_CENTRE, shape = DepthClockView.SHAPE_STRETCH)
     return listOf(
@@ -1151,4 +1254,32 @@ private fun builtinLooks(d: LockDesign): List<Pair<Int, LockDesign>> {
         R.string.ichthys_ed2_look_typo to plain.copy(style = 78, depth = DepthClockView.DEPTH_OVERLAP, look = "typo"),
         R.string.ichthys_ed2_look_matrix to plain.copy(style = 69, depth = DepthClockView.DEPTH_OFF, look = "matrix"),
     )
+}
+
+/**
+ * A built-in wallpaper's picture, decoded small and off the main thread: the full 1080 x 2400
+ * pictures, a row of them at once, would take some 10 MB of memory each.
+ */
+@Composable
+private fun WallpaperThumb(res: Int) {
+    val context = LocalContext.current
+    val tk = t
+    val thumb by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(
+        null, res) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                android.graphics.BitmapFactory.decodeResource(context.resources, res,
+                    android.graphics.BitmapFactory.Options().apply { inSampleSize = 8 })
+                    ?.asImageBitmap()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+    val shown = thumb
+    if (shown != null) {
+        Image(shown, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+    } else {
+        Box(Modifier.fillMaxSize().background(tk.card))
+    }
 }

@@ -133,6 +133,28 @@
 
     <!-- Wallpaper and looks -->
     <string name="ichthys_ed2_wallpaper_current">Current</string>
+    <!-- IchthysOS: the wallpapers that come with IchthysOS (names under their pictures) -->
+    <string name="ichthys_wall_peyto_lake">Peyto Lake</string>
+    <string name="ichthys_wall_dog_rock_sky">Shepherd</string>
+    <string name="ichthys_wall_lighthouse_white">Lighthouse</string>
+    <string name="ichthys_wall_woman_red_sky">Red</string>
+    <string name="ichthys_wall_man_white_shirt">White shirt</string>
+    <string name="ichthys_wall_sea_stack">Sea stack</string>
+    <string name="ichthys_wall_treeline_lake">Drowned trees</string>
+    <string name="ichthys_wall_ridge_haze">Haze</string>
+    <string name="ichthys_wall_sunset_paddy">Paddy sunset</string>
+    <string name="ichthys_wall_quiraing">Quiraing</string>
+    <string name="ichthys_wall_green_hill">Green hill</string>
+    <string name="ichthys_wall_sky_meadows">Sky Meadows</string>
+    <string name="ichthys_wall_light_cloud">Sunbeam</string>
+    <string name="ichthys_wall_city_skyline">City</string>
+    <string name="ichthys_wall_toronto_sunset">Toronto</string>
+    <string name="ichthys_wall_vintage_car_night">Night drive</string>
+    <string name="ichthys_wall_fluid_abstract">Fluid</string>
+    <string name="ichthys_wall_copper_lines">Copper lines</string>
+    <string name="ichthys_ed2_fullscreen">Full screen</string>
+    <string name="ichthys_ed2_done">Done</string>
+    <string name="ichthys_ed2_wallpaper_credits">Photo credits</string>
     <string name="ichthys_ed2_wallpaper_note">The wallpaper is set when you tap Apply.</string>
     <string name="ichthys_ed2_delete">Delete</string>
     <string name="ichthys_ed2_look_pond">Pond</string>

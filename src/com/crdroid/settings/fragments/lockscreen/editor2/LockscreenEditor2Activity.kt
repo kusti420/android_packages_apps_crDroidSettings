@@ -98,6 +98,9 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -241,6 +244,9 @@ fun LockEditor2(
     var ideas by remember { mutableStateOf(false) }
     var ideaTitle by remember { mutableStateOf<String?>(null) }
     var confirmDiscard by remember { mutableStateOf(false) }
+    // IchthysOS: the preview filling the screen (top bar, tabs and sheet out of the way); every
+    // gesture works there as in the docked preview.
+    var maximized by remember { mutableStateOf(false) }
     var reload by remember { mutableIntStateOf(0) }
     // Not Compose state: the preview reports it on every composition (hit tests read it).
     val layoutRef = remember { arrayOfNulls<LockLayout>(1) }
@@ -342,6 +348,7 @@ fun LockEditor2(
         when {
             leaving -> Unit
             ideas -> ideas = false
+            maximized -> maximized = false
             sheet != EditorSheet.NONE -> sheet = EditorSheet.NONE
             else -> cancel()
         }
@@ -395,7 +402,8 @@ fun LockEditor2(
             val tk = Guard.tokens
             val draftNow by rememberUpdatedState(draft)
             val sheetNow by rememberUpdatedState(sheet)
-            val selected = elementFor(sheet)
+            // What is framed: the element being moved, else the open sheet's.
+            val selected = dragging ?: elementFor(sheet)
             // IchthysOS polish: the sheet that is shown, kept while the sheet slides away (it used to go
             // blank as it left).
             val shownSheet = remember { arrayOf(EditorSheet.NONE) }
@@ -407,11 +415,23 @@ fun LockEditor2(
                 view.performHapticFeedback(constant)
             }
 
+            /**
+             * IchthysOS: how far the clock may go sideways and still be all on the screen (8 dp
+             * in), from its width as drawn (turned and sized); a fixed share of the screen let a
+             * wide clock hang off the edge.
+             */
+            fun dxLimit(): Float {
+                val c = layoutRef[0]?.clockCorners(0f).orEmpty()
+                if (c.isEmpty()) return screen.width * MAX_DX
+                val w = c.maxOf { it.x } - c.minOf { it.x }
+                return maxOf(0f, (screen.width - w) / 2f - 8 * geo.density)
+            }
+
             /** Back inside the limits, on a spring, from wherever the fingers left it. */
             fun settleClock() {
                 val from = draftNow
                 val goal = from.copy(
-                    dx = from.dx.coerceIn(-screen.width * MAX_DX, screen.width * MAX_DX),
+                    dx = from.dx.coerceIn(-dxLimit(), dxLimit()),
                     dy = from.dy.coerceIn(-screen.height * MIN_DY, screen.height * MAX_DY),
                     scale = from.scale.coerceIn(MIN_SCALE, MAX_SCALE),
                 )
@@ -434,6 +454,11 @@ fun LockEditor2(
                 Modifier.fillMaxSize().background(tk.ink).statusBarsPadding().navigationBarsPadding()
             ) {
                 // Cancel · Ideas · Apply
+                AnimatedVisibility(
+                    visible = !maximized,
+                    enter = expandVertically(spring(dampingRatio = 1f, stiffness = 420f)) + fadeIn(tween(160)),
+                    exit = shrinkVertically(spring(dampingRatio = 1f, stiffness = 520f)) + fadeOut(tween(100)),
+                ) {
                 Row(
                     Modifier.fillMaxWidth()
                         .graphicsLayer {
@@ -484,11 +509,14 @@ fun LockEditor2(
                         }
                     }
                 }
+                }
 
                 // The preview: everything on it can be tapped; the selected element can be moved.
+                val previewPad by animateDpAsState(if (maximized) 4.dp else 16.dp,
+                    spring(dampingRatio = 1f, stiffness = 420f), label = "previewPad")
                 Box(
                     Modifier.fillMaxWidth().weight(1f).zIndex(1f)
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                        .padding(horizontal = previewPad, vertical = 6.dp)
                 ) {
                     // IchthysOS polish: nothing of the preview shows before its wallpaper (the
                     // face alone, grey and unmasked, flashed for a frame on a cold start).
@@ -520,7 +548,7 @@ fun LockEditor2(
                                         (sheetNow == EditorSheet.CLOCK || sheetNow == EditorSheet.LAYOUT) &&
                                             lay.clockCorners(FRAME_PAD_DP * dens)
                                                 .any { (it - p0).getDistance() < 28 * dens }
-                                    val target = if (onHandle) LockElement.CLOCK else hit(lay, p0)
+                                    var target = if (onHandle) LockElement.CLOCK else hit(lay, p0)
                                     val centre = lay.clockCentre
                                     val startDist = maxOf((p0 - centre).getDistance(), 1f)
                                     var moved = false
@@ -544,10 +572,19 @@ fun LockEditor2(
                                         finger += pan
                                         if (!moved && (total.getDistance() > viewConfiguration.touchSlop / k ||
                                                 ev.changes.size > 1)) {
+                                            // IchthysOS: two fingers anywhere pinch and turn the clock
+                                            // (they no longer have to start on it).
+                                            if (ev.changes.size > 1 && target != LockElement.DATE &&
+                                                target != LockElement.WEATHER) {
+                                                target = LockElement.CLOCK
+                                            }
                                             moved = target == LockElement.CLOCK || target == LockElement.DATE ||
                                                 target == LockElement.WEATHER
                                             if (moved) {
-                                                sheet = sheetFor(target!!)
+                                                // IchthysOS: the sheet stays as it is while a finger
+                                                // moves something. Switching it here changed its
+                                                // height, so the preview rescaled under the finger
+                                                // and the clock jumped away from it.
                                                 dragging = target
                                                 tick(HapticFeedbackConstants.DRAG_START)
                                             }
@@ -584,7 +621,7 @@ fun LockEditor2(
                                                 rawDy += pan.y
                                                 rawScale *= zoomBy
                                                 rawRot += turnBy
-                                                val dxMax = screen.width * MAX_DX
+                                                val dxMax = dxLimit()
                                                 val dyMin = -screen.height * MIN_DY
                                                 val dyMax = screen.height * MAX_DY
                                                 var dx = rubber(rawDx, -dxMax, dxMax, screen.width * 0.08f)
@@ -614,8 +651,10 @@ fun LockEditor2(
                                         }
                                     } while (ev.changes.any { it.pressed })
                                     if (!moved) {
-                                        // A tap selects (or, on empty space, deselects).
-                                        sheet = target?.let { sheetFor(it) } ?: EditorSheet.NONE
+                                        // A tap on something opens its sheet; on empty space it
+                                        // leaves the sheet as it is (it used to fold it away and
+                                        // the whole layout jumped).
+                                        target?.let { sheet = sheetFor(it) }
                                     } else if (target == LockElement.DATE) {
                                         val dropped = dropDate(draftNow, lay, finger)
                                         if (dropped != draftNow) tick(HapticFeedbackConstants.CONTEXT_CLICK)
@@ -663,11 +702,24 @@ fun LockEditor2(
                             }
                         },
                     )
+                    // Full screen and back: the same preview, bigger; editing goes on in it.
+                    PreviewSizeButton(
+                        maximized,
+                        Modifier.align(Alignment.TopEnd).padding(8.dp)
+                            .graphicsLayer { alpha = 1f - zoom.value },
+                    ) { maximized = !maximized }
                 }
 
                 // The tabs, and the docked sheet for the open one. IchthysOS polish: the sheet comes
                 // and goes on a spring (the preview resizes along with it, no jump), and its content
                 // changes in place with a short cross-fade.
+                AnimatedVisibility(
+                    visible = !maximized,
+                    enter = expandVertically(spring(dampingRatio = 0.9f, stiffness = 420f),
+                        expandFrom = Alignment.Top) + fadeIn(tween(160)),
+                    exit = shrinkVertically(spring(dampingRatio = 1f, stiffness = 520f),
+                        shrinkTowards = Alignment.Top) + fadeOut(tween(100)),
+                ) {
                 Column(Modifier.graphicsLayer { alpha = 1f - zoom.value }) {
                     EditorTabs(sheet) { sheet = it }
                     AnimatedVisibility(
@@ -688,6 +740,47 @@ fun LockEditor2(
                             onSkyMinute = { skyMinute = it },
                         )
                     }
+                }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The preview's own button: four corner arrows out (full screen) or a "Done" pill (back to the
+ * docked preview with its tabs and sheet).
+ */
+@Composable
+private fun PreviewSizeButton(maximized: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val tk = Guard.tokens
+    val shape = RoundedCornerShape(12.dp)
+    Box(
+        modifier.height(40.dp).then(if (maximized) Modifier else Modifier.width(40.dp))
+            .clip(shape).background(tk.ink.copy(alpha = 0.72f))
+            .border(1.dp, if (maximized) tk.accent else tk.hairline, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = if (maximized) 14.dp else 0.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (maximized) {
+            Text(stringResource(R.string.ichthys_ed2_done).uppercase(), fontFamily = tk.mono,
+                fontSize = 12.sp, letterSpacing = 1.sp, fontWeight = FontWeight.SemiBold,
+                color = tk.accent)
+        } else {
+            val desc = stringResource(R.string.ichthys_ed2_fullscreen)
+            Canvas(Modifier.size(18.dp).semantics { contentDescription = desc }) {
+                val u = size.width / 24f
+                val st = Stroke(1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+                for ((x, y, dx, dy) in listOf(
+                        floatArrayOf(4f, 4f, 1f, 1f).toList(), floatArrayOf(20f, 4f, -1f, 1f).toList(),
+                        floatArrayOf(4f, 20f, 1f, -1f).toList(), floatArrayOf(20f, 20f, -1f, -1f).toList())) {
+                    val corner = Path().apply {
+                        moveTo(x * u, (y + 6f * dy) * u)
+                        lineTo(x * u, y * u)
+                        lineTo((x + 6f * dx) * u, y * u)
+                    }
+                    drawPath(corner, tk.text, style = st)
                 }
             }
         }
@@ -720,12 +813,14 @@ private fun rubber(v: Float, lo: Float, hi: Float, band: Float): Float =
     }
 
 /** The clock's limits in the editor (as before; now with a rubber band past them). */
-private const val MIN_SCALE = 0.5f
-private const val MAX_SCALE = 1.5f
+private const val MIN_SCALE = 0.4f
+private const val MAX_SCALE = 1.8f
 private const val SCALE_BAND = 0.12f
-private const val MAX_DX = 0.4f
-private const val MIN_DY = 0.1f
-private const val MAX_DY = 0.45f
+// IchthysOS: room to put the clock where the owner wants it (down to just above the
+// notifications, out to the sides); it used to stop short of where people wanted it.
+private const val MAX_DX = 0.5f
+private const val MIN_DY = 0.12f
+private const val MAX_DY = 0.55f
 /** The centre magnet's reach and the angles a turn snaps to. */
 private const val SNAP_DP = 8f
 private val ROT_SNAPS = listOf(-90f, 0f, 90f)
