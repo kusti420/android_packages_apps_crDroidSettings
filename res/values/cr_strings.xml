@@ -1741,7 +1741,7 @@
     <string name="duress_error_mismatch">The two entries do not match</string>
     <string name="duress_error_too_short">Must be at least %1$d characters</string>
     <string name="duress_error_too_short_generic">That code is too short</string>
-    <string name="duress_error_same_as_real">That is your real PIN or password. Choose a different code.</string>
+    <string name="duress_error_same_as_real">That is your real PIN or password, or a single typo away from it. Choose a clearly different code.</string>
     <string name="duress_error_wrong_type">The emergency code must be the same kind (PIN or password) as your real lock screen credential</string>
     <string name="duress_error_autoconfirm_length">PIN auto-confirm is on, so the emergency PIN must have exactly the same number of digits as your real PIN — otherwise it could never be typed at the lock screen</string>
     <string name="duress_error_generic">Could not set the emergency wipe code</string>

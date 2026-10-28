@@ -93,11 +93,14 @@ public class DuressCredentialSettings extends SettingsPreferenceFragment {
         final boolean hasRealCredential =
                 credentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE;
         final boolean armed = hasRealCredential && mLockPatternUtils.hasDuressCredential(mUserId);
+        // IchthysOS: a pattern lock can't take a code; say so here, not after confirming it.
+        final boolean pattern = credentialType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
         if (mSetPref != null) {
-            mSetPref.setEnabled(hasRealCredential);
+            mSetPref.setEnabled(hasRealCredential && !pattern);
             mSetPref.setSummary(!hasRealCredential
                     ? R.string.duress_requires_lockscreen
+                    : pattern ? R.string.duress_unsupported_type
                     : (armed ? R.string.duress_status_set : R.string.duress_status_not_set));
         }
         if (mRemovePref != null) {
