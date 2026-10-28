@@ -418,8 +418,13 @@ fun LockScreenPreview(
                     if (design.showNotifications) {
                         NotificationCard(notif, design.privateNotifications)
                     }
-                    Shortcut(scStart, shortcuts?.byId(design.shortcutStart)?.icon)
-                    Shortcut(scEnd, shortcuts?.byId(design.shortcutEnd)?.icon)
+                    // IchthysOS: a shortcut the lock screen won't show (none, or one that needs
+                    // setting up, like Device controls without a controls app) is a faint ghost
+                    // here: still there to tap and change, not passed off as shown.
+                    val start = shortcuts?.byId(design.shortcutStart)
+                    val end = shortcuts?.byId(design.shortcutEnd)
+                    Shortcut(scStart, start?.icon, shown = start?.enabled == true)
+                    Shortcut(scEnd, end?.icon, shown = end?.enabled == true)
                     Canvas(Modifier.fillMaxSize()) {
                         drawCircle(Color(0x80F6F1EA), 26 * d, Offset(w / 2f, h * 0.865f),
                             style = Stroke(2 * d))
@@ -684,11 +689,12 @@ private fun NotificationCard(at: Rect, showContent: Boolean) {
 }
 
 @Composable
-private fun Shortcut(at: Rect, icon: Drawable?) {
+private fun Shortcut(at: Rect, icon: Drawable?, shown: Boolean = true) {
     val density = LocalDensity.current
     val image = remember(icon) { icon?.let { toImage(it) } }
     Box(
         Modifier.offset { IntOffset(at.left.roundToInt(), at.top.roundToInt()) }
+            .graphicsLayer { alpha = if (shown) 1f else 0.3f }
             .size(with(density) { at.width.toDp() }, with(density) { at.height.toDp() })
             .clip(RoundedCornerShape(50))
             .background(Color(0xB31E1A1E)),

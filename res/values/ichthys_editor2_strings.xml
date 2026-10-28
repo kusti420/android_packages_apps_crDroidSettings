@@ -152,6 +152,7 @@
     <string name="ichthys_wall_vintage_car_night">Night drive</string>
     <string name="ichthys_wall_fluid_abstract">Fluid</string>
     <string name="ichthys_wall_copper_lines">Copper lines</string>
+    <string name="ichthys_ed2_shortcut_needs_setup">Needs setup</string>
     <string name="ichthys_ed2_fullscreen">Full screen</string>
     <string name="ichthys_ed2_done">Done</string>
     <string name="ichthys_ed2_wallpaper_credits">Photo credits</string>
@@ -185,10 +186,10 @@
     <string name="ichthys_ed2_idea_xray">X-ray heat</string>
     <string name="ichthys_ed2_idea_deep">Deep</string>
     <string name="ichthys_ed2_idea_gradient">Gradient</string>
-    <string name="ichthys_ed2_idea_thin">Thin</string>
-    <string name="ichthys_ed2_idea_serif">Serif</string>
-    <string name="ichthys_ed2_idea_mono">Mono</string>
-    <string name="ichthys_ed2_idea_wide">Wide</string>
+    <string name="ichthys_ed2_idea_thin">Soft</string>
+    <string name="ichthys_ed2_idea_serif">Heavy</string>
+    <string name="ichthys_ed2_idea_mono">Grotesk</string>
+    <string name="ichthys_ed2_idea_wide">Condensed</string>
     <string name="ichthys_ed2_idea_square">Square</string>
     <string name="ichthys_ed2_idea_date_below">Date below</string>
     <string name="ichthys_ed2_idea_details">Details</string>

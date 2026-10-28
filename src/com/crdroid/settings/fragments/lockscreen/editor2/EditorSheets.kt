@@ -1012,6 +1012,12 @@ private fun ShortcutSheet(start: Boolean, d: LockDesign, catalog: LockShortcuts.
                         fontSize = 10.sp, letterSpacing = 0.4.sp, overflow = TextOverflow.Ellipsis,
                         color = if (on) tk.accent else tk.muted, maxLines = 1,
                         modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp))
+                    // IchthysOS: one SystemUI can't show yet (Device controls without a
+                    // controls app, a wallet without cards): it says so.
+                    if (a != null && !a.enabled) {
+                        Text(stringResource(R.string.ichthys_ed2_shortcut_needs_setup), fontSize = 9.sp,
+                            color = tk.muted, maxLines = 1)
+                    }
                 }
             }
             repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
