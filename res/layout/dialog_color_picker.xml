@@ -111,6 +111,19 @@
 
     </LinearLayout>
 
+    <!-- IchthysOS: for pickers whose unset state follows the theme accent (accentDefault): one
+         tap forgets the stored colour and closes the dialog. Shown only for those pickers. -->
+    <Button
+        android:id="@+id/use_accent"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="7dp"
+        android:layout_marginEnd="7dp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        android:text="@string/color_use_accent" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

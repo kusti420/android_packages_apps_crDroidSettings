@@ -51,6 +51,7 @@ public class BatteryIcon extends SettingsPreferenceFragment
     // Values of the list preferences; mirror SystemUI's BatteryCustomization constants.
     private static final int FILL_MODE_TINT = 0;
     private static final int FILL_MODE_CUSTOM = 1;
+    private static final int FILL_MODE_ACCENT = 2;
     private static final int STATE_COLORS_THEME = 1;
     private static final int STATE_COLORS_CUSTOM = 2;
 
@@ -64,6 +65,16 @@ public class BatteryIcon extends SettingsPreferenceFragment
 
         mFillMode = (SystemSettingListPreference) findPreference(KEY_FILL_MODE);
         mFillMode.setOnPreferenceChangeListener(this);
+        // IchthysOS: the custom colour's reset ("Use accent color" / the row's reset) also puts
+        // the mode back to System accent, so the icon follows the accent and the page says so.
+        findPreference(KEY_FILL_COLOR).setOnPreferenceChangeListener((pref, value) -> {
+            if (Settings.System.getStringForUser(getContentResolver(), KEY_FILL_COLOR,
+                    UserHandle.USER_CURRENT) == null) {
+                mFillMode.setValue(String.valueOf(FILL_MODE_ACCENT));
+                updateColorPrefs(FILL_MODE_ACCENT, mStateColors.getIntValue(STATE_COLORS_THEME));
+            }
+            return true;
+        });
         mStateColors = (SystemSettingListPreference) findPreference(KEY_STATE_COLORS);
         mStateColors.setOnPreferenceChangeListener(this);
 

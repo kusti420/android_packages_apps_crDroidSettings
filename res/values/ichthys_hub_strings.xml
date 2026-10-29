@@ -90,6 +90,8 @@
 
     <!-- Colour pickers whose unset value follows the theme accent -->
     <string name="color_default_accent">Accent (default)</string>
+    <!-- Colour picker dialog: forget the chosen colour and follow the theme accent again -->
+    <string name="color_use_accent">Use accent color</string>
 
     <!-- Hub sections (tracker#59) -->
     <string name="ichthys_hub_theme_title">Theme</string>

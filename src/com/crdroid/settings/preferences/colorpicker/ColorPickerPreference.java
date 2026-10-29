@@ -186,7 +186,7 @@ public class ColorPickerPreference extends Preference implements
     }
 
     /** accentDefault: forget the stored colour, so the reader follows the accent again. */
-    private void resetToAccent() {
+    protected void resetToAccent() {
         final androidx.preference.PreferenceDataStore store = getPreferenceDataStore();
         if (store != null) {
             store.putString(getKey(), null);
@@ -322,6 +322,9 @@ public class ColorPickerPreference extends Preference implements
 
         mDialog = new ColorPickerDialog(getContext(), mCurrentValue);
         mDialog.setOnColorChangedListener(this);
+        if (mAccentDefault) {
+            mDialog.setUseAccentAction(this::resetToAccent);
+        }
         if (mAlphaSliderEnabled) {
             mDialog.setAlphaSliderVisible(true);
         }

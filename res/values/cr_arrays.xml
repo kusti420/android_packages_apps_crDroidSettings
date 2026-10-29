@@ -264,6 +264,10 @@
         <item>@string/status_bar_battery_style_circle</item>
         <item>@string/status_bar_battery_style_dotted_circle</item>
         <item>@string/status_bar_battery_style_filled_circle</item>
+        <item>@string/ichthys_battery_style_arc</item>
+        <item>@string/ichthys_battery_style_hexagon</item>
+        <item>@string/ichthys_battery_style_segments</item>
+        <item>@string/ichthys_battery_style_bar</item>
         <item>@string/status_bar_battery_style_text</item>
         <item>@string/status_bar_battery_style_hidden</item>
     </string-array>
@@ -274,6 +278,10 @@
         <item>1</item>
         <item>3</item>
         <item>5</item>
+        <item>8</item>
+        <item>10</item>
+        <item>7</item>
+        <item>9</item>
         <item>2</item>
         <item>6</item>
     </string-array>
@@ -334,6 +342,10 @@
         <item>@string/status_bar_battery_style_circle</item>
         <item>@string/status_bar_battery_style_dotted_circle</item>
         <item>@string/status_bar_battery_style_filled_circle</item>
+        <item>@string/ichthys_battery_style_arc</item>
+        <item>@string/ichthys_battery_style_hexagon</item>
+        <item>@string/ichthys_battery_style_segments</item>
+        <item>@string/ichthys_battery_style_bar</item>
         <item>@string/status_bar_battery_style_text</item>
         <item>@string/status_bar_battery_style_hidden</item>
     </string-array>
@@ -345,6 +357,10 @@
         <item>1</item>
         <item>3</item>
         <item>5</item>
+        <item>8</item>
+        <item>10</item>
+        <item>7</item>
+        <item>9</item>
         <item>2</item>
         <item>6</item>
     </string-array>

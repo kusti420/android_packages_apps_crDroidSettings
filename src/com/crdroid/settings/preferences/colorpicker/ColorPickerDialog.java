@@ -47,6 +47,7 @@ public class ColorPickerDialog extends AlertDialog implements ColorPickerView.On
     private ColorPickerPanelView mYellow;
 
     private OnColorChangedListener mListener;
+    private android.widget.Button mUseAccent;
 
     public interface OnColorChangedListener {
         public void onColorChanged(int color);
@@ -86,6 +87,7 @@ public class ColorPickerDialog extends AlertDialog implements ColorPickerView.On
 
         mHex = layout.findViewById(R.id.hex);
         ImageButton mSetButton = layout.findViewById(R.id.enter);
+        mUseAccent = layout.findViewById(R.id.use_accent);
 
         ((LinearLayout) mOldColor.getParent()).setPadding(Math.round(mColorPicker.getDrawingOffset()),
                 0, Math.round(mColorPicker.getDrawingOffset()), 0);
@@ -146,6 +148,19 @@ public class ColorPickerDialog extends AlertDialog implements ColorPickerView.On
                 }
             });
         }
+    }
+
+    /**
+     * IchthysOS: shows the "Use accent color" button; [onUseAccent] runs when it is tapped and
+     * the dialog closes.
+     */
+    public void setUseAccentAction(Runnable onUseAccent) {
+        if (mUseAccent == null) return;
+        mUseAccent.setVisibility(View.VISIBLE);
+        mUseAccent.setOnClickListener(v -> {
+            onUseAccent.run();
+            dismiss();
+        });
     }
 
     /**

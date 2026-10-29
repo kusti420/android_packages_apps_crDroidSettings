@@ -511,6 +511,10 @@
     <!-- IchthysOS: battery icon options (tracker#37) -->
     <string name="ichthys_battery_style_classic">Classic (upright)</string>
     <string name="ichthys_battery_style_landscape">Landscape (pill)</string>
+    <string name="ichthys_battery_style_arc">Arc gauge</string>
+    <string name="ichthys_battery_style_hexagon">Hexagon</string>
+    <string name="ichthys_battery_style_segments">Segments</string>
+    <string name="ichthys_battery_style_bar">Bar</string>
     <string name="ichthys_battery_icon_title">Battery icon</string>
     <string name="ichthys_battery_icon_summary">Size, colors, charging and saver indicators</string>
     <string name="ichthys_battery_icon_look_category">Icon</string>
