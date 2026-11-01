@@ -193,6 +193,10 @@
     <string name="ichthys_qs_media_dock_custom_action_title">Extra media button</string>
     <string name="ichthys_qs_media_dock_custom_action_summary">Add a fourth button to the docked player for the app\'s first own action, such as like or shuffle. Shoal style only</string>
 
+    <!-- Quick settings: notes page left of the tiles -->
+    <string name="ichthys_qs_notes_page_title">Notes page</string>
+    <string name="ichthys_qs_notes_page_summary">Swipe right on the tiles for pinned notes. While locked only their colours show; the text waits for unlock</string>
+
     <!-- Clock picker: depth lock screen (tracker#58) -->
     <string name="ichthys_depth_title">Depth</string>
     <string name="ichthys_depth_off">Flat</string>

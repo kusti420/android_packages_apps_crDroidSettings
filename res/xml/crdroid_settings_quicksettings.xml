@@ -190,6 +190,15 @@
             android:summary="@string/ichthys_qs_media_dock_custom_action_summary"
             android:defaultValue="false" />
 
+        <!-- IchthysOS: notes page left of the tiles in expanded quick settings.
+             Backend: Settings.System "qs_notes_page", observed by SystemUI QuickSettingsScene.kt. -->
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="qs_notes_page"
+            android:icon="@drawable/ic_pencil"
+            android:title="@string/ichthys_qs_notes_page_title"
+            android:summary="@string/ichthys_qs_notes_page_summary"
+            android:defaultValue="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
