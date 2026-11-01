@@ -14,11 +14,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<!-- IchthysOS > Apps: the app store, background limits and integrity spoofing.
-
-     pm_downgrade_allowed was on the old Miscellaneous tab; its ichthys.nix option keeps the
-     path it had there (system.misc.pmDowngradeAllowed), through crdroid_paths.lock of
-     frameworks/base/tools/ichthys-config/gen_crdroid_options.py. -->
+<!-- IchthysOS > Apps: the app store, background limits, install and compatibility bypasses, and
+     integrity spoofing. pm_downgrade_allowed moved from here to ichthys_install.xml; its
+     ichthys.nix option keeps the path it had (system.misc.pmDowngradeAllowed), through
+     crdroid_options.lock of frameworks/base/tools/ichthys-config/gen_crdroid_options.py. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/ichthys_hub_apps_title">
@@ -39,18 +38,13 @@
         android:summary="@string/ichthys_background_summary"
         android:fragment="com.crdroid.settings.fragments.Background" />
 
-    <PreferenceCategory
-        android:key="ichthys_apps_install_category"
-        android:title="@string/ichthys_apps_install_category">
-
-        <!-- Application downgrade -->
-        <com.crdroid.settings.preferences.GlobalSettingSwitchPreference
-            android:key="pm_downgrade_allowed"
-            android:icon="@drawable/ic_arrow_down_box"
-            android:title="@string/app_downgrade_title"
-            android:summary="@string/app_downgrade_summary"
-            android:defaultValue="false" />
-    </PreferenceCategory>
+    <!-- Low-target-SDK block, downgrades, screenshots in protected apps (InstallCompat). -->
+    <Preference
+        android:key="ichthys_install"
+        android:icon="@drawable/ic_download"
+        android:title="@string/ichthys_install_title"
+        android:summary="@string/ichthys_install_summary"
+        android:fragment="com.crdroid.settings.fragments.InstallCompat" />
 
     <PreferenceCategory
         android:key="ichthys_apps_integrity_category"
@@ -71,6 +65,18 @@
             android:title="@string/tricky_store_title"
             android:summary="@string/tricky_store_summary"
             android:fragment="com.crdroid.settings.fragments.misc.TrickyStore" />
+
+        <!-- IchthysOS: Google Photos spoof, moved here from the Play Integrity Fix page; same key
+             and the same reader (PropImitationHooks in frameworks/base). Off by default: on this
+             ROM (microG, no Google Photos) it does nothing useful, and the reader defaults to off
+             as well. Like the rest of this category it is no ichthys.nix option (SKIP_KEYS in
+             gen_crdroid_options.py); IchthysApps.java restarts Photos and Play on a change. -->
+        <com.crdroid.settings.preferences.SecureSettingSwitchPreference
+            android:key="spoof_pif_photos"
+            android:icon="@drawable/ic_google"
+            android:title="@string/pif_spoof_photos"
+            android:summary="@string/pif_spoof_photos_summary"
+            android:defaultValue="false" />
     </PreferenceCategory>
 
 </PreferenceScreen>

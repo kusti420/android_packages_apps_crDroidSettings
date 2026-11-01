@@ -10,6 +10,7 @@
 package com.crdroid.settings.preferences;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
 import androidx.preference.PreferenceViewHolder;
@@ -33,5 +34,10 @@ public class DangerGlobalListPreference extends GlobalSettingListPreference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         DangerSwitchPreference.bindDanger(holder);
+    }
+
+    @Override
+    public void setIcon(Drawable icon) {
+        if (!DangerSwitchPreference.keepsGlyph(icon)) super.setIcon(icon);
     }
 }

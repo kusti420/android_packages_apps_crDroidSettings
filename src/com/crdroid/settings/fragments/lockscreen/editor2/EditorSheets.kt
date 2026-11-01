@@ -100,6 +100,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.settings.R
 import com.android.settingslib.ichthys.clock.DepthClockView
+import com.android.settingslib.ichthys.clock.ProjectedClock
 import com.android.settingslib.ichthys.clock.LockWeather
 import com.android.settingslib.ichthys.clock.SquareDigits
 import com.android.settingslib.ichthys.sky.LivingSky
@@ -627,6 +628,9 @@ private fun ClockSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
                 DepthClockView.FONT_COMPACT to R.string.ichthys_ed2_font_compact,
                 DepthClockView.FONT_GROTESK to R.string.ichthys_ed2_font_grotesk,
                 DepthClockView.FONT_HEAVY to R.string.ichthys_ed2_font_heavy,
+                DepthClockView.FONT_BUBBLE to R.string.ichthys_ed2_font_bubble,
+                DepthClockView.FONT_BLOCK to R.string.ichthys_ed2_font_block,
+                DepthClockView.FONT_INLINE to R.string.ichthys_ed2_font_inline,
                 DepthClockView.FONT_TALL to R.string.ichthys_ed2_font_tall,
                 DepthClockView.FONT_FLEX to R.string.ichthys_ed2_font_flex,
                 DepthClockView.FONT_WIDE to R.string.ichthys_ed2_font_wide,
@@ -790,6 +794,43 @@ private fun LayoutSheet(state: EditorState, geo: LockGeometry, onDraft: (LockDes
         }
     }
     if (state.picture.cutout == null) Note(stringResource(R.string.ichthys_ed2_depth_no_subject))
+
+    // IchthysOS projected clock: the Depth face's digits flat over the picture, or painted onto a
+    // wall plane of it (ProjectedClock); the quad's corners are dragged on the preview.
+    if (d.isDepthFace) {
+        Label(stringResource(R.string.ichthys_ed2_placement))
+        ChipRow {
+            listOf(DepthClockView.PLACEMENT_FLAT to R.string.ichthys_ed2_placement_flat,
+                DepthClockView.PLACEMENT_PROJECTED to R.string.ichthys_ed2_placement_projected)
+                .forEach { (mode, label) ->
+                    val shown = remember(home, mode, state.picture) { home.copy(placement = mode) }
+                    PictureChip(stringResource(label), d.placement == mode,
+                        { onDraft(d.copy(placement = mode, look = "custom")) }) {
+                        MiniLock(shown, state.picture, Modifier.fillMaxSize())
+                    }
+                }
+        }
+        if (d.isProjected) {
+            Note(stringResource(R.string.ichthys_ed2_projected_hint))
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                OutlineAction(stringResource(R.string.ichthys_ed2_projected_reset), {
+                    onDraft(d.copy(quad = ProjectedClock.DEFAULT_QUAD.toList(), look = "custom"))
+                })
+                OutlineAction(stringResource(R.string.ichthys_ed2_projected_flat), {
+                    // A rectangle of the digit block's own proportions where the quad is.
+                    val block = geo.depthBlock(d.font, d.datePos, d.showDate)
+                    val aspect = block.halfWidth * 2f / maxOf(1f, block.height)
+                    onDraft(d.copy(
+                        quad = ProjectedClock.flatQuad(d.resolvedQuad(state.picture), aspect,
+                            geo.width, geo.height).toList(),
+                        look = "custom"))
+                })
+            }
+        }
+    }
 
     val line = stringResource(R.string.ichthys_ed2_date_line)
     Label(line + " · " + stringResource(R.string.ichthys_ed2_date_shows))
@@ -1165,13 +1206,15 @@ private fun LivingSkySection(
             when {
                 pic.backdrop == null -> R.string.ichthys_ed2_sky_no_photo
                 pic.skyInfo == null -> R.string.ichthys_ed2_sky_looking
-                pic.skyInfo.reason == LivingSky.REASON_DARK -> R.string.ichthys_ed2_sky_dark
                 else -> R.string.ichthys_ed2_sky_none
             }
         Note(stringResource(reason))
         Spacer(Modifier.size(8.dp))
         return
     }
+    // IchthysOS: a night picture is graded the other way round: by day its sky is relit to a
+    // clean day sky and the land lifted (LivingSky's day path); scrub the day below to see it.
+    if (pic.skyInfo?.darkSky == true) Note(stringResource(R.string.ichthys_ed2_sky_dark))
     if (!d.livingSky) {
         Note(stringResource(R.string.ichthys_ed2_sky_note))
         Spacer(Modifier.size(8.dp))

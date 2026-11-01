@@ -26,6 +26,7 @@
      (system.misc.screenOnMemoryReclaim) through the generator's crdroid_paths.lock. -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
     android:title="@string/ichthys_background_title">
 
     <!-- Unrestricted background (tracker#39). Mode list + app picker + keep-after-reboot, all
@@ -78,6 +79,19 @@
             android:entries="@array/backstage_max_hours_entries"
             android:entryValues="@array/backstage_max_hours_values"
             android:defaultValue="0" />
+
+        <!-- The custom duration behind the list's "Custom" (-1) entry; Background.java shows it
+             only then and keeps its summary in hours and minutes. Hand-written option
+             background.backstageMaxMinutes (IchthysOptions.java). -->
+        <com.crdroid.settings.preferences.SecureSettingSeekBarPreference
+            android:key="ichthys_backstage_max_minutes"
+            android:icon="@drawable/ic_timer_outline"
+            android:title="@string/backstage_max_minutes_title"
+            android:defaultValue="90"
+            android:max="2880"
+            settings:min="5"
+            settings:interval="5"
+            settings:units="@string/backstage_max_minutes_unit" />
     </PreferenceCategory>
 
     <PreferenceCategory

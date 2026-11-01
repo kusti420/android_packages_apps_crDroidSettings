@@ -34,6 +34,22 @@
                 android:targetPackage="org.omnirom.omnijaws"
                 android:targetClass="org.omnirom.omnijaws.SettingsActivity" />
         </Preference>
+        <!-- IchthysOS: OmniJaws' icon pack, picked here in the house style: the dialog shows each
+             pack's name with sun / cloud / rain / snow samples (OptionPreviews). Stored by
+             OmniJaws (its settings provider), not a Settings key, so not an ichthys.nix option. -->
+        <com.crdroid.settings.preferences.WeatherIconPackPreference
+            android:key="weather_icon_pack"
+            android:icon="@drawable/ic_weather_condition"
+            android:title="@string/weather_icon_pack_title"
+            android:summary="%s" />
+        <!-- IchthysOS: the weather follows the shared place (a trip under way, else the home
+             city; IchthysPlacesService), not a city of its own. WeatherSettings.java shows the
+             active place here and opens Guard > Rules > Shared values to change it. -->
+        <Preference
+            android:key="weather_location"
+            android:icon="@drawable/ic_map_marker"
+            android:title="@string/weather_location_title"
+            android:summary="@string/weather_location_device" />
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="lockscreen_weather_enabled"
             android:icon="@drawable/ic_weather"

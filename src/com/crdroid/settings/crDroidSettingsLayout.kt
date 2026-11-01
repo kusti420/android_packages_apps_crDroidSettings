@@ -25,6 +25,7 @@ import com.crdroid.settings.fragments.Background
 import com.crdroid.settings.fragments.Buttons
 import com.crdroid.settings.fragments.IchthysApps
 import com.crdroid.settings.fragments.IchthysSystem
+import com.crdroid.settings.fragments.InstallCompat
 import com.crdroid.settings.fragments.LockScreen
 import com.crdroid.settings.fragments.Navigation
 import com.crdroid.settings.fragments.Notifications
@@ -110,8 +111,8 @@ class crDroidSettingsLayout : SettingsPreferenceFragment() {
             MonetSettings.reset(context)
             SlimRecents.reset(context)
             // Apps
-            IchthysApps.reset(context)
             Background.reset(context)
+            InstallCompat.reset(context)
             // System
             Buttons.reset(context)
             Notifications.reset(context)

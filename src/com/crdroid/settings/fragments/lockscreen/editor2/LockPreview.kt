@@ -114,6 +114,11 @@ class LockLayout(
     val clockCentreX: Float,
     val clockRot: Float = 0f,
     val clockPivot: Offset = Offset.Zero,
+    /**
+     * IchthysOS projected clock: the wall quad's corners (screen px; top left, top right, bottom
+     * right, bottom left) while the Depth face is projected, else null. The editor's handles.
+     */
+    val quad: List<Offset>? = null,
 ) {
     /** [p] in the clock's own, unturned frame (where [rects]' clock rectangle is). */
     fun unturn(p: Offset): Offset = turn(p, clockPivot, -clockRot)
@@ -229,7 +234,16 @@ fun LockScreenPreview(
         val whole = Rect(cx - faceW * design.scale / 2f, top, cx + faceW * design.scale / 2f,
             top + faceH * design.scale)
         val report = faceContent?.takeIf { it.style == design.style }
-        val clock = report?.content ?: whole
+        // IchthysOS projected clock: the digits are on the wallpaper's wall (ProjectedClock); the
+        // clock element is the quad's box, its corners the handles. The face keeps the date line.
+        val projected = design.isProjected && picture.source != null
+        val quadFr = if (projected) design.resolvedQuad(picture) else null
+        val quadPx =
+            quadFr?.let { q -> List(4) { i -> Offset(q[i * 2] * w, q[i * 2 + 1] * h) } }
+        val clock =
+            quadPx?.let { q ->
+                Rect(q.minOf { it.x }, q.minOf { it.y }, q.maxOf { it.x }, q.maxOf { it.y })
+            } ?: report?.content ?: whole
         // Turned about the scaled box's middle (KeyguardCustomClockView: pivot in the middle, the
         // scaled top put back).
         val pivot = Offset(cx, top + faceH * design.scale / 2f)
@@ -277,7 +291,7 @@ fun LockScreenPreview(
         rects[LockElement.NOTIFICATIONS] = notif
         rects[LockElement.SHORTCUT_START] = scStart
         rects[LockElement.SHORTCUT_END] = scEnd
-        val layout = LockLayout(k, rects, cx, design.rot, pivot)
+        val layout = LockLayout(k, rects, cx, if (quadPx != null) 0f else design.rot, pivot, quadPx)
         if (onLayout != null) SideEffect { onLayout(layout) }
 
         // The selection frame's glide (see FrameMotion).
@@ -333,6 +347,13 @@ fun LockScreenPreview(
                     if (sky != null) LivingSkyImage(sky, picture, null, Modifier.fillMaxSize())
                     else Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 } ?: if (chrome) Box(Modifier.fillMaxSize().background(Color(0xFF0B1418))) else Unit
+
+                // IchthysOS projected clock: the digits on the wallpaper's wall, over the picture
+                // and under the subject (drawn below), as SystemUI's depth layers draw them.
+                if (quadFr != null) {
+                    ProjectedClockImage(design, picture, quadFr, accent, screen.width, screen.height,
+                        Modifier.fillMaxSize())
+                }
 
                 // The face, as KeyguardCustomClockView lays it out: 40 dp in from the screen's
                 // sides, its top at 72 dp + margin under the status bar, scaled about its top
@@ -434,8 +455,10 @@ fun LockScreenPreview(
                     Canvas(Modifier.fillMaxSize()) {
                         overlay?.invoke(this, layout)
                         val target = selected?.let { rects[it] }
-                        motion.draw(this, target, selected == LockElement.CLOCK,
-                            if (selected == LockElement.CLOCK) design.rot else 0f,
+                        // IchthysOS projected clock: its handles are the quad's own corners (the
+                        // editor draws them), not the frame's.
+                        motion.draw(this, target, selected == LockElement.CLOCK && quadPx == null,
+                            if (selected == LockElement.CLOCK && quadPx == null) design.rot else 0f,
                             if (selected == LockElement.CLOCK) pivot else target?.center ?: Offset.Zero, d)
                     }
                 }
@@ -505,7 +528,7 @@ private fun rememberPreviewSky(
     // IchthysOS: the Depth face's contrast follows the preview's graded sky (as on the lock screen).
     SideEffect {
         com.android.settingslib.ichthys.clock.ClockBackdrop.publish(
-            LivingSky.brightnessBehindClock(grade, sky.intensity))
+            LivingSky.brightnessBehindClock(grade, sky.intensity, info))
     }
 
     val saver = remember {
@@ -582,6 +605,48 @@ private fun LivingSkyImage(sky: PreviewSky, picture: LockPicture, mask: Bitmap?,
         drawIntoCanvas {
             if (mask != null) painter.drawMasked(it.nativeCanvas, sky.width, sky.height, mask)
             else painter.draw(it.nativeCanvas, sky.width, sky.height)
+        }
+    }
+}
+
+/**
+ * IchthysOS projected clock: the Depth face's digits painted onto [quad] (fractions) of the
+ * wallpaper's wall, through the same renderer SystemUI's depth layers use (ProjectedClock), at the
+ * time now (a new minute redraws it). The picture itself is the wall: its light tints the paint,
+ * its shading is multiplied into it.
+ */
+@Composable
+private fun ProjectedClockImage(
+    design: LockDesign,
+    picture: LockPicture,
+    quad: FloatArray,
+    accent: Int,
+    w: Int,
+    h: Int,
+    modifier: Modifier,
+) {
+    val wall = picture.source ?: return
+    val context = LocalContext.current
+    val renderer = remember { com.android.settingslib.ichthys.clock.ProjectedClock.Renderer() }
+    var tick by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000L - System.currentTimeMillis() % 60_000L)
+            tick++
+        }
+    }
+    val colour = design.inkOrNull(accent) ?: AColor.WHITE
+    Canvas(modifier) {
+        tick
+        val c = java.util.Calendar.getInstance()
+        val h24 = c.get(java.util.Calendar.HOUR_OF_DAY)
+        val hour =
+            if (android.text.format.DateFormat.is24HourFormat(context)) h24
+            else (h24 % 12).let { if (it == 0) 12 else it }
+        drawIntoCanvas {
+            renderer.draw(it.nativeCanvas, w, h, quad, hour, c.get(java.util.Calendar.MINUTE),
+                design.font, colour, design.opacity.coerceIn(0, 100) / 100f, wall, wall, 1f, 0f,
+                density)
         }
     }
 }
@@ -800,6 +865,8 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
                     if (d.rot != 0f && d.depth == DepthClockView.DEPTH_SHAPE) DepthClockView.DEPTH_OVERLAP
                     else d.depth
                 v.previewShapeStyle = d.shape
+                // IchthysOS projected clock: the face then draws only its date line.
+                v.previewProjected = d.placement
                 v.previewFont = d.font
                 v.previewGlassFrost = d.glassFrost
                 v.previewGlassOpacity = d.glassOpacity

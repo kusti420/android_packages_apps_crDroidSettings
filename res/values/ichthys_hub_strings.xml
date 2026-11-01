@@ -40,6 +40,24 @@
     <string name="ichthys_apps_integrity_category">Integrity</string>
     <string name="ichthys_apps_install_category">Installing</string>
 
+    <!-- Apps > Install & compatibility (ichthys_install.xml). Every summary names what the
+         bypass gives up; these are the owner's deliberate holes in Android's blocks. -->
+    <string name="ichthys_install_title">Install &amp; compatibility</string>
+    <string name="ichthys_install_summary">Apps built for old Android, downgrades, screenshots in protected apps</string>
+    <string name="ichthys_install_capture_category">Screenshots and screen recording</string>
+    <string name="low_target_sdk_title">Allow apps built for old Android</string>
+    <string name="low_target_sdk_summary">Install apps that target an Android version older than the system accepts (otherwise refused as built for an older version). They keep the permission behaviour of their time, which the block exists to stop malware hiding behind. Applies to every install, including adb.</string>
+    <string name="secure_window_bypass_apps_title">Allow screenshots in selected apps</string>
+    <!-- %1$s is secure_window_bypass_apps_none or secure_window_bypass_apps_count -->
+    <string name="secure_window_bypass_apps_summary"><xliff:g id="count">%1$s</xliff:g>. Their own screenshot protection is ignored: screenshots, screen recording, casting, the recents preview and any app that can read the screen show them.</string>
+    <string name="secure_window_bypass_apps_none">No apps selected</string>
+    <plurals name="secure_window_bypass_apps_count">
+        <item quantity="one">%d app</item>
+        <item quantity="other">%d apps</item>
+    </plurals>
+    <string name="disable_secure_windows_title">Allow screenshots in every app</string>
+    <string name="disable_secure_windows_summary">Ignores every screenshot protection on the device: all apps\u2019 secure windows and the system\u2019s own blocks for sensitive notifications and work policies. Anything that can record the screen, malware included, sees banking apps, passwords and payment screens.</string>
+
     <!-- Apps > Background -->
     <string name="ichthys_background_title">Background</string>
     <string name="ichthys_background_summary">Unrestricted apps, Backstage, memory and unused apps</string>
@@ -118,6 +136,11 @@
     <string name="ichthys_navigation_mode_title">Navigation mode</string>
     <string name="ichthys_navigation_mode_summary">Gestures or buttons</string>
     <string name="weather_source_category">Source</string>
+    <!-- IchthysOS: the Weather page's Location row (the shared place from Guard) -->
+    <string name="weather_location_title">Location</string>
+    <string name="weather_location_home">%1$s · home city. Tap to change it or add a trip</string>
+    <string name="weather_location_trip">%1$s · trip under way. Tap to change it</string>
+    <string name="weather_location_device">This device\'s location. Tap to set a home city or a trip</string>
     <string name="weather_where_category">Where it shows</string>
     <string name="weather_lockscreen_category">On the lock screen</string>
     <string name="ichthys_editor_summary">Looks, clock face, size and place, depth, wallpaper</string>

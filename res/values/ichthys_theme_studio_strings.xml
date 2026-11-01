@@ -22,7 +22,9 @@
     <string name="theme_studio_colours_category">Colours</string>
     <string name="theme_studio_surfaces_category">Surfaces and shape</string>
     <string name="theme_studio_type_category">Type</string>
-    <string name="theme_studio_icons_category">Icons</string>
+    <!-- IchthysOS: the "Settings appearance" section (icon tiles, tile colour) — the rows that
+         only change how the Settings app itself looks. -->
+    <string name="theme_studio_settings_ui_category">Settings appearance</string>
     <string name="theme_studio_statusbar_category">Status bar</string>
     <string name="theme_studio_qs_category">Quick settings</string>
     <string name="theme_studio_navbar_category">Navigation bar</string>
@@ -51,6 +53,16 @@
          directly and record no generation, so not every change is one. -->
     <string name="theme_studio_generations_summary">Imports and config applies are generations. Rolling back to one also undoes accent, palette, navigation bar and switch changes made since</string>
     <string name="theme_studio_generations_current">Generation %1$d is current</string>
+    <!-- IchthysOS: the generations list says what each one changed, who applied it, which one a
+         rollback restored and which one was restored. -->
+    <string name="theme_studio_generations_current_rollback">Generation %1$d is current · rolled back to #%2$d</string>
+    <string name="theme_studio_generation_current">current</string>
+    <string name="theme_studio_generation_rolled_back_to">Rolled back to #%1$d (%2$s)</string>
+    <string name="theme_studio_generation_rolled_back_to_gone">Rolled back to #%1$d (no longer kept)</string>
+    <string name="theme_studio_generation_restored_by">Restored by #%1$d</string>
+    <string name="theme_studio_generation_changed">Changed: %1$s</string>
+    <string name="theme_studio_generation_source">Applied by %1$s</string>
+    <string name="theme_studio_generation_initial">State before the first apply</string>
     <string name="theme_studio_unavailable">The configuration service isn\'t running</string>
     <string name="theme_studio_review_title">Review changes</string>
     <string name="theme_studio_apply">Replace</string>
@@ -64,6 +76,7 @@
     <string name="theme_studio_export_error">Couldn\'t export: %1$s</string>
     <string name="theme_studio_exported">Config exported</string>
     <string name="theme_studio_rollback_title">Roll back to generation %1$d?</string>
+    <string name="theme_studio_rollback_message">Restores the setup of %1$s (%2$s) as a new generation; nothing is rewritten.</string>
     <string name="theme_studio_rollback">Roll back</string>
     <string name="theme_studio_restart_hint">Some changes show after SystemUI restarts</string>
 
@@ -140,13 +153,13 @@
         <item>tonal</item>
         <item>stock</item>
     </string-array>
-    <string name="theme_studio_badges_title">Icon badges</string>
-    <string name="theme_studio_badges_summary">Draw Settings icons on badge tiles</string>
-    <!-- theme.iconStyle -->
-    <string name="theme_studio_icon_style_title">Icon style</string>
+    <string name="theme_studio_badges_title">Icon tiles</string>
+    <string name="theme_studio_badges_summary">Draw each Settings icon on a rounded tile. Off: plain icons</string>
+    <!-- theme.iconStyle: what the tiles (and their glyphs) are coloured with -->
+    <string name="theme_studio_icon_style_title">Tile colour</string>
     <string-array name="theme_studio_icon_style_entries" translatable="false">
-        <item>Mono (quiet tiles)</item>
-        <item>Colour badges</item>
+        <item>Mono (grey tiles, accent for IchthysOS rows)</item>
+        <item>Colour (accent and per-category colours)</item>
     </string-array>
     <string-array name="theme_studio_icon_style_values" translatable="false">
         <item>mono</item>

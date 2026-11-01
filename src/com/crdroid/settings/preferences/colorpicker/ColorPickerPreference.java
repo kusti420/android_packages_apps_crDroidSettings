@@ -158,9 +158,10 @@ public class ColorPickerPreference extends Preference implements
     }
 
     /**
-     * Whether a colour is stored. A picked colour is always opaque, so a stored 0 is not one: it
-     * is what the old reset code wrote. It is deleted here, so that every reader (some treat 0
-     * as unset, some do not) falls back to the accent.
+     * Whether a colour is stored. A picked colour is always opaque, so a stored transparent value
+     * is not one: 0 is what the old reset code wrote, 0x00ffffff the "auto" sentinel older
+     * readers (Slim Recents) used as their default. Either is deleted here, so that every reader
+     * (some treat them as unset, some do not) falls back to the accent.
      */
     private boolean hasStoredValue() {
         final androidx.preference.PreferenceDataStore store = getPreferenceDataStore();
@@ -168,11 +169,19 @@ public class ColorPickerPreference extends Preference implements
             return getSharedPreferences() != null && getSharedPreferences().contains(getKey());
         }
         final String raw = store.getString(getKey(), null);
-        if ("0".equals(raw)) {
-            store.putString(getKey(), null);
+        if (raw == null || raw.isEmpty()) {
             return false;
         }
-        return raw != null && !raw.isEmpty();
+        try {
+            // IchthysOS: alpha 0 (0, 0x00ffffff, ...) is never a picked colour: unset.
+            if ((Integer.parseInt(raw) >>> 24) == 0) {
+                store.putString(getKey(), null);
+                return false;
+            }
+        } catch (NumberFormatException ignored) {
+            // Not an int: treat as stored, getPersistedInt() falls back to the accent.
+        }
+        return true;
     }
 
     /** Shows {@link #mCurrentValue} in the summary and the preview without storing it. */

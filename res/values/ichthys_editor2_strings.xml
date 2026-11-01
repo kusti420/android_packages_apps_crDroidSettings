@@ -57,6 +57,9 @@
     <string name="ichthys_ed2_font_compact">Compact</string>
     <string name="ichthys_ed2_font_grotesk">Grotesk</string>
     <string name="ichthys_ed2_font_heavy">Heavy</string>
+    <string name="ichthys_ed2_font_bubble">Bubble</string>
+    <string name="ichthys_ed2_font_block">Block</string>
+    <string name="ichthys_ed2_font_inline">Inline</string>
     <string name="ichthys_ed2_glass_clear">Clear</string>
     <string name="ichthys_ed2_glass_frosted">Frosted</string>
     <string name="ichthys_ed2_glass_auto">Auto opacity</string>
@@ -73,6 +76,13 @@
     <string name="ichthys_ed2_depth_overlap">Overlap</string>
     <string name="ichthys_ed2_depth_xray">X-ray</string>
     <string name="ichthys_ed2_depth_shape">Shape</string>
+    <!-- IchthysOS projected clock: the Depth face's digits flat, or painted onto a wall plane of the wallpaper -->
+    <string name="ichthys_ed2_placement">Placement</string>
+    <string name="ichthys_ed2_placement_flat">Flat</string>
+    <string name="ichthys_ed2_placement_projected">On the wall</string>
+    <string name="ichthys_ed2_projected_hint">Drag the four corners on the preview onto a flat surface of the wallpaper (a wall, a building face). They are remembered for this wallpaper. The subject still stands in front; X-ray cuts through it.</string>
+    <string name="ichthys_ed2_projected_reset">Reset corners</string>
+    <string name="ichthys_ed2_projected_flat">Make it a rectangle</string>
     <string name="ichthys_ed2_depth_no_subject">No subject found in this wallpaper yet. Depth needs a person or object in front (it is found a few seconds after the wallpaper is set).</string>
     <string name="ichthys_ed2_shape">Shape</string>
     <string name="ichthys_ed2_shape_stretch">Stretch</string>
@@ -203,7 +213,7 @@
     <string name="ichthys_ed2_sky_intensity">Intensity</string>
     <string name="ichthys_ed2_sky_note">The photo\'s sky warms at sunrise, turns gold and blue at sunset and shows the stars at night.</string>
     <string name="ichthys_ed2_sky_none">This photo has no sky to bring to life.</string>
-    <string name="ichthys_ed2_sky_dark">This photo\'s sky is already a night sky.</string>
+    <string name="ichthys_ed2_sky_dark">A night picture: by day its sky is relit to a clean daytime sky and the scene lifted; at night it stays as it is.</string>
     <string name="ichthys_ed2_sky_looking">Looking for the sky in this photo\u2026</string>
     <string name="ichthys_ed2_sky_no_photo">Needs a photo as the lock screen wallpaper.</string>
     <string name="ichthys_ed2_sky_day">Preview the day</string>

@@ -71,6 +71,11 @@ class LockPicture(
     val skyInfo: LivingSky.SkyInfo? = null,
     /** The subject's coverage (alpha), the backdrop's size, for the graded cut-out. */
     val cutoutMask: Bitmap? = null,
+    /**
+     * IchthysOS projected clock: the wallpaper's key ("L<lockId>S<sysId>", as IchthysDepth keys
+     * its masks), the saved quad is looked up by; null for a photo not yet set as the wallpaper.
+     */
+    val wallpaperKey: String? = null,
 ) {
     /** Living Sky can grade this picture. */
     val livingSky: Boolean
@@ -132,7 +137,7 @@ object LockPictures {
                     val skyMask =
                         if (LivingSky.readOptions(context.contentResolver, user).enabled ||
                             wantSky) open(SKIES)?.let { cut(it) } else null
-                    build(back, cutMask, w, h, skyMask)
+                    build(back, cutMask, w, h, skyMask, key)
                 }
             }
         } catch (e: Exception) {
@@ -219,7 +224,8 @@ object LockPictures {
      * Cut-out, outline and palette for [back] (half screen size) and its [mask] (same size, alpha =
      * subject; null: none). A mask covering almost nothing counts as none, like SystemUI's.
      */
-    private fun build(back: Bitmap, mask: Bitmap?, w: Int, h: Int, sky: Bitmap? = null): LockPicture {
+    private fun build(back: Bitmap, mask: Bitmap?, w: Int, h: Int, sky: Bitmap? = null,
+            wallpaperKey: String? = null): LockPicture {
         var outline = mask?.let { SubjectOutline.fromMask(it, w, h) }
         var cut: Bitmap? = null
         // IchthysOS: the same test SystemUI's lock screen makes (DepthSource): only a real
@@ -264,6 +270,7 @@ object LockPictures {
             land = land,
             skyInfo = skyInfo,
             cutoutMask = cut,
+            wallpaperKey = wallpaperKey,
         )
     }
 

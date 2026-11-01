@@ -65,13 +65,16 @@ public class SlimRecents extends SettingsPreferenceFragment {
         Settings.System.putIntForUser(resolver,
                 Settings.System.SLIM_RECENTS_MEM_DISPLAY_LONG_CLICK_CLEAR, 0,
                 UserHandle.USER_CURRENT);
-        Settings.System.putInt(resolver, Settings.System.SLIM_MEM_BAR_COLOR, 0x00ffffff);
-        Settings.System.putInt(resolver, Settings.System.SLIM_MEM_TEXT_COLOR, 0x00ffffff);
-        // Appearance.
-        Settings.System.putIntForUser(resolver,
-                Settings.System.RECENT_PANEL_BG_COLOR, 0x00ffffff, UserHandle.USER_CURRENT);
-        Settings.System.putIntForUser(resolver,
-                Settings.System.RECENT_CARD_BG_COLOR, 0x00ffffff, UserHandle.USER_CURRENT);
+        // IchthysOS: the bar colour has no stored default. Unset, RecentController draws the
+        // theme accent and the picker (accentDefault) shows the accent; so "reset" deletes the
+        // value rather than writing the old 0x00ffffff sentinel, which the picker would show as
+        // a picked transparent white.
+        Settings.System.putString(resolver, Settings.System.SLIM_MEM_BAR_COLOR, null);
+        Settings.System.putInt(resolver, Settings.System.SLIM_MEM_TEXT_COLOR, 0xffffffff);
+        // IchthysOS: the panel and card background colour options were removed; the panel and
+        // cards always use the theme default. Clear any colour a previous build stored.
+        Settings.System.putString(resolver, Settings.System.RECENT_PANEL_BG_COLOR, null);
+        Settings.System.putString(resolver, Settings.System.RECENT_CARD_BG_COLOR, null);
     }
 
     @Override

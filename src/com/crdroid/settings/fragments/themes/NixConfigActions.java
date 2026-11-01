@@ -26,12 +26,17 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.format.DateFormat;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.widget.Toast;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import com.android.internal.ichthys.IIchthysConfig;
 import com.android.settings.R;
+import com.android.settings.ichthys.ShoalStyle;
 import com.crdroid.settings.utils.SystemUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -39,7 +44,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -136,8 +143,13 @@ public final class NixConfigActions {
                 if (gens.length == 0) {
                     return;
                 }
-                summary = mFragment.getString(R.string.theme_studio_generations_current,
-                        Integer.parseInt(gens[0].split("\t")[0]));
+                // IchthysOS: a current generation that is a rollback says what it restored.
+                final Generation current = Generation.parse(gens[0]);
+                summary = current.rollbackTo >= 0
+                        ? mFragment.getString(R.string.theme_studio_generations_current_rollback,
+                                current.number, current.rollbackTo)
+                        : mFragment.getString(R.string.theme_studio_generations_current,
+                                current.number);
             } catch (Exception e) {
                 return;
             }
@@ -259,49 +271,157 @@ public final class NixConfigActions {
         });
     }
 
+    /** One line of {@link IIchthysConfig#listGenerations}. */
+    private static final class Generation {
+        final int number;
+        final long time;
+        final String summary;
+        final String source;
+        final boolean current;
+        /** The generation this one restored (a rollback), else -1. */
+        final int rollbackTo;
+
+        private Generation(String[] f) {
+            number = Integer.parseInt(f[0]);
+            time = Long.parseLong(f[1]);
+            summary = f[2];
+            source = f[3];
+            current = "1".equals(f[4]);
+            rollbackTo = f.length > 5 && !f[5].isEmpty() ? Integer.parseInt(f[5]) : -1;
+        }
+
+        /** @return null for a line that isn't one */
+        static Generation parse(String line) {
+            final String[] f = line.split("\t", -1);
+            if (f.length < 5) {
+                return null;
+            }
+            try {
+                return new Generation(f);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+    }
+
+    private String when(long time) {
+        final Date date = new Date(time);
+        return DateFormat.getMediumDateFormat(ctx()).format(date) + " "
+                + DateFormat.getTimeFormat(ctx()).format(date);
+    }
+
+    /**
+     * IchthysOS: the generations list, newest first, each with what it changed and who applied
+     * it. A rollback reads "Rolled back to #N (date)", and generation N itself carries a
+     * "Restored by #M" badge; both, like the current one, are in the accent so the eye finds
+     * where the history went back to.
+     */
     private void showGenerations() {
         final Context ctx = ctx();
-        final String[] gens;
+        final String[] lines;
         try {
-            gens = mService.listGenerations(UserHandle.USER_CURRENT);
+            lines = mService.listGenerations(UserHandle.USER_CURRENT);
         } catch (RemoteException | RuntimeException e) {
             Toast.makeText(ctx, mFragment.getString(R.string.theme_studio_error, reason(e)),
                     Toast.LENGTH_LONG).show();
             return;
         }
-        final List<String> labels = new ArrayList<>();
-        final List<Integer> numbers = new ArrayList<>();
-        for (String line : gens) {
-            final String[] f = line.split("\t", -1);
-            if (f.length < 5) {
+        final List<Generation> gens = new ArrayList<>();
+        final Map<Integer, Generation> byNumber = new HashMap<>();
+        // Which rollback (the newest, if several) restored a generation.
+        final Map<Integer, Integer> restoredBy = new HashMap<>();
+        for (String line : lines) {
+            final Generation g = Generation.parse(line);
+            if (g == null) {
                 continue;
             }
-            final int n = Integer.parseInt(f[0]);
-            final Date date = new Date(Long.parseLong(f[1]));
-            final String when = DateFormat.getMediumDateFormat(ctx).format(date) + " "
-                    + DateFormat.getTimeFormat(ctx).format(date);
-            labels.add(("1".equals(f[4]) ? "● " : "") + n + " · " + when + "\n" + f[2]);
-            numbers.add(n);
+            gens.add(g);
+            byNumber.put(g.number, g);
+            if (g.rollbackTo >= 0 && !restoredBy.containsKey(g.rollbackTo)) {
+                restoredBy.put(g.rollbackTo, g.number);
+            }
         }
-        if (labels.isEmpty()) {
+        if (gens.isEmpty()) {
             return;
+        }
+        final int accent = ShoalStyle.accent(ctx);
+        final List<CharSequence> labels = new ArrayList<>();
+        for (Generation g : gens) {
+            final SpannableStringBuilder sb = new SpannableStringBuilder();
+            final boolean marked = g.current || g.rollbackTo >= 0
+                    || restoredBy.containsKey(g.number);
+            appendStyled(sb, (g.current ? "\u25CF " : "") + "#" + g.number + " \u00B7 "
+                    + when(g.time), marked ? accent : 0, true);
+            if (g.current) {
+                sb.append("  ").append(
+                        mFragment.getString(R.string.theme_studio_generation_current));
+            }
+            final Integer restorer = restoredBy.get(g.number);
+            if (restorer != null) {
+                sb.append("\n");
+                appendStyled(sb, "\u25C0 " + mFragment.getString(
+                        R.string.theme_studio_generation_restored_by, restorer), accent, true);
+            }
+            if (g.rollbackTo >= 0) {
+                final Generation target = byNumber.get(g.rollbackTo);
+                sb.append("\n");
+                appendStyled(sb, target != null
+                        ? mFragment.getString(R.string.theme_studio_generation_rolled_back_to,
+                                g.rollbackTo, when(target.time))
+                        : mFragment.getString(R.string.theme_studio_generation_rolled_back_to_gone,
+                                g.rollbackTo), accent, false);
+            }
+            if (g.number == 0) {
+                sb.append("\n").append(
+                        mFragment.getString(R.string.theme_studio_generation_initial));
+            } else {
+                if (!g.summary.isEmpty()) {
+                    sb.append("\n").append(mFragment.getString(
+                            R.string.theme_studio_generation_changed, g.summary));
+                }
+                if (g.rollbackTo < 0 && !g.source.isEmpty()) {
+                    sb.append("\n").append(mFragment.getString(
+                            R.string.theme_studio_generation_source, g.source));
+                }
+            }
+            labels.add(sb);
         }
         new AlertDialog.Builder(ctx)
                 .setTitle(R.string.theme_studio_generations_title)
                 .setItems(labels.toArray(new CharSequence[0]), (d, which) -> {
-                    if (which == 0) {
+                    final Generation g = gens.get(which);
+                    if (g.current) {
                         return; // already current
                     }
-                    final int gen = numbers.get(which);
                     new AlertDialog.Builder(ctx)
                             .setTitle(mFragment.getString(R.string.theme_studio_rollback_title,
-                                    gen))
+                                    g.number))
+                            .setMessage(mFragment.getString(R.string.theme_studio_rollback_message,
+                                    when(g.time), g.number == 0
+                                            ? mFragment.getString(
+                                                    R.string.theme_studio_generation_initial)
+                                            : g.summary))
                             .setPositiveButton(R.string.theme_studio_rollback, (d2, w2) ->
-                                    rollbackAsync(gen))
+                                    rollbackAsync(g.number))
                             .setNegativeButton(android.R.string.cancel, null)
                             .show();
                 })
                 .show();
+    }
+
+    /** Appends {@code text} in {@code color} (0: unchanged), bold when asked. */
+    private static void appendStyled(SpannableStringBuilder sb, String text, int color,
+            boolean bold) {
+        final int start = sb.length();
+        sb.append(text);
+        if (color != 0) {
+            sb.setSpan(new ForegroundColorSpan(color), start, sb.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (bold) {
+            sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start, sb.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
     }
 
     private void rollbackAsync(int gen) {

@@ -27,6 +27,7 @@ import com.android.internal.util.crdroid.ThemeUtils
 import com.android.settings.R
 import com.android.settingslib.ichthys.clock.DepthClockView
 import com.android.settingslib.ichthys.clock.LockWeather
+import com.android.settingslib.ichthys.clock.ProjectedClock
 import com.android.settingslib.ichthys.sky.LivingSky
 import com.crdroid.settings.utils.SystemUtils
 import kotlin.math.abs
@@ -64,6 +65,9 @@ object LockKeys {
     const val GLASS_OPACITY = DepthClockView.KEY_GLASS_OPACITY
     const val DATE_POS = DepthClockView.KEY_DATE_POS
     const val DATE_ALIGN = DepthClockView.KEY_DATE_ALIGN
+    /** IchthysOS projected clock: flat or on the wallpaper's wall, and the saved quads. */
+    const val PLACEMENT = DepthClockView.KEY_PLACEMENT
+    const val QUADS = ProjectedClock.KEY_QUADS
     const val LOOK = "ichthys_lockscreen_look"
     const val LOOKS = "ichthys_lockscreen_looks"
     const val SHOW_NOTIFICATIONS = "lock_screen_show_notifications"
@@ -132,9 +136,27 @@ data class LockDesign(
     val livingSky: Boolean = false,
     val skyWeather: Boolean = true,
     val skyIntensity: Int = 100,
+    /**
+     * IchthysOS projected clock: the Depth face flat over the picture or painted onto a wall plane
+     * of it (DepthClockView.PLACEMENT_*). [quad]: the draft's corners for the previewed wallpaper
+     * (fractions of the screen, 8 values; null: the saved one for it, else the default), saved
+     * under the wallpaper's key on Apply; [quads]: the saved quads as read ([LockKeys.QUADS]).
+     */
+    val placement: Int = DepthClockView.PLACEMENT_FLAT,
+    val quad: List<Float>? = null,
+    val quads: String? = null,
 ) {
     val isDepthFace: Boolean
         get() = style == DEPTH_STYLE
+
+    /** IchthysOS: the Depth face's digits are on the wallpaper's wall (ProjectedClock). */
+    val isProjected: Boolean
+        get() = isDepthFace && placement == DepthClockView.PLACEMENT_PROJECTED
+
+    /** The quad the preview of [picture] draws: the draft's, else the one saved for it, else the default. */
+    fun resolvedQuad(picture: LockPicture): FloatArray =
+        quad?.takeIf { it.size == 8 }?.toFloatArray()?.takeIf { ProjectedClock.isValid(it) }
+            ?: ProjectedClock.quadFor(quads, picture.wallpaperKey)
 
     /** The weather options as the lock screen reads them. */
     val weatherOptions: LockWeather.Options
@@ -158,9 +180,11 @@ data class LockDesign(
     /** Same placement, look and clock (ignores shortcuts, notifications and the look's id). */
     fun sameClockAs(o: LockDesign): Boolean =
         copy(shortcutStart = "", shortcutEnd = "", showNotifications = true,
-            privateNotifications = true, look = "", dx = 0f, dy = 0f, scale = 1f, rot = 0f) ==
+            privateNotifications = true, look = "", dx = 0f, dy = 0f, scale = 1f, rot = 0f,
+            quad = null, quads = null) ==
             o.copy(shortcutStart = "", shortcutEnd = "", showNotifications = true,
-                privateNotifications = true, look = "", dx = 0f, dy = 0f, scale = 1f, rot = 0f) &&
+                privateNotifications = true, look = "", dx = 0f, dy = 0f, scale = 1f, rot = 0f,
+                quad = null, quads = null) &&
             abs(dx - o.dx) < 1 && abs(dy - o.dy) < 1 && abs(scale - o.scale) < 0.005f &&
             abs(rot - o.rot) < 0.5f
 
@@ -196,6 +220,7 @@ data class LockDesign(
             .put("weatherIcons", weatherIcons)
             .put("weatherSize", weatherSize)
             .put("livingSky", livingSky)
+            .put("placement", placement)
 
     /** [o] (a saved look; v1 looks have only the first few fields) over this design. */
     fun withLook(o: JSONObject): LockDesign =
@@ -230,6 +255,8 @@ data class LockDesign(
             weatherSize = o.optInt("weatherSize", weatherSize),
             // Looks saved before Living Sky keep it as it is.
             livingSky = o.optBoolean("livingSky", livingSky),
+            // IchthysOS projected clock: a look's placement; the quad stays the wallpaper's.
+            placement = o.optInt("placement", DepthClockView.PLACEMENT_FLAT),
         )
 }
 
@@ -375,8 +402,21 @@ object LockStore {
             livingSky = sky.enabled,
             skyWeather = sky.weather,
             skyIntensity = sky.intensity,
+            placement = int(context, LockKeys.PLACEMENT, DepthClockView.PLACEMENT_FLAT),
+            quads = str(context, LockKeys.QUADS),
         )
     }
+
+    /** IchthysOS projected clock: the lock wallpaper's key, as IchthysDepth keys its masks. */
+    fun currentWallpaperKey(context: Context): String? =
+        try {
+            val wm = context.getSystemService(WallpaperManager::class.java) ?: return null
+            val user = UserHandle.myUserId()
+            "L" + wm.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, user) +
+                "S" + wm.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, user)
+        } catch (e: Exception) {
+            null
+        }
 
     /**
      * Writes what differs between [draft] and [original] (so SystemUI rebuilds the face once; the
@@ -433,6 +473,15 @@ object LockStore {
         i(LivingSky.KEY_INTENSITY, draft.skyIntensity, original.skyIntensity)
         i(LivingSky.KEY_WEATHER, b(draft.skyWeather), b(original.skyWeather))
         i(LivingSky.KEY_ENABLED, b(draft.livingSky), b(original.livingSky))
+        // IchthysOS projected clock: the corners go under the wallpaper that is now the lock
+        // screen's (set above: its ids are new then), the placement after them.
+        val quad = draft.quad?.takeIf { it.size == 8 }?.toFloatArray()
+        if (quad != null && ProjectedClock.isValid(quad)) {
+            currentWallpaperKey(context)?.let { key ->
+                put(context, LockKeys.QUADS, ProjectedClock.withQuad(str(context, LockKeys.QUADS), key, quad))
+            }
+        }
+        i(LockKeys.PLACEMENT, draft.placement, original.placement)
         if (draft.look != original.look) put(context, LockKeys.LOOK, draft.look)
         if (draft.shortcutStart != original.shortcutStart) {
             LockShortcuts.select(context, LockShortcuts.SLOT_START, draft.shortcutStart)

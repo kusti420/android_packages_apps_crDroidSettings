@@ -17,7 +17,6 @@ package com.crdroid.settings.fragments;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -35,6 +34,7 @@ import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.fragments.backstage.Backstage;
 import com.crdroid.settings.fragments.misc.UnrestrictedBackgroundApps;
+import com.crdroid.settings.preferences.CustomSeekBarPreference;
 
 /**
  * IchthysOS &gt; Apps &gt; Background: what apps may do while they are not on screen. Unrestricted
@@ -51,11 +51,17 @@ public class Background extends SettingsPreferenceFragment {
     private static final String KEY_UNRESTRICTED_PERSIST = "ichthys_unrestricted_bg_persist";
     private static final String KEY_BACKSTAGE = "ichthys_backstage";
     private static final String KEY_BACKSTAGE_MAX_HOURS = "ichthys_backstage_max_hours";
+    private static final String KEY_BACKSTAGE_MAX_MINUTES = "ichthys_backstage_max_minutes";
+    /** KEY_BACKSTAGE_MAX_HOURS value meaning "the custom duration in KEY_BACKSTAGE_MAX_MINUTES". */
+    private static final int MAX_HOURS_CUSTOM = -1;
+    private static final int DEFAULT_MAX_MINUTES = 90;
 
     private ListPreference mUnrestrictedMode;
     private Preference mUnrestrictedApps;
     private Preference mUnrestrictedPersist;
     private Preference mBackstage;
+    private ListPreference mBackstageMaxHours;
+    private CustomSeekBarPreference mBackstageMaxMinutes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +70,46 @@ public class Background extends SettingsPreferenceFragment {
 
         mBackstage = findPreference(KEY_BACKSTAGE);
         setupUnrestrictedBackground();
+        setupBackstageLimit();
+    }
+
+    // The custom duration row only applies while the list says "Custom"; its summary reads in
+    // hours and minutes (the slider itself counts minutes).
+    private void setupBackstageLimit() {
+        mBackstageMaxHours = findPreference(KEY_BACKSTAGE_MAX_HOURS);
+        mBackstageMaxMinutes = findPreference(KEY_BACKSTAGE_MAX_MINUTES);
+        if (mBackstageMaxHours == null || mBackstageMaxMinutes == null) return;
+
+        mBackstageMaxHours.setOnPreferenceChangeListener((p, v) -> {
+            updateBackstageLimit(Integer.parseInt((String) v), mBackstageMaxMinutes.getValue());
+            return true;
+        });
+        mBackstageMaxMinutes.setOnPreferenceChangeListener((p, v) -> {
+            updateBackstageLimit(backstageMaxHours(), (Integer) v);
+            return true;
+        });
+        updateBackstageLimit(backstageMaxHours(), mBackstageMaxMinutes.getValue());
+    }
+
+    private int backstageMaxHours() {
+        return mBackstageMaxHours == null || mBackstageMaxHours.getValue() == null
+                ? 0 : Integer.parseInt(mBackstageMaxHours.getValue());
+    }
+
+    private void updateBackstageLimit(int hours, int minutes) {
+        if (mBackstageMaxMinutes == null) return;
+        mBackstageMaxMinutes.setVisible(hours == MAX_HOURS_CUSTOM);
+        // CustomSeekBarPreference prefixes the value ("390 min"); the user summary adds the
+        // readable form once it is an hour or more.
+        if (minutes < 60) {
+            mBackstageMaxMinutes.setSummary(null);
+        } else if (minutes % 60 == 0) {
+            mBackstageMaxMinutes.setSummary(
+                    getString(R.string.backstage_max_minutes_hours, minutes / 60));
+        } else {
+            mBackstageMaxMinutes.setSummary(getString(
+                    R.string.backstage_max_minutes_hours_minutes, minutes / 60, minutes % 60));
+        }
     }
 
     // The mode row explains what the chosen mode does; the app picker and keep-after-reboot rows
@@ -74,10 +120,6 @@ public class Background extends SettingsPreferenceFragment {
         mUnrestrictedPersist = findPreference(KEY_UNRESTRICTED_PERSIST);
         if (mUnrestrictedMode == null) return;
 
-        // Both danger rows render on a solid red card, like the power-menu Emergency button, so
-        // it's obvious these aren't everyday toggles. Whiten the glyphs to stay legible on red.
-        whitenIcon(mUnrestrictedMode);
-        whitenIcon(mUnrestrictedPersist);
 
         mUnrestrictedMode.setOnPreferenceChangeListener((p, v) -> {
             updateUnrestrictedBackground(Integer.parseInt((String) v));
@@ -135,19 +177,11 @@ public class Background extends SettingsPreferenceFragment {
         updateBackstage();
     }
 
-    // Tints the preference's glyph white so it stays legible on the red danger pill,
-    // matching the power-menu Emergency button's plain white glyph on solid red.
-    private void whitenIcon(Preference pref) {
-        if (pref == null || pref.getIcon() == null) return;
-        final Drawable glyph = pref.getIcon().mutate();
-        glyph.setTint(0xFFFFFFFF);
-        pref.setIcon(glyph);
-    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // IchthysOS Shoal: the row icons become outlined badges in the accent.
+        // IchthysOS Shoal: the row icons become outlined badges in the accent. The two danger
+        // rows (Danger*Preference) decline the badge and keep a white glyph on their red card.
         ShoalStyle.badgeAll(getPreferenceScreen(), ShoalStyle.accent(view.getContext()));
     }
 
@@ -159,9 +193,11 @@ public class Background extends SettingsPreferenceFragment {
         Settings.Global.putInt(resolver, KEY_UNRESTRICTED_MODE, 0);
         Settings.Global.putInt(resolver, KEY_UNRESTRICTED_PERSIST, 0);
         Settings.Global.putString(resolver, UnrestrictedBackgroundApps.KEY_PACKAGES, null);
-        // Backstage: no time limit. The apps in Backstage are running state, not a setting,
-        // and are left alone.
+        // Backstage: no time limit, the custom duration back at its default. The apps in
+        // Backstage are running state, not a setting, and are left alone.
         Settings.Secure.putIntForUser(resolver, KEY_BACKSTAGE_MAX_HOURS, 0,
+                UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(resolver, KEY_BACKSTAGE_MAX_MINUTES, DEFAULT_MAX_MINUTES,
                 UserHandle.USER_CURRENT);
     }
 

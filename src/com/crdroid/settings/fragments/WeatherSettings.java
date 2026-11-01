@@ -17,12 +17,15 @@
 package com.crdroid.settings.fragments;
 
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import androidx.preference.Preference;
 import androidx.preference.SwitchPreferenceCompat;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.crdroid.OmniJawsClient;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.android.settings.ichthys.guard.ui.GuardActivity;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 import com.crdroid.settings.utils.SystemUtils;
@@ -36,8 +39,12 @@ public class WeatherSettings extends SettingsPreferenceFragment
         implements Preference.OnPreferenceChangeListener {
 
     private static final String KEY_WEATHER = "lockscreen_weather_enabled";
+    private static final String KEY_LOCATION = "weather_location";
+    /** IchthysOS: "lat,lon|name|kind" (kind "home" or "trip"), from IchthysPlacesService. */
+    private static final String SHARED_LOCATION_ACTIVE = "ichthys_location_active";
 
     private SwitchPreferenceCompat mWeather;
+    private Preference mLocation;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,16 +54,40 @@ public class WeatherSettings extends SettingsPreferenceFragment
         if (mWeather != null) {
             mWeather.setOnPreferenceChangeListener(this);
         }
+        // IchthysOS: the place the weather is for is a shared value (Guard > Rules > Shared
+        // values); this row shows it and opens that screen.
+        mLocation = findPreference(KEY_LOCATION);
+        if (mLocation != null) {
+            mLocation.setIntent(GuardActivity.sharedValuesIntent(getContext()));
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (mLocation != null) {
+            mLocation.setSummary(locationSummary());
+        }
         if (mWeather == null) return;
         final boolean enabled = OmniJawsClient.get().isOmniJawsEnabled(getContext());
         mWeather.setEnabled(enabled);
         mWeather.setSummary(enabled ? R.string.lockscreen_weather_summary
                 : R.string.lockscreen_weather_enabled_info);
+    }
+
+    /** The active place as "Tallinn · home city ..." or the device-location fallback. */
+    private CharSequence locationSummary() {
+        final String active = Settings.Secure.getString(getContentResolver(),
+                SHARED_LOCATION_ACTIVE);
+        if (active != null) {
+            final String[] parts = active.split("\\|", -1);
+            if (parts.length > 1 && !TextUtils.isEmpty(parts[1])) {
+                final boolean trip = parts.length > 2 && "trip".equals(parts[2]);
+                return getString(trip ? R.string.weather_location_trip
+                        : R.string.weather_location_home, parts[1]);
+            }
+        }
+        return getString(R.string.weather_location_device);
     }
 
     @Override

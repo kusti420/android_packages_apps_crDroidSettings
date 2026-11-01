@@ -101,6 +101,36 @@
             android:title="@string/custom_volume_horizontal_title"
             android:summary="@string/custom_volume_horizontal_summary"
             android:defaultValue="false" />
+        <!-- IchthysOS: premade looks of the horizontal panel (SystemUI HorizontalVolumeStyle,
+             read when the dialog is shown). 0 Shoal pill, 1 thin line, 2 segmented, 3 filled
+             card. The picker shows drawn previews (OptionPreviews). -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="volume_horizontal_style"
+            android:title="@string/volume_horizontal_style_title"
+            android:summary="%s"
+            android:entries="@array/volume_horizontal_style_entries"
+            android:entryValues="@array/volume_horizontal_style_values"
+            android:defaultValue="0"
+            android:dependency="custom_volume_horizontal" />
+        <!-- IchthysOS: what the horizontal row prints at its end: nothing, the step or a %. -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="volume_horizontal_level"
+            android:title="@string/volume_horizontal_level_title"
+            android:summary="%s"
+            android:entries="@array/volume_horizontal_level_entries"
+            android:entryValues="@array/volume_horizontal_level_values"
+            android:defaultValue="1"
+            android:dependency="custom_volume_horizontal" />
+        <!-- IchthysOS: track thickness of the horizontal row (pill / card height, line and
+             segment weight). -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="volume_horizontal_thickness"
+            android:title="@string/volume_horizontal_thickness_title"
+            android:summary="%s"
+            android:entries="@array/volume_horizontal_thickness_entries"
+            android:entryValues="@array/volume_horizontal_thickness_values"
+            android:defaultValue="1"
+            android:dependency="custom_volume_horizontal" />
     </PreferenceCategory>
 
     <!-- Adaptive playback: pause media when the volume reaches zero, resume when it is raised

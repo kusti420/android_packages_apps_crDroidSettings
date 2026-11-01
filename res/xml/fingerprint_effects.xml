@@ -77,24 +77,6 @@
             android:title="@string/ichthys_fp_custom_color_title"
             settings:accentDefault="true" />
 
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="ichthys_udfps_anim_offset_x"
-            android:title="@string/ichthys_fp_anim_offset_x_title"
-            android:defaultValue="0"
-            android:max="40"
-            settings:min="-40"
-            settings:interval="1"
-            settings:units="@string/unit_dp" />
-
-        <com.crdroid.settings.preferences.SystemSettingSeekBarPreference
-            android:key="ichthys_udfps_anim_offset_y"
-            android:title="@string/ichthys_fp_anim_offset_y_title"
-            android:defaultValue="0"
-            android:max="40"
-            settings:min="-40"
-            settings:interval="1"
-            settings:units="@string/unit_dp" />
-
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="ichthys_udfps_anim_bp"
             android:title="@string/ichthys_fp_anim_bp_title"

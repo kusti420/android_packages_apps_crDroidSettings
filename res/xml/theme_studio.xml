@@ -116,10 +116,14 @@
             android:persistent="false" />
     </PreferenceCategory>
 
-    <!-- Icons -->
+    <!-- Settings appearance: the rows that only change how the Settings app itself looks
+         (theme.iconBadges / theme.iconStyle -> Settings.Secure ichthys_settings_icon_badges /
+         ichthys_settings_icon_style, read by ShoalStyle when a page binds; SettingsActivity and the
+         homepage rebuild themselves when these changed behind them). Same keys and ichthys.nix
+         paths as when they sat under "Icons". -->
     <PreferenceCategory
-        android:key="theme_studio_icons"
-        android:title="@string/theme_studio_icons_category">
+        android:key="theme_studio_settings_ui"
+        android:title="@string/theme_studio_settings_ui_category">
 
         <SwitchPreferenceCompat
             android:key="theme_studio_badges"

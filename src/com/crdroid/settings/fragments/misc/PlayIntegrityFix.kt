@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.SwitchPreferenceCompat
 import com.android.internal.logging.nano.MetricsProto
 import com.android.settings.R
 import com.android.settings.SettingsPreferenceFragment
@@ -89,11 +88,7 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
             true
         }
 
-        findPreference<SwitchPreferenceCompat>("spoof_pif_photos")?.setOnPreferenceChangeListener { _, newValue ->
-            killPackage(PHOTOS_PACKAGE)
-            killPackage(VENDING_PACKAGE)
-            true
-        }
+        // IchthysOS: the Google Photos spoof switch lives on the Apps page now (IchthysApps).
 
         refreshStatus()
     }
@@ -322,7 +317,6 @@ class PlayIntegrityFix : SettingsPreferenceFragment() {
         private const val VENDING_PACKAGE = "com.android.vending"
         private const val GMS_PACKAGE = "com.google.android.gms"
         private const val MICROG_DROIDGUARD_PACKAGE = "org.microg.gms.droidguard"
-        private const val PHOTOS_PACKAGE = "com.google.android.apps.photos"
 
         private val DEVICE_MODEL_MAP = mapOf(
             "oriole" to "Pixel 6",

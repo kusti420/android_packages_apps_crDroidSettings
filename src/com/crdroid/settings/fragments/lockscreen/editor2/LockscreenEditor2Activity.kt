@@ -78,6 +78,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.IntSize
+import com.android.settingslib.ichthys.clock.ProjectedClock
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -543,6 +548,17 @@ fun LockEditor2(
                                     val p0 = down.position / k
                                     val d0 = draftNow
                                     val dens = geo.density
+                                    // IchthysOS projected clock: a finger on the wall quad's corner
+                                    // or inside it moves the quad, not the face (quadGesture).
+                                    val quadNow = lay.quad
+                                    if (quadNow != null && quadHit(quadNow, p0, dens) != null) {
+                                        val movedQuad =
+                                            quadGesture(down, k, quadNow, screen, dens, { draftNow },
+                                                { draft = it }, { dragging = LockElement.CLOCK }, ::tick)
+                                        if (!movedQuad) sheet = EditorSheet.LAYOUT
+                                        dragging = null
+                                        return@awaitEachGesture
+                                    }
                                     // A corner handle of the selected clock resizes it (the corners of
                                     // the turned frame).
                                     val onHandle =
@@ -680,6 +696,12 @@ fun LockEditor2(
                         overlay = { lay ->
                             val dens = geo.density
                             if (dragging != null) guardRails(dens)
+                            // IchthysOS projected clock: the wall quad and its corner handles.
+                            lay.quad?.let { q ->
+                                if (selected == LockElement.CLOCK || dragging == LockElement.CLOCK) {
+                                    quadHandles(q, dens, tk.accent, dragging == LockElement.CLOCK)
+                                }
+                            }
                             if (snapped) {
                                 drawLine(tk.accent, Offset(lay.clockCentreX, 0f),
                                     Offset(lay.clockCentreX, size.height), strokeWidth = 2f,
@@ -806,6 +828,107 @@ private fun BarAction(label: String, line: Color, ink: Color, onClick: () -> Uni
  * [v] inside [lo]..[hi]; past them it gives way less and less, up to [band] beyond (iOS-style
  * rubber band: the further you pull, the harder it gets).
  */
+/**
+ * IchthysOS projected clock (ProjectedClock): what a finger at [p] (screen px) takes hold of on the
+ * wall quad [q] (screen px): a corner's index (0..3, within 28 dp), 4 inside the quad, null off it.
+ */
+private fun quadHit(q: List<Offset>, p: Offset, dens: Float): Int? {
+    q.forEachIndexed { i, c -> if ((c - p).getDistance() < 28 * dens) return i }
+    var sign = 0f
+    for (i in 0 until 4) {
+        val a = q[i]
+        val b = q[(i + 1) % 4]
+        val cross = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)
+        if (sign == 0f) sign = cross else if (sign * cross < 0f) return null
+    }
+    return 4
+}
+
+/**
+ * IchthysOS projected clock: the gesture on the wall quad. A corner handle drags that corner (the
+ * quad snaps to an upright rectangle when it nearly is one, with a tick); a finger inside moves the
+ * whole plane; two fingers scale it about its middle. Corners are kept in ProjectedClock's range
+ * and the quad convex (an invalid shape is simply not taken). Returns whether anything moved (a
+ * tap doesn't).
+ */
+private suspend fun AwaitPointerEventScope.quadGesture(
+    down: PointerInputChange,
+    k: Float,
+    start: List<Offset>,
+    screen: IntSize,
+    dens: Float,
+    current: () -> LockDesign,
+    update: (LockDesign) -> Unit,
+    onDrag: () -> Unit,
+    tick: (Int) -> Unit,
+): Boolean {
+    val p0 = down.position / k
+    val corner = quadHit(start, p0, dens) ?: return false
+    val raw = FloatArray(8) { i -> if (i % 2 == 0) start[i / 2].x / screen.width else start[i / 2].y / screen.height }
+    val snapTol = 10 * dens / screen.width
+    var moved = false
+    var total = Offset.Zero
+    var snapped = false
+    do {
+        val ev = awaitPointerEvent()
+        val pan = ev.calculatePan() / k
+        val zoom = ev.calculateZoom()
+        total += pan
+        if (!moved && (total.getDistance() > viewConfiguration.touchSlop / k || ev.changes.size > 1)) {
+            moved = true
+            onDrag()
+            tick(HapticFeedbackConstants.DRAG_START)
+        }
+        if (moved) {
+            val fx = pan.x / screen.width
+            val fy = pan.y / screen.height
+            if (corner < 4 && ev.changes.size == 1) {
+                raw[corner * 2] += fx
+                raw[corner * 2 + 1] += fy
+            } else {
+                for (i in 0 until 4) {
+                    raw[i * 2] += fx
+                    raw[i * 2 + 1] += fy
+                }
+                if (zoom != 1f) {
+                    val cx = (raw[0] + raw[2] + raw[4] + raw[6]) / 4f
+                    val cy = (raw[1] + raw[3] + raw[5] + raw[7]) / 4f
+                    for (i in 0 until 4) {
+                        raw[i * 2] = cx + (raw[i * 2] - cx) * zoom
+                        raw[i * 2 + 1] = cy + (raw[i * 2 + 1] - cy) * zoom
+                    }
+                }
+            }
+            val q = FloatArray(8) { raw[it].coerceIn(ProjectedClock.QUAD_MIN, ProjectedClock.QUAD_MAX) }
+            val snap = if (corner < 4) ProjectedClock.snapRectangle(q, snapTol) else null
+            if ((snap != null) != snapped) tick(HapticFeedbackConstants.SEGMENT_TICK)
+            snapped = snap != null
+            val shown = snap ?: q
+            if (ProjectedClock.isValid(shown)) {
+                update(current().copy(quad = shown.toList(), look = "custom"))
+            }
+            ev.changes.forEach { it.consume() }
+        }
+    } while (ev.changes.any { it.pressed })
+    return moved
+}
+
+/** IchthysOS projected clock: the wall quad's outline and its four corner handles (screen px). */
+private fun DrawScope.quadHandles(q: List<Offset>, dens: Float, accent: Color, active: Boolean) {
+    val outline = Path().apply {
+        moveTo(q[0].x, q[0].y)
+        for (i in 1 until 4) lineTo(q[i].x, q[i].y)
+        close()
+    }
+    drawPath(outline, Color.Black.copy(alpha = 0.22f), style = Stroke(4.5f * dens))
+    drawPath(outline, if (active) accent else Color.White, style = Stroke(2f * dens))
+    for (c in q) {
+        drawCircle(Color.Black.copy(alpha = 0.25f), 10.5f * dens, c)
+        drawCircle(Color.White, 8.5f * dens, c)
+        drawCircle(accent, 3f * dens, c)
+    }
+}
+
 private fun rubber(v: Float, lo: Float, hi: Float, band: Float): Float =
     when {
         v < lo -> lo - band * (1f - 1f / ((lo - v) / band * 0.55f + 1f))

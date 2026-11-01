@@ -15,11 +15,10 @@
  */
 package com.crdroid.settings.fragments;
 
-import android.content.ContentResolver;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.View;
 
 import androidx.preference.Preference;
@@ -34,8 +33,9 @@ import com.android.settingslib.search.SearchIndexable;
 import java.util.List;
 
 /**
- * IchthysOS &gt; Apps: Ichthys Apps (the app store), the Background page, app downgrades and
- * integrity spoofing (Play Integrity Fix, TrickyStore).
+ * IchthysOS &gt; Apps: Ichthys Apps (the app store), the Background and Install &amp;
+ * compatibility pages, and integrity spoofing (Play Integrity Fix, TrickyStore, the Google
+ * Photos spoof).
  */
 @SearchIndexable
 public class IchthysApps extends SettingsPreferenceFragment {
@@ -44,6 +44,10 @@ public class IchthysApps extends SettingsPreferenceFragment {
 
     private static final String KEY_STORE = "ichthys_apps_store";
     private static final String STORE_PACKAGE = "org.ichthys.apps";
+    /** IchthysOS: the Google Photos spoof (moved here from the Play Integrity Fix page). */
+    private static final String KEY_SPOOF_PHOTOS = "spoof_pif_photos";
+    private static final String PHOTOS_PACKAGE = "com.google.android.apps.photos";
+    private static final String VENDING_PACKAGE = "com.android.vending";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +65,24 @@ public class IchthysApps extends SettingsPreferenceFragment {
                 getPreferenceScreen().removePreference(store);
             }
         }
+
+        // IchthysOS: the spoof is read when Photos starts (and Play checks it), so both restart
+        // to pick a change up, as the Play Integrity Fix page did.
+        final Preference photos = findPreference(KEY_SPOOF_PHOTOS);
+        if (photos != null) {
+            photos.setOnPreferenceChangeListener((p, v) -> {
+                forceStop(PHOTOS_PACKAGE);
+                forceStop(VENDING_PACKAGE);
+                return true;
+            });
+        }
+    }
+
+    private void forceStop(String pkg) {
+        try {
+            getContext().getSystemService(ActivityManager.class).forceStopPackage(pkg);
+        } catch (RuntimeException ignored) {
+        }
     }
 
     private static Intent storeIntent(Context context) {
@@ -72,11 +94,6 @@ public class IchthysApps extends SettingsPreferenceFragment {
         super.onViewCreated(view, savedInstanceState);
         // IchthysOS Shoal: the row icons become outlined badges in the accent.
         ShoalStyle.badgeAll(getPreferenceScreen(), ShoalStyle.accent(view.getContext()));
-    }
-
-    public static void reset(Context mContext) {
-        ContentResolver resolver = mContext.getContentResolver();
-        Settings.Global.putInt(resolver, "pm_downgrade_allowed", 0);
     }
 
     @Override

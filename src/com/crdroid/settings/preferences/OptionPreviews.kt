@@ -54,6 +54,7 @@ import androidx.preference.Preference
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.settings.R
+import com.android.settingslib.ichthys.clock.LockWeather
 import com.android.systemui.monet.ColorScheme
 import kotlin.math.PI
 import kotlin.math.abs
@@ -89,7 +90,7 @@ object OptionPreviews {
     )
 
     /** Colours the previews draw with, from the current theme. */
-    private class Pal(ctx: Context) {
+    private class Pal(val ctx: Context) {
         val dark = (ctx.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
         val accent = attr(ctx, android.R.attr.colorAccent) or 0xFF000000.toInt()
@@ -426,6 +427,25 @@ object OptionPreviews {
         }
     }
 
+    /**
+     * IchthysOS: the Monet engine page carries ThemeStyle's own names (TONAL_SPOT, …); Theme
+     * Studio's theme_style row carries the ichthys.nix ones (tonalSpot, fruitSalad, monochrome,
+     * …). Both resolve here, so every palette previews as itself.
+     */
+    private fun themeStyleOf(v: String): Int = try {
+        ThemeStyle.valueOf(v)
+    } catch (e: RuntimeException) {
+        when (v) {
+            "vibrant" -> ThemeStyle.VIBRANT
+            "expressive" -> ThemeStyle.EXPRESSIVE
+            "spritz" -> ThemeStyle.SPRITZ
+            "rainbow" -> ThemeStyle.RAINBOW
+            "fruitSalad" -> ThemeStyle.FRUIT_SALAD
+            "monochrome" -> ThemeStyle.MONOCHROMATIC
+            else -> ThemeStyle.TONAL_SPOT
+        }
+    }
+
     /** Superellipse ("squircle") in [r]. */
     private fun squircle(r: RectF, out: Path) {
         out.reset()
@@ -563,6 +583,11 @@ object OptionPreviews {
                     Path.Direction.CW)
                 "5" -> path.addOval(s.centerX() - w * 1.1f * k, s.top - h * 1.15f * k,
                     s.centerX() + w * 1.1f * k, s.top + h * 1.15f * k, Path.Direction.CW)
+                // IchthysOS: "default" keeps the stock per-trigger effect; the usual one is the
+                // power button's (PowerButtonReveal), an oval growing from the button's edge.
+                "0" -> path.addOval(s.right + w * 0.05f - w * 1.25f * k, s.top + h * 0.3f - h * k,
+                    s.right + w * 0.05f + w * 1.25f * k, s.top + h * 0.3f + h * k,
+                    Path.Direction.CW)
                 else -> path.addOval(s.centerX() - w * 1.2f * k, s.bottom - h * 1.6f * k,
                     s.centerX() + w * 1.2f * k, s.bottom + h * 0.6f * k, Path.Direction.CW)
             }
@@ -575,9 +600,7 @@ object OptionPreviews {
         }
 
         val monet = Spec(3, 0.8f, 0) { c, b, v, _, p ->
-            val style = try { ThemeStyle.valueOf(v) } catch (e: RuntimeException) {
-                ThemeStyle.TONAL_SPOT
-            }
+            val style = themeStyleOf(v)
             // IchthysOS: the preset seed first, so a custom accent previews its own palettes.
             val scheme = p.presetSeed?.let { ColorScheme(it, p.dark, style) }
                 ?: p.seedColors?.let { ColorScheme(it, p.dark, style) }
@@ -615,13 +638,102 @@ object OptionPreviews {
             }
         }
 
-        m["status_bar_battery_style"] = Spec(3, 0.8f, 0) { c, b, v, _, p ->
+        // IchthysOS: one picture per value SystemUI draws (UnifiedBattery / IchthysBatteryStyles,
+        // tracker#37), shared by the status bar list and the QS header override. Geometry follows
+        // the SystemUI canvases at the stock frame thickness (step 3); the level is 64 %.
+        val batteryStyle = Spec(3, 0.8f, 0) { c, b, v, _, p ->
             val cx = b.centerX()
             val cy = b.centerY() - b.height() * 0.04f
             val s = min(b.width(), b.height()) * 0.5f
             val level = 0.64f
+            val track = alpha(p.fg, 0.3f)
             when (v) {
-                "0" -> { // portrait
+                "-1" -> { // QS header follows the status bar: whatever the bar shows
+                    val bar = statusStrip(c, b, p)
+                    val h = bar.height()
+                    clockText(c, "12:30", bar.left, bar.centerY(), h * 0.72f, p.fg, Paint.Align.LEFT)
+                    battery(c, bar.right, bar.centerY(), h * 0.62f, p.fg)
+                }
+                "4" -> battery(c, cx + s * 0.6f, cy, s * 0.6f, p.fg) // landscape pill
+                "1", "3" -> { // circle / dotted circle: ring track, level arc from 12 o'clock
+                    val pnt = strokePaint(track, s * 0.11f)
+                    if (v == "3") pnt.pathEffect = DashPathEffect(floatArrayOf(s * 0.06f, s * 0.06f), 0f)
+                    tmp.set(cx - s * 0.4f, cy - s * 0.4f, cx + s * 0.4f, cy + s * 0.4f)
+                    c.drawArc(tmp, 0f, 360f, false, pnt)
+                    pnt.color = p.fg
+                    c.drawArc(tmp, -90f, 360f * level, false, pnt)
+                    clockText(c, "64", cx, cy, s * 0.26f, p.fg)
+                }
+                "5" -> { // filled circle: faint disc, level pie, outline
+                    c.drawCircle(cx, cy, s * 0.42f, fillPaint(track))
+                    tmp.set(cx - s * 0.42f, cy - s * 0.42f, cx + s * 0.42f, cy + s * 0.42f)
+                    c.drawArc(tmp, -90f, 360f * level, true, fillPaint(p.fg))
+                    c.drawCircle(cx, cy, s * 0.4f, strokePaint(p.fg, s * 0.05f))
+                }
+                "2" -> clockText(c, "64%", cx, cy, s * 0.42f, p.fg)
+                "6" -> { // hidden: the room the icon would take
+                    val w = s * 1.1f
+                    rr(c, cx - w / 2, cy - s * 0.3f, cx + w / 2, cy + s * 0.3f, s * 0.1f,
+                        strokePaint(p.faint, s * 0.05f).apply {
+                            pathEffect = DashPathEffect(floatArrayOf(s * 0.08f, s * 0.08f), 0f)
+                        })
+                }
+                "7" -> { // segments: 22x12 landscape cell, four bars lit from the left
+                    val u = s * 0.075f
+                    val l = cx - 11 * u
+                    val top = cy - 6 * u
+                    val t = 1.6f * u
+                    rr(c, l, top, l + 20 * u, top + 12 * u, 2 * u, strokePaint(p.fg, t))
+                    rr(c, l + 20 * u, cy - 2.2f * u, l + 21.6f * u, cy + 2.2f * u, 0.5f * u,
+                        fillPaint(p.fg))
+                    val gap = 0.9f * u
+                    val cellW = (20 * u - 2 * t - gap * 5) / 4
+                    val lit = ((level * 100 + 12) / 25).toInt()
+                    for (i in 0 until 4) {
+                        val x = l + t + gap + i * (cellW + gap)
+                        rr(c, x, top + t + gap, x + cellW, top + 12 * u - t - gap, 0.7f * u,
+                            fillPaint(if (i < lit) p.fg else alpha(p.fg, 0.22f)))
+                    }
+                }
+                "8" -> { // arc gauge: 270 degrees open at the bottom, percent in the opening
+                    val pnt = strokePaint(track, s * 0.11f)
+                    tmp.set(cx - s * 0.4f, cy - s * 0.4f, cx + s * 0.4f, cy + s * 0.4f)
+                    c.drawArc(tmp, 135f, 270f, false, pnt)
+                    pnt.color = p.fg
+                    c.drawArc(tmp, 135f, 270f * level, false, pnt)
+                    clockText(c, "64", cx, cy, s * 0.26f, p.fg)
+                }
+                "9" -> { // bar: thin rounded track, no frame or terminal
+                    val u = s * 0.075f
+                    val l = cx - 12 * u
+                    val h = 5 * u
+                    rr(c, l, cy - h / 2, l + 24 * u, cy + h / 2, h / 2, fillPaint(track))
+                    rr(c, l, cy - h / 2, l + max(h, 24 * u * level), cy + h / 2, h / 2,
+                        fillPaint(p.fg))
+                }
+                "10" -> { // hexagon outline filling from the bottom, percent inside
+                    val sw = s * 0.1f
+                    val r = s * 0.45f
+                    fun hex(radius: Float, out: Path) {
+                        out.reset()
+                        for (i in 0 until 6) {
+                            val a = Math.toRadians(60.0 * i - 30.0)
+                            val x = cx + radius * cos(a).toFloat()
+                            val y = cy + radius * sin(a).toFloat()
+                            if (i == 0) out.moveTo(x, y) else out.lineTo(x, y)
+                        }
+                        out.close()
+                    }
+                    c.save()
+                    c.clipRect(cx - r, cy + r - 2 * r * level, cx + r, cy + r)
+                    hex(r - sw * 0.9f, path)
+                    c.drawPath(path, fillPaint(alpha(p.fg, 0.45f)))
+                    c.restore()
+                    hex(r, path)
+                    c.drawPath(path, strokePaint(p.fg, sw))
+                    clockText(c, "64", cx, cy, s * 0.24f, p.fg)
+                }
+                else -> { // "0" portrait; SystemUI also falls back to it for unknown values
                     val w = s * 0.5f
                     rr(c, cx - w / 2, cy - s / 2, cx + w / 2, cy + s / 2, w * 0.18f,
                         strokePaint(p.fg, s * 0.06f))
@@ -630,31 +742,10 @@ object OptionPreviews {
                     rr(c, cx - w / 2 + s * 0.08f, cy + s / 2 - s * 0.08f - (s - s * 0.16f) * level,
                         cx + w / 2 - s * 0.08f, cy + s / 2 - s * 0.08f, w * 0.08f, fillPaint(p.fg))
                 }
-                "4" -> battery(c, cx + s * 0.6f, cy, s * 0.6f, p.fg)
-                "1", "3" -> {
-                    val pnt = strokePaint(alpha(p.fg, 0.25f), s * 0.11f)
-                    if (v == "3") pnt.pathEffect = DashPathEffect(floatArrayOf(s * 0.06f, s * 0.06f), 0f)
-                    tmp.set(cx - s * 0.4f, cy - s * 0.4f, cx + s * 0.4f, cy + s * 0.4f)
-                    c.drawArc(tmp, 0f, 360f, false, pnt)
-                    pnt.color = p.fg
-                    c.drawArc(tmp, -90f, 360f * level, false, pnt)
-                    clockText(c, "64", cx, cy, s * 0.26f, p.fg)
-                }
-                "5" -> {
-                    c.drawCircle(cx, cy, s * 0.42f, strokePaint(p.fg, s * 0.05f))
-                    tmp.set(cx - s * 0.34f, cy - s * 0.34f, cx + s * 0.34f, cy + s * 0.34f)
-                    c.drawArc(tmp, -90f, 360f * level, true, fillPaint(p.fg))
-                }
-                "2" -> clockText(c, "64%", cx, cy, s * 0.42f, p.fg)
-                else -> {
-                    val w = s * 1.1f
-                    rr(c, cx - w / 2, cy - s * 0.3f, cx + w / 2, cy + s * 0.3f, s * 0.1f,
-                        strokePaint(p.faint, s * 0.05f).apply {
-                            pathEffect = DashPathEffect(floatArrayOf(s * 0.08f, s * 0.08f), 0f)
-                        })
-                }
             }
         }
+        m["status_bar_battery_style"] = batteryStyle
+        m["qs_battery_style"] = batteryStyle
 
         m["statusbar_battery_bar_style"] = Spec(3, 0.7f, 2400) { c, b, v, t, p ->
             val bar = statusStrip(c, b, p)
@@ -1227,7 +1318,135 @@ object OptionPreviews {
             fill.colorFilter = null
         }
 
+        // ---- Volume: the horizontal panel's looks (SystemUI HorizontalVolumeSlider). One row
+        // each: stream icon, track, level. Drawn with the theme's accent and text colours, as
+        // the real row draws with the Shoal tokens.
+
+        m["volume_horizontal_style"] = Spec(2, 0.5f, 0) { c, b, v, _, p ->
+            volumeRow(c, b, v, 1, p)
+        }
+
+        m["volume_horizontal_thickness"] = Spec(3, 0.5f, 0) { c, b, v, _, p ->
+            volumeRow(c, b, "0", v.toIntOrNull() ?: 1, p)
+        }
+
+        // ---- Weather: each icon pack's own sun, cloud, rain and snow (OmniJaws condition
+        // codes 32, 26, 11, 16), tinted in the text colour when the pack is line art.
+
+        m["weather_icon_pack"] = Spec(2, 0.5f, 0) { c, b, v, _, p ->
+            val codes = intArrayOf(32, 26, 11, 16)
+            val n = codes.size
+            val s = min(b.width() / (n + 1.2f), b.height() * 0.78f)
+            val gap = (b.width() - n * s) / (n + 1)
+            val top = b.centerY() - s / 2
+            for (i in 0 until n) {
+                val d = LockWeather.icon(p.ctx, v, codes[i]) ?: continue
+                val m2 = d.mutate()
+                if (LockWeather.isMono(v)) m2.setTint(p.fg) else m2.setTintList(null)
+                val l = b.left + gap + i * (s + gap)
+                m2.setBounds(l.toInt(), top.toInt(), (l + s).toInt(), (top + s).toInt())
+                m2.draw(c)
+            }
+        }
+
         return m
+    }
+
+    /**
+     * One horizontal volume row in look [style] ("0" Shoal pill, "1" thin line, "2" segmented,
+     * "3" filled card) at [thickness] (0 slim, 1 regular, 2 bold), as HorizontalVolumeSlider
+     * lays it out: the icon in the accent, the fill up to 62 %, the level in a mono-ish bold.
+     */
+    private fun volumeRow(c: Canvas, b: RectF, style: String, thickness: Int, p: Pal) {
+        val frac = 0.62f
+        val w = b.width() * 0.92f
+        val l = b.centerX() - w / 2
+        val r = l + w
+        val cy = b.centerY()
+        val unit = b.height() / 10f
+        val weight = floatArrayOf(0.75f, 1f, 1.25f)[thickness.coerceIn(0, 2)]
+        val track = alpha(p.fg, 0.10f)
+        val textSize = unit * 1.6f
+        fun speaker(cx: Float, s: Float, color: Int) {
+            path.reset()
+            path.moveTo(cx - s * 0.5f, cy - s * 0.22f)
+            path.lineTo(cx - s * 0.15f, cy - s * 0.22f)
+            path.lineTo(cx + s * 0.25f, cy - s * 0.5f)
+            path.lineTo(cx + s * 0.25f, cy + s * 0.5f)
+            path.lineTo(cx - s * 0.15f, cy + s * 0.22f)
+            path.lineTo(cx - s * 0.5f, cy + s * 0.22f)
+            path.close()
+            c.drawPath(path, fillPaint(color))
+            tmp.set(cx - s * 0.1f, cy - s * 0.5f, cx + s * 0.7f, cy + s * 0.5f)
+            c.drawArc(tmp, -40f, 80f, false, strokePaint(color, s * 0.12f))
+        }
+        when (style) {
+            "1" -> { // thin line, round knob
+                val ic = unit * 2.2f
+                speaker(l + ic * 0.5f, ic, p.accent)
+                val x0 = l + ic * 1.4f
+                val x1 = r - unit * 4f
+                val knob = unit * 1.4f * weight
+                val tw = unit * 0.4f * weight
+                val kx = x0 + knob / 2 + (x1 - x0 - knob) * frac
+                c.drawRoundRect(RectF(x0, cy - tw / 2, x1, cy + tw / 2), tw / 2, tw / 2,
+                    fillPaint(track))
+                c.drawRoundRect(RectF(x0, cy - tw / 2, kx, cy + tw / 2), tw / 2, tw / 2,
+                    fillPaint(p.accent))
+                c.drawCircle(kx, cy, knob / 2, fillPaint(p.accent))
+                clockText(c, "19", r, cy, textSize, p.fg, Paint.Align.RIGHT)
+            }
+            "2" -> { // segmented bars
+                val ic = unit * 2.2f
+                speaker(l + ic * 0.5f, ic, p.accent)
+                val x0 = l + ic * 1.4f
+                val x1 = r - unit * 4f
+                val n = 12
+                val gap = unit * 0.3f
+                val bw = (x1 - x0 - gap * (n - 1)) / n
+                val bh = unit * 2f * weight
+                val lit = Math.round(frac * n)
+                for (i in 0 until n) {
+                    val x = x0 + i * (bw + gap)
+                    rr(c, x, cy - bh / 2, x + bw, cy + bh / 2, min(bw, bh) / 2,
+                        fillPaint(if (i < lit) p.accent else track))
+                }
+                clockText(c, "19", r, cy, textSize, p.fg, Paint.Align.RIGHT)
+            }
+            "3" -> { // the row is the card
+                val h = unit * 4.6f * weight
+                val rad = h * 0.22f
+                tmp.set(l, cy - h / 2, r, cy + h / 2)
+                c.save()
+                path.reset()
+                path.addRoundRect(tmp, rad, rad, Path.Direction.CW)
+                c.clipPath(path)
+                c.drawRect(tmp, fillPaint(alpha(p.fg, 0.07f)))
+                c.drawRect(l, tmp.top, l + w * frac, tmp.bottom, fillPaint(alpha(p.accent, 0.35f)))
+                c.restore()
+                rr(c, l, tmp.top, r, tmp.bottom, rad, strokePaint(p.faint, unit * 0.12f))
+                val ic = min(unit * 2.2f, h * 0.5f)
+                speaker(l + unit * 1.6f, ic, p.accent)
+                textLines(c, l + unit * 3.4f, cy - ic * 0.22f, w * 0.3f, 1, ic * 0.44f, p.dim)
+                clockText(c, "19", r - unit * 1.2f, cy, textSize, p.fg, Paint.Align.RIGHT)
+            }
+            else -> { // Shoal pill: icon and level inside the track
+                val h = unit * 3.6f * weight
+                tmp.set(l, cy - h / 2, r, cy + h / 2)
+                c.save()
+                path.reset()
+                path.addRoundRect(tmp, h / 2, h / 2, Path.Direction.CW)
+                c.clipPath(path)
+                c.drawRect(tmp, fillPaint(track))
+                c.drawRect(l, tmp.top, l + w * frac, tmp.bottom, fillPaint(alpha(p.accent, 0.45f)))
+                c.restore()
+                rr(c, l, tmp.top, r, tmp.bottom, h / 2, strokePaint(p.faint, unit * 0.12f))
+                val ic = min(unit * 2.2f, h * 0.55f)
+                speaker(l + h * 0.55f, ic, p.accent)
+                clockText(c, "19", r - h * 0.4f, cy, min(textSize, h * 0.5f), p.fg,
+                    Paint.Align.RIGHT)
+            }
+        }
     }
 
     private var artCache: Bitmap? = null

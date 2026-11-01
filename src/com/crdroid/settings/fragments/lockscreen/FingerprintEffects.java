@@ -160,8 +160,8 @@ public class FingerprintEffects extends SettingsPreferenceFragment
         ContentResolver resolver = context.getContentResolver();
         String[] keys = {
             KEY_ANIM_EFFECT, "ichthys_udfps_anim_speed", "ichthys_udfps_anim_scale",
-            KEY_ANIM_COLOR_MODE, KEY_ANIM_COLOR, "ichthys_udfps_anim_offset_x",
-            "ichthys_udfps_anim_offset_y", "ichthys_udfps_anim_bp", "ichthys_udfps_anim_enroll",
+            KEY_ANIM_COLOR_MODE, KEY_ANIM_COLOR, "ichthys_udfps_anim_bp",
+            "ichthys_udfps_anim_enroll",
             KEY_PRESSED_STYLE, KEY_PRESSED_COLOR_MODE, KEY_PRESSED_COLOR,
             "ichthys_udfps_pressed_size", KEY_ICON_STYLE, KEY_ICON_COLOR_MODE, KEY_ICON_COLOR,
             "ichthys_udfps_icon_opacity", "ichthys_udfps_icon_aod",

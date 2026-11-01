@@ -602,6 +602,7 @@
         <item>@string/hardware_keys_action_volume_panel</item>
         <item>@string/hardware_keys_action_notifications_panel</item>
         <item>@string/hardware_keys_action_expand_qs_panel</item>
+        <item>@string/hardware_keys_action_backstage</item> <!-- IchthysOS -->
     </string-array>
 
     <string-array name="navbar_keys_action_values" translatable="false">
@@ -619,6 +620,7 @@
         <item>15</item>
         <item>17</item>
         <item>18</item>
+        <item>20</item> <!-- IchthysOS: send to Backstage -->
     </string-array>
 
     <!-- Volume key cursor control -->
@@ -1454,6 +1456,40 @@
     <string-array name="volume_panel_style_values" translatable="false">
         <item>0</item>
         <item>1</item>
+    </string-array>
+
+    <!-- IchthysOS: horizontal volume panel looks (SystemUI HorizontalVolumeStyle) -->
+    <string-array name="volume_horizontal_style_entries">
+        <item>@string/volume_horizontal_style_shoal</item>
+        <item>@string/volume_horizontal_style_line</item>
+        <item>@string/volume_horizontal_style_segmented</item>
+        <item>@string/volume_horizontal_style_card</item>
+    </string-array>
+    <string-array name="volume_horizontal_style_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="volume_horizontal_level_entries">
+        <item>@string/volume_horizontal_level_hidden</item>
+        <item>@string/volume_horizontal_level_step</item>
+        <item>@string/volume_horizontal_level_percent</item>
+    </string-array>
+    <string-array name="volume_horizontal_level_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="volume_horizontal_thickness_entries">
+        <item>@string/volume_horizontal_thickness_slim</item>
+        <item>@string/volume_horizontal_thickness_regular</item>
+        <item>@string/volume_horizontal_thickness_bold</item>
+    </string-array>
+    <string-array name="volume_horizontal_thickness_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
 
     <!-- IchthysOS: charging control modes. Values must match

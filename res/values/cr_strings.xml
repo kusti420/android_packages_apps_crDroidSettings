@@ -64,15 +64,25 @@
     <string name="slim_recents_mem_clear_summary">Long-press the memory bar to clear all recent apps</string>
     <string name="slim_recents_mem_bar_color_title">RAM bar colour</string>
     <string name="slim_recents_mem_text_color_title">RAM text colour</string>
-    <string name="slim_recents_appearance_category">Appearance</string>
-    <string name="slim_recents_panel_bg_color_title">Panel background colour</string>
-    <string name="slim_recents_card_bg_color_title">Card background colour</string>
-    <string name="slim_recents_color_auto_summary">Transparent uses the theme default</string>
     <string name="unit_percent">%</string>
     <string name="unit_dp">dp</string>
     <string name="ichthys_volume_category">Volume</string>
     <string name="custom_volume_horizontal_title">Horizontal volume slider</string>
-    <string name="custom_volume_horizontal_summary">Android 8.1-style horizontal volume panel with a live step number</string>
+    <string name="custom_volume_horizontal_summary">Horizontal volume panel at the top of the screen, in one of the looks below</string>
+    <!-- IchthysOS: horizontal volume panel looks and options -->
+    <string name="volume_horizontal_style_title">Horizontal panel look</string>
+    <string name="volume_horizontal_style_shoal">Shoal pill</string>
+    <string name="volume_horizontal_style_line">Thin line</string>
+    <string name="volume_horizontal_style_segmented">Segmented</string>
+    <string name="volume_horizontal_style_card">Filled card</string>
+    <string name="volume_horizontal_level_title">Level shown</string>
+    <string name="volume_horizontal_level_hidden">Hidden</string>
+    <string name="volume_horizontal_level_step">Step</string>
+    <string name="volume_horizontal_level_percent">Percent</string>
+    <string name="volume_horizontal_thickness_title">Track thickness</string>
+    <string name="volume_horizontal_thickness_slim">Slim</string>
+    <string name="volume_horizontal_thickness_regular">Regular</string>
+    <string name="volume_horizontal_thickness_bold">Bold</string>
     <string name="custom_volume_steps_title">Media volume steps</string>
     <string name="custom_volume_steps_summary">Number of steps for the media volume slider (requires a reboot)</string>
     <string name="ichthys_battery_category">Battery</string>
@@ -264,6 +274,9 @@
     <string name="hardware_keys_action_notifications_panel">Toggle notifications panel</string>
     <string name="hardware_keys_action_expand_qs_panel">Expand QS panel</string>
     <string name="hardware_keys_action_ringer_modes">Change ringer mode</string>
+    <!-- IchthysOS: DeviceKeysConstants.Action.BACKSTAGE (20): the app on screen goes to Backstage,
+         or comes out of it. -->
+    <string name="hardware_keys_action_backstage">Send to Backstage</string>
     <string name="home_answer_call_title">Answer call</string>
     <string name="home_answer_call_summary">Answer incoming calls by pressing the home button</string>
     <string name="camera_sleep_on_release_title">Screen peek</string>
@@ -1125,7 +1138,10 @@
 
     <!-- Weather -->
     <string name="weather_settings_title">Weather settings</string>
-    <string name="weather_settings_summary">Setup icon pack and weather service</string>
+    <string name="weather_settings_summary">Weather service, units and update interval</string>
+    <!-- IchthysOS: the weather icon pack picker (OmniJaws' icon_pack), with icon samples -->
+    <string name="weather_icon_pack_title">Weather icons</string>
+    <string name="weather_icon_pack_unavailable">Weather app not installed</string>
     <string name="lockscreen_weather_category">Weather</string>
     <string name="lockscreen_weather_title">Weather update</string>
     <string name="lockscreen_weather_summary">Display current weather update</string>

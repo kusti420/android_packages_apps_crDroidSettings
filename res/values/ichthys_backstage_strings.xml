@@ -14,7 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- IchthysOS: Backstage (kusti420/ichthysos-tracker#38) -->
     <string name="backstage_title">Backstage</string>
     <string name="backstage_summary">Keep apps running as if they were open, on a hidden screen</string>
@@ -30,6 +30,7 @@
     <!-- IchthysOS: the service reads the limit when an app is added, so a change doesn't reach
          apps already in Backstage. %s is the chosen entry (ListPreference summary). -->
     <string name="backstage_max_hours_summary">%s, for apps sent to Backstage from now on</string>
+    <!-- IchthysOS: -1 = the custom duration below (ichthys_backstage_max_minutes). -->
     <string-array name="backstage_max_hours_entries" translatable="false">
         <item>Never</item>
         <item>1 hour</item>
@@ -37,6 +38,8 @@
         <item>4 hours</item>
         <item>8 hours</item>
         <item>12 hours</item>
+        <item>24 hours</item>
+        <item>Custom</item>
     </string-array>
     <string-array name="backstage_max_hours_values" translatable="false">
         <item>0</item>
@@ -45,5 +48,13 @@
         <item>4</item>
         <item>8</item>
         <item>12</item>
+        <item>24</item>
+        <item>-1</item>
     </string-array>
+    <!-- IchthysOS: the custom duration, shown only while "Custom" is chosen. -->
+    <string name="backstage_max_minutes_title">Custom duration</string>
+    <string name="backstage_max_minutes_unit">min</string>
+    <!-- Summary of the custom duration: hours and minutes, e.g. "6 h 30 min". -->
+    <string name="backstage_max_minutes_hours_minutes"><xliff:g id="hours" example="6">%1$d</xliff:g> h <xliff:g id="minutes" example="30">%2$d</xliff:g> min</string>
+    <string name="backstage_max_minutes_hours"><xliff:g id="hours" example="6">%1$d</xliff:g> h</string>
 </resources>

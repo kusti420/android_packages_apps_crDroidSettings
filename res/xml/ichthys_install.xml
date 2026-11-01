@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 IchthysOS
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- IchthysOS > Apps > Install & compatibility: the owner's bypasses of the blocks Android puts
+     on installing and using apps. Each is a switch the platform reads directly (no helper app):
+       - pm_low_target_sdk_allowed (Global): InstallPackageHelper skips the low-target-SDK block;
+       - pm_downgrade_allowed (Global): InstallPackageHelper allows a lower versionCode (was on
+         the Apps hub; its ichthys.nix path stays system.misc.pmDowngradeAllowed through the
+         generator's lock);
+       - ichthys_secure_window_bypass_pkgs (Secure, SecureWindowBypassApps picker) and
+         disable_secure_windows (Secure, AOSP's debug key honoured on every build): WindowState
+         stops treating the matching windows as secure.
+     Signature checks on updates are deliberately not here: nothing weakens them. -->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/ichthys_install_title">
+
+    <PreferenceCategory
+        android:key="install_installing_category"
+        android:title="@string/ichthys_apps_install_category">
+
+        <!-- Low target SDK block. Red danger card: the installed app runs with pre-Marshmallow
+             permission behaviour. -->
+        <com.crdroid.settings.preferences.DangerGlobalSwitchPreference
+            android:key="pm_low_target_sdk_allowed"
+            android:icon="@drawable/ic_android_head"
+            android:title="@string/low_target_sdk_title"
+            android:summary="@string/low_target_sdk_summary"
+            android:defaultValue="false" />
+
+        <!-- Application downgrade -->
+        <com.crdroid.settings.preferences.GlobalSettingSwitchPreference
+            android:key="pm_downgrade_allowed"
+            android:icon="@drawable/ic_arrow_down_box"
+            android:title="@string/app_downgrade_title"
+            android:summary="@string/app_downgrade_summary"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="install_capture_category"
+        android:title="@string/ichthys_install_capture_category">
+
+        <!-- Per-app FLAG_SECURE bypass. InstallCompat.java puts the count and the risk in the
+             summary. -->
+        <Preference
+            android:key="ichthys_secure_window_bypass_apps"
+            android:icon="@drawable/ic_screenshot"
+            android:title="@string/secure_window_bypass_apps_title"
+            android:fragment="com.crdroid.settings.fragments.misc.SecureWindowBypassApps" />
+
+        <!-- Device-wide: every window is treated as non-secure, the system's own blocks too. -->
+        <com.crdroid.settings.preferences.DangerSwitchPreference
+            android:key="disable_secure_windows"
+            android:icon="@drawable/ic_screenrecord"
+            android:title="@string/disable_secure_windows_title"
+            android:summary="@string/disable_secure_windows_summary"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
