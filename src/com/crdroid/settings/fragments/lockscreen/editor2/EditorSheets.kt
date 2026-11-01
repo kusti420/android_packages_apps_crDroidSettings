@@ -62,11 +62,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -284,10 +286,13 @@ private fun PictureChip(label: String, on: Boolean, onClick: () -> Unit, width: 
  * [d] with the clock in its home place (no move, turn or size): what the sheets' thumbnails
  * show. The same object while only the place changes, so dragging the clock doesn't rebuild
  * every thumbnail on every frame (each is a whole lock screen with its clock view).
+ * IchthysOS: and at full opacity: the clock opacity is the live clock's (edited in the Colour
+ * group, shown on the big preview); a thumbnail shows the option itself (a 29 % clock made every
+ * face card nearly black). Dragging the opacity slider no longer rebuilds the thumbnails either.
  */
 @Composable
 private fun rememberAtHome(d: LockDesign): LockDesign {
-    val home = d.copy(dx = 0f, dy = 0f, scale = 1f, rot = 0f, look = "")
+    val home = d.copy(dx = 0f, dy = 0f, scale = 1f, rot = 0f, opacity = 100, look = "")
     return remember(home) { home }
 }
 
@@ -321,8 +326,10 @@ private fun ClockOnly(design: LockDesign) {
         val cardW = constraints.maxWidth.toFloat()
         val cardH = constraints.maxHeight.toFloat()
         val fullH = maxWidth * (screen.height.toFloat() / screen.width)
+        // IchthysOS: the face at full opacity (the clock opacity is the live clock's, not the face's).
         val shown = remember(design) {
-            design.copy(depth = DepthClockView.DEPTH_OFF, weather = false, placement = DepthClockView.PLACEMENT_FLAT)
+            design.copy(depth = DepthClockView.DEPTH_OFF, weather = false, placement = DepthClockView.PLACEMENT_FLAT,
+                opacity = 100)
         }
         var clock by remember(shown) { mutableStateOf<Rect?>(null) }
         Box(
@@ -1394,13 +1401,35 @@ private fun LivingSkySection(
         "${d.skyIntensity}%", onCommit) { edit(d.copy(skyIntensity = it.toInt())) }
 
     // Preview the day: any minute of today, with the sky's colour across the day under it.
-    val times = remember { LivingSky.sunTimes(context) }
-    val today = remember { java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR) }
-    val minute = state.skyMinute
-    val nowMinute = remember {
+    // IchthysOS: "now", today and the sun times follow the clock while the sheet stays open (taken
+    // once, "Now · 14:02" and its thumb fell behind the preview's own now, which moves each minute).
+    var clockTick by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(60_000L - System.currentTimeMillis() % 60_000L)
+            clockTick++
+        }
+    }
+    val times = remember(clockTick) { LivingSky.sunTimes(context) }
+    val today = remember(clockTick) { java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR) }
+    val nowMinute = remember(clockTick) {
         val c = java.util.Calendar.getInstance()
         c.get(java.util.Calendar.HOUR_OF_DAY) * 60f + c.get(java.util.Calendar.MINUTE)
     }
+    // IchthysOS: the thumb and the label follow the finger here ([scrub]: only this section
+    // recomposes); the preview (the whole editor recomposes and the sky is re-graded) follows at
+    // most every SKY_SCRUB_MS with the latest minute, and exactly where the finger lifts.
+    var scrub by remember { mutableStateOf<Float?>(null) }
+    val pushedAt = remember { longArrayOf(0L) }
+    val push by rememberUpdatedState(onSkyMinute)
+    LaunchedEffect(scrub) {
+        val v = scrub ?: return@LaunchedEffect
+        val wait = pushedAt[0] + SKY_SCRUB_MS - android.os.SystemClock.uptimeMillis()
+        if (wait > 0L) kotlinx.coroutines.delay(wait)
+        pushedAt[0] = android.os.SystemClock.uptimeMillis()
+        push(v)
+    }
+    val minute = scrub ?: state.skyMinute
     val shown = minute ?: nowMinute
     val sun = LivingSky.sun(times, shown, today)
     Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 8.dp),
@@ -1428,7 +1457,11 @@ private fun LivingSkySection(
     }
     Box(Modifier.fillMaxWidth().padding(horizontal = 26.dp).height(8.dp)
         .clip(RoundedCornerShape(4.dp)).background(Brush.horizontalGradient(bar)))
-    ShoalSlider(shown, { onSkyMinute(it) }, 0f..1439f, Modifier.padding(horizontal = 18.dp))
+    ShoalSlider(shown, { scrub = it }, 0f..1439f, Modifier.padding(horizontal = 18.dp),
+        onFinished = {
+            scrub?.let { onSkyMinute(it) }
+            scrub = null
+        })
     Row(Modifier.fillMaxWidth().heightIn(min = 40.dp).padding(horizontal = 18.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -1440,6 +1473,9 @@ private fun LivingSkySection(
     }
     Spacer(Modifier.size(6.dp))
 }
+
+/** IchthysOS: how often a dragged "preview the day" slider re-grades the preview (~30 Hz). */
+private const val SKY_SCRUB_MS = 33L
 
 private fun hhmm(minutes: Float): String {
     val m = minutes.toInt().coerceIn(0, 1439)

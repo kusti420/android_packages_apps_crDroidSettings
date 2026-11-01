@@ -604,6 +604,14 @@ class PreviewSky(val width: Int, val height: Int) {
     var time = 0f
     var flash = 0f
     val frame = mutableLongStateOf(0L)
+    /**
+     * IchthysOS: bumped when the grade, intensity, picture or weather above change; the canvases
+     * read it while drawing. They are handed this same PreviewSky every time, so (strong skipping)
+     * their composables skip and their draw lambdas never saw a new grade: the "preview the day"
+     * slider and the intensity slider moved nothing on the preview.
+     */
+    val version = mutableIntStateOf(0)
+    internal var drawnKey: List<Any?>? = null
 }
 
 @Composable
@@ -627,8 +635,10 @@ private fun rememberPreviewSky(
     }
     // Showing now: a new grade every minute, as on the lock screen.
     var tick by remember { mutableIntStateOf(0) }
-    LaunchedEffect(minute) {
-        if (minute != null) return@LaunchedEffect
+    // IchthysOS: keyed on now-or-scrubbed only (not every scrubbed minute: a restart per step).
+    val showingNow = minute == null
+    LaunchedEffect(showingNow) {
+        if (!showingNow) return@LaunchedEffect
         while (true) {
             delay(60_000L - System.currentTimeMillis() % 60_000L)
             tick++
@@ -656,6 +666,13 @@ private fun rememberPreviewSky(
     SideEffect {
         com.android.settingslib.ichthys.clock.ClockBackdrop.publish(
             LivingSky.colourBehindClock(grade, sky.intensity, info), info.skyColour)
+        // IchthysOS: the canvases redraw with what changed (see PreviewSky.version); not on every
+        // composition (a clock drag recomposes the preview each frame and changes none of it).
+        val drawn = listOf(grade, sky.intensity, info, sky.weather)
+        if (drawn != sky.drawnKey) {
+            sky.drawnKey = drawn
+            sky.version.intValue++
+        }
     }
 
     val saver = remember {
@@ -722,11 +739,14 @@ private fun LivingSkyImage(sky: PreviewSky, picture: LockPicture, mask: Bitmap?,
         remember(subjectMask, sky.width, sky.height) {
             subjectMask?.let { LivingSky.fitted(it, sky.width, sky.height) }
         }
-    val grade = sky.grade ?: return
-    val info = sky.info ?: return
-    val intensity = sky.intensity
+    // IchthysOS: the grade is read while drawing, not captured here: this composable skips while
+    // it is handed the same PreviewSky, so a captured grade stayed the first one (PreviewSky.version).
     Canvas(modifier) {
         sky.frame.longValue
+        sky.version.intValue
+        val grade = sky.grade ?: return@Canvas
+        val info = sky.info ?: return@Canvas
+        val intensity = sky.intensity
         painter.bind(shader, skyShader, info, grade, intensity, sky.width,
             sky.height, density, sky.time, sky.flash, sky.weather, subject)
         drawIntoCanvas {
@@ -767,6 +787,8 @@ private fun ProjectedClockImage(
     val colour = design.inkOrNull(accent) ?: AColor.WHITE
     Canvas(modifier) {
         tick
+        // IchthysOS: the sky's light is read while drawing; a new grade (a scrubbed minute) redraws.
+        sky?.version?.intValue
         val c = java.util.Calendar.getInstance()
         val h24 = c.get(java.util.Calendar.HOUR_OF_DAY)
         val minute = c.get(java.util.Calendar.MINUTE)
