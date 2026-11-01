@@ -248,7 +248,7 @@
     <string name="ichthys_ed2_surface_fold">Corner fold</string>
     <string name="ichthys_ed2_surface_curve">Curve</string>
     <string name="ichthys_ed2_surface_mesh">Free mesh</string>
-    <string name="ichthys_ed2_surface_fold_hint">Two faces sharing the corner's edge: drag the four outer corners and the two fold handles. The clock is one row, split at the fold; each face takes its own light.</string>
+    <string name="ichthys_ed2_surface_fold_hint">Two faces sharing the corner\'s edge: drag the four outer corners and the two fold handles. The clock is one row, split at the fold; each face takes its own light.</string>
     <string name="ichthys_ed2_surface_curve_hint">Drag the corners; pull the diamond in the middle of the top or bottom edge to bow it. The cylinder bend wraps it round a vertical axis.</string>
     <string name="ichthys_ed2_surface_mesh_hint">Nine handles, anywhere. Edges snap to the lines found in the picture (yellow) and to a rectangle. Two fingers scale about the centre.</string>
     <string name="ichthys_ed2_fit_auto">Auto-fit to edges</string>
@@ -269,7 +269,7 @@
     <string name="ichthys_ed2_notif_cards_hint">The stack of cards under the clock. Drag the card on the preview to where it should start.</string>
     <string name="ichthys_ed2_notif_glance_hint">The dock with counts only. What they say comes after the unlock.</string>
     <string name="ichthys_ed2_notif_anchor">Starts at</string>
-    <string name="ichthys_ed2_notif_anchor_hint">Never above the clock, never into the fingerprint sensor's zone. Auto keeps a clear gap under the clock and its date.</string>
+    <string name="ichthys_ed2_notif_anchor_hint">Never above the clock, never into the fingerprint sensor\'s zone. Auto keeps a clear gap under the clock and its date.</string>
     <string name="ichthys_ed2_dock_dim">Dim when idle</string>
     <string name="ichthys_ed2_dock_dim_hint">The icons fade a little after ten seconds without a touch.</string>
     <string name="ichthys_ed2_dock_sample_line">Mari · are you coming tonight?</string>
