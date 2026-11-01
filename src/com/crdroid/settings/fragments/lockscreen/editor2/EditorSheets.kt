@@ -612,6 +612,11 @@ private fun FaceSheet(state: EditorState, onDraft: (LockDesign) -> Unit) {
                 DepthClockView.FONT_BUBBLE to R.string.ichthys_ed2_font_bubble,
                 DepthClockView.FONT_BLOCK to R.string.ichthys_ed2_font_block,
                 DepthClockView.FONT_INLINE to R.string.ichthys_ed2_font_inline,
+                // IchthysOS: faces matched to the owner's reference clocks.
+                DepthClockView.FONT_CAPSULE to R.string.ichthys_ed2_font_capsule,
+                DepthClockView.FONT_BLACK to R.string.ichthys_ed2_font_black,
+                DepthClockView.FONT_STRIPE to R.string.ichthys_ed2_font_stripe,
+                DepthClockView.FONT_LINES to R.string.ichthys_ed2_font_lines,
                 DepthClockView.FONT_TALL to R.string.ichthys_ed2_font_tall,
                 DepthClockView.FONT_FLEX to R.string.ichthys_ed2_font_flex,
                 DepthClockView.FONT_WIDE to R.string.ichthys_ed2_font_wide,

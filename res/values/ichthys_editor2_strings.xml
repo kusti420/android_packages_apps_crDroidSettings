@@ -60,6 +60,14 @@
     <string name="ichthys_ed2_font_bubble">Bubble</string>
     <string name="ichthys_ed2_font_block">Block</string>
     <string name="ichthys_ed2_font_inline">Inline</string>
+    <!-- IchthysOS: Saira, rounded-square digits (the glass clock reference) -->
+    <string name="ichthys_ed2_font_capsule">Capsule</string>
+    <!-- IchthysOS: Rubik Black, set tight -->
+    <string name="ichthys_ed2_font_black">Black</string>
+    <!-- IchthysOS: Zen Tokyo Zoo, two-line striped digits -->
+    <string name="ichthys_ed2_font_stripe">Stripe</string>
+    <!-- IchthysOS: Big Shoulders Inline -->
+    <string name="ichthys_ed2_font_lines">Lines</string>
     <string name="ichthys_ed2_glass_clear">Clear</string>
     <string name="ichthys_ed2_glass_frosted">Frosted</string>
     <string name="ichthys_ed2_glass_auto">Auto opacity</string>
