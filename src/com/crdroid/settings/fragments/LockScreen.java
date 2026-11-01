@@ -125,9 +125,6 @@ public class LockScreen extends SettingsPreferenceFragment
                 UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, "ichthys_aod_notif_icons", -1,
                 UserHandle.USER_CURRENT);
-        // IchthysOS: charger-connected animation, back to the default style.
-        Settings.System.putStringForUser(resolver, "ichthys_charging_animation", "pulse",
-                UserHandle.USER_CURRENT);
         PulseSettings.reset(mContext);
         MediaArtSettings.reset(mContext);
     }

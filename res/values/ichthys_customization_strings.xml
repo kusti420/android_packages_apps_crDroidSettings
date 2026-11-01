@@ -145,18 +145,38 @@
     <string name="ichthys_lockscreen_hide_statusbar_title">Hide status bar</string>
     <string name="ichthys_lockscreen_hide_statusbar_summary">No status bar icons or clock on the lock screen</string>
     <!-- IchthysOS: charger-connected animation styles (crdroid_settings_lockscreen.xml). -->
+    <!-- IchthysOS > System > Battery and display (ichthys_system.xml). -->
     <string name="ichthys_charging_animation_title">Charging animation</string>
+    <string name="ichthys_charging_animation_keywords">charger, plugged in, power connected, wireless charging, ripple</string>
+    <string name="ichthys_charging_animation_wake_title">Turn on the screen to play</string>
+    <string name="ichthys_charging_animation_wake_summary">When power is connected with the screen off, turn it on and play the animation. Not in a pocket or during a call</string>
     <string-array name="ichthys_charging_animation_entries" translatable="false">
         <item>Pulse ring</item>
+        <item>One UI</item>
         <item>Liquid fill</item>
         <item>Spark line</item>
+        <item>Battery capsule</item>
+        <item>Dot matrix</item>
+        <item>Aurora</item>
+        <item>Bubbles</item>
+        <item>Lightning bolt</item>
+        <item>Rising wave</item>
+        <item>Big number</item>
         <item>Ripple</item>
         <item>Off</item>
     </string-array>
     <string-array name="ichthys_charging_animation_values" translatable="false">
         <item>pulse</item>
+        <item>oneui</item>
         <item>fill</item>
         <item>spark</item>
+        <item>capsule</item>
+        <item>dots</item>
+        <item>aurora</item>
+        <item>bubbles</item>
+        <item>bolt</item>
+        <item>wave</item>
+        <item>number</item>
         <item>ripple</item>
         <item>off</item>
     </string-array>

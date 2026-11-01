@@ -32,7 +32,7 @@
     <string name="ichthys_hub_apps_summary">Ichthys Apps, background, installing and integrity</string>
     <string name="ichthys_hub_system_title">System</string>
     <!-- IchthysOS: what the System page holds now; buttons, notifications and sound have their own hub rows. -->
-    <string name="ichthys_hub_system_summary">Charging, Smart Pixels, screenshot preview, duress PIN, ichthys.nix import and export, about</string>
+    <string name="ichthys_hub_system_summary">Charging, charging animation, Smart Pixels, screenshot preview, duress PIN, ichthys.nix import and export, about</string>
     <!-- IchthysOS: toast when a link row is tapped and no browser is enabled. -->
     <string name="ichthys_no_browser">No browser is enabled. Link: <xliff:g id="url">%1$s</xliff:g></string>
 

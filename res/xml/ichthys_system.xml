@@ -41,6 +41,29 @@
             android:summary="@string/charging_control_summary"
             android:fragment="com.crdroid.settings.fragments.health.ChargingControlSettings" />
 
+        <!-- IchthysOS: the charger-connected animation (wired and wireless, lock screen and over
+             apps), played by SystemUI's WiredChargingRippleController / ShoalChargingView. -->
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="ichthys_charging_animation"
+            android:icon="@drawable/ic_battery_charging"
+            android:title="@string/ichthys_charging_animation_title"
+            android:dialogTitle="@string/ichthys_charging_animation_title"
+            android:entries="@array/ichthys_charging_animation_entries"
+            android:entryValues="@array/ichthys_charging_animation_values"
+            android:summary="%s"
+            settings:keywords="@string/ichthys_charging_animation_keywords"
+            android:defaultValue="pulse" />
+
+        <!-- IchthysOS: with the screen off, connecting power turns it on to play the animation.
+             Off: the animation is skipped and the screen stays off. IchthysSystem greys this
+             out while the style is Off. -->
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="ichthys_charging_animation_wake"
+            android:icon="@drawable/ic_power"
+            android:title="@string/ichthys_charging_animation_wake_title"
+            android:summary="@string/ichthys_charging_animation_wake_summary"
+            android:defaultValue="false" />
+
         <!-- Smart Pixels -->
         <Preference
             android:key="smart_pixels"
