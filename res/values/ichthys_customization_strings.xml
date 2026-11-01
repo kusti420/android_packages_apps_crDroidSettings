@@ -144,6 +144,22 @@
     <!-- Lock screen -->
     <string name="ichthys_lockscreen_hide_statusbar_title">Hide status bar</string>
     <string name="ichthys_lockscreen_hide_statusbar_summary">No status bar icons or clock on the lock screen</string>
+    <!-- IchthysOS: charger-connected animation styles (crdroid_settings_lockscreen.xml). -->
+    <string name="ichthys_charging_animation_title">Charging animation</string>
+    <string-array name="ichthys_charging_animation_entries" translatable="false">
+        <item>Pulse ring</item>
+        <item>Liquid fill</item>
+        <item>Spark line</item>
+        <item>Ripple</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="ichthys_charging_animation_values" translatable="false">
+        <item>pulse</item>
+        <item>fill</item>
+        <item>spark</item>
+        <item>ripple</item>
+        <item>off</item>
+    </string-array>
     <string name="ichthys_lockscreen_max_notifs_title">Notifications on the lock screen</string>
     <string name="ichthys_aod_notif_icons_title">Notification icons on always-on display</string>
     <string-array name="ichthys_lockscreen_max_notifs_entries" translatable="false">
