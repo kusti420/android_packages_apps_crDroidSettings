@@ -48,18 +48,17 @@
             android:summary="@string/theme_studio_accent_summary"
             android:fragment="com.crdroid.settings.fragments.themes.ThemeEngine" />
 
+        <!-- IchthysOS: theme.style (Monet palette style). Values are the ichthys.nix names;
+             ThemeStudio.java applies them through the config service, like the rows above. The
+             colour source row that used to sit here was dead (nothing read it): the accent page
+             (theme_studio_accent) owns the colour source. -->
         <ListPreference
             android:key="theme_style"
             android:title="@string/monet_engine_style_title"
+            android:summary="%s"
             android:entries="@array/monet_engine_style_entries"
-            android:entryValues="@array/monet_engine_style_values"
-            android:defaultValue="0" />
-        <ListPreference
-            android:key="color_source"
-            android:title="@string/monet_engine_color_source_title"
-            android:entries="@array/monet_engine_color_source_entries"
-            android:entryValues="@array/monet_engine_color_source_values"
-            android:defaultValue="0" />
+            android:entryValues="@array/theme_studio_style_values"
+            android:persistent="false" />
 
     </PreferenceCategory>
 

@@ -152,4 +152,14 @@
         <item>mono</item>
         <item>colour</item>
     </string-array>
+    <!-- theme.style option names (ichthys.nix), in the order of monet_engine_style_entries. -->
+    <string-array name="theme_studio_style_values" translatable="false">
+        <item>tonalSpot</item>
+        <item>vibrant</item>
+        <item>expressive</item>
+        <item>spritz</item>
+        <item>rainbow</item>
+        <item>fruitSalad</item>
+        <item>monochrome</item>
+    </string-array>
 </resources>

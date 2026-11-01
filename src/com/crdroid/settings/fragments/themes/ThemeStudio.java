@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -85,6 +86,8 @@ public class ThemeStudio extends SettingsPreferenceFragment
     private static final String KEY_STATUSBAR = "theme_studio_statusbar";
     private static final String KEY_QS = "theme_studio_qs";
     private static final String KEY_SURFACE = "theme_studio_surface";
+    /** IchthysOS: theme.style, the Monet palette style; applied live, no SystemUI restart. */
+    private static final String KEY_STYLE = "theme_style";
     private static final String KEY_BADGES = "theme_studio_badges";
     private static final String KEY_ICON_STYLE = "theme_studio_icon_style";
     private static final String KEY_IMPORT = "theme_studio_import";
@@ -116,7 +119,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
         mService = IIchthysConfig.Stub.asInterface(ServiceManager.getService("ichthys_config"));
 
         for (String key : new String[] {KEY_PRESET, KEY_RADIUS, KEY_SHAPE, KEY_FONT,
-                KEY_SURFACE, KEY_BADGES, KEY_ICON_STYLE}) {
+                KEY_SURFACE, KEY_STYLE, KEY_BADGES, KEY_ICON_STYLE}) {
             final Preference p = findPreference(key);
             if (p != null) {
                 p.setOnPreferenceChangeListener(this);
@@ -214,24 +217,33 @@ public class ThemeStudio extends SettingsPreferenceFragment
         final OverlayManager om = ctx.getSystemService(OverlayManager.class);
         if (om != null) {
             final PackageManager pm = ctx.getPackageManager();
+            // IchthysOS: one row per font overlay package (packages/overlays/Font*Overlay), by
+            // label, so the list reads A-Z whatever order OverlayManager returns.
+            final Map<String, String> byLabel = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             try {
                 for (OverlayInfo oi : om.getOverlayInfosForTarget("android",
                         UserHandle.of(UserHandle.myUserId()))) {
                     if (!FONT_CATEGORY.equals(oi.getCategory())) {
                         continue;
                     }
-                    CharSequence label;
+                    String label;
                     try {
                         label = pm.getApplicationLabel(pm.getApplicationInfo(
-                                oi.getPackageName(), 0));
+                                oi.getPackageName(), 0)).toString();
                     } catch (PackageManager.NameNotFoundException e) {
                         label = oi.getPackageName();
                     }
-                    entries.add(label);
-                    values.add(oi.getPackageName());
+                    if (byLabel.containsKey(label)) {
+                        label = label + " (" + oi.getPackageName() + ")";
+                    }
+                    byLabel.put(label, oi.getPackageName());
                 }
             } catch (RuntimeException e) {
                 Log.w(TAG, "font overlays", e);
+            }
+            for (Map.Entry<String, String> e : byLabel.entrySet()) {
+                entries.add(e.getKey());
+                values.add(e.getValue());
             }
         }
         pref.setEntries(entries.toArray(new CharSequence[0]));
@@ -265,6 +277,7 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 }
                 setValue(KEY_PRESET, live.get("theme.preset"), "koi");
                 setValue(KEY_SURFACE, live.get("theme.surface"), "hairline");
+                setValue(KEY_STYLE, live.get("theme.style"), "tonalSpot");
                 setValue(KEY_ICON_STYLE, live.get("theme.iconStyle"), "mono");
                 final androidx.preference.TwoStatePreference badges = findPreference(KEY_BADGES);
                 if (badges != null) {
@@ -327,6 +340,10 @@ public class ThemeStudio extends SettingsPreferenceFragment
                 path = "theme.surface";
                 value = v;
                 break;
+            case KEY_STYLE:
+                path = "theme.style";
+                value = v;
+                break;
             case KEY_ICON_STYLE:
                 path = "theme.iconStyle";
                 value = v;
@@ -342,7 +359,8 @@ public class ThemeStudio extends SettingsPreferenceFragment
         // Only the options that rebuild the token overlays (preset, surfaces, shape, font) need
         // SystemUI to start over; icon style and badges are Settings' own.
         final boolean restart = !KEY_BADGES.equals(preference.getKey())
-                && !KEY_ICON_STYLE.equals(preference.getKey());
+                && !KEY_ICON_STYLE.equals(preference.getKey())
+                && !KEY_STYLE.equals(preference.getKey());
         applyAsync(config, true, "Theme Studio: " + path, restart);
         return true;
     }
