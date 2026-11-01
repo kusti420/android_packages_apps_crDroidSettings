@@ -54,6 +54,8 @@ import androidx.preference.Preference
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.settings.R
+import com.android.settingslib.ichthys.charging.ChargingAnimationSettings
+import com.android.settingslib.ichthys.charging.ChargingStylePainter
 import com.android.settingslib.ichthys.clock.LockWeather
 import com.android.systemui.monet.ColorScheme
 import kotlin.math.PI
@@ -86,6 +88,13 @@ object OptionPreviews {
         /** Preview height / width. */
         val aspect: Float,
         val loopMs: Long,
+        /**
+         * IchthysOS: the dialog stays open after a pick (the selection moves), so options can be
+         * tried one after the other; closed with its button.
+         */
+        val keepOpen: Boolean = false,
+        /** IchthysOS: also run when an option is picked (e.g. a live preview of it). */
+        val onPick: ((Context, String) -> Unit)? = null,
         val painter: Painter,
     )
 
@@ -157,19 +166,31 @@ object OptionPreviews {
         list.setPadding((14 * dp).toInt(), (8 * dp).toInt(), (14 * dp).toInt(), 0)
         list.clipToPadding = false
         var dialog: AlertDialog? = null
-        list.adapter = Adapter(spec, pal, values.map { it.toString() },
+        lateinit var adapter: Adapter
+        adapter = Adapter(spec, pal, values.map { it.toString() },
             labels.map { it.toString() }, pref.value) { value ->
             if (pref.callChangeListener(value)) pref.value = value
-            dialog?.dismiss()
+            spec.onPick?.invoke(ctx, value)
+            if (spec.keepOpen) {
+                adapter.selected = pref.value
+                adapter.notifyDataSetChanged()
+            } else {
+                dialog?.dismiss()
+            }
         }
+        list.adapter = adapter
         val frame = FrameLayout(ctx)
         frame.addView(list, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT))
-        dialog = AlertDialog.Builder(ctx)
+        val builder = AlertDialog.Builder(ctx)
             .setTitle(pref.dialogTitle ?: pref.title)
             .setView(frame)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        if (spec.keepOpen) {
+            builder.setPositiveButton(android.R.string.ok, null)
+        } else {
+            builder.setNegativeButton(android.R.string.cancel, null)
+        }
+        dialog = builder.create()
         dialog.show()
         // Keep long lists scrolling inside the dialog instead of pushing the buttons off.
         list.post {
@@ -186,7 +207,7 @@ object OptionPreviews {
         val pal: Pal,
         val values: List<String>,
         val labels: List<String>,
-        val selected: String?,
+        var selected: String?,
         val onPick: (String) -> Unit,
     ) : RecyclerView.Adapter<Adapter.Holder>() {
 
@@ -483,6 +504,96 @@ object OptionPreviews {
     }
 
     // ---------------------------------------------------------------- the settings
+
+    /**
+     * IchthysOS: the charging animation picker. Each card is a small dark phone screen playing
+     * its style on a loop, drawn by SettingsLib's ChargingStylePainter (the same code SystemUI
+     * plays full screen) at a 360 x 630 dp virtual screen scaled into the card. "Ripple" (the
+     * stock surfaceeffects ripple, which lives in SystemUI) gets a drawn stand-in. Tapping a card
+     * selects it and has SystemUI play it once for real; the dialog stays open for the next one.
+     */
+    private fun chargingSpec(): Spec {
+        val loopMs = 2900L
+        val painters = HashMap<String, ChargingStylePainter>()
+        var level = -1
+        var forPal: Pal? = null
+        return Spec(3, 1.75f, loopMs, keepOpen = true,
+            onPick = { ctx, v -> ChargingAnimationSettings.sendPreview(ctx, v) }) { c, b, v, t, p ->
+            // A new dialog (new context and theme): set the painters up again.
+            if (p !== forPal) {
+                forPal = p
+                painters.clear()
+                level = -1
+            }
+            val dp = p.ctx.resources.displayMetrics.density
+            val r = 10 * dp
+            // The screen: the lock screen's night ground with a faint wallpaper wash.
+            tmp.set(b)
+            c.save()
+            clipRound.reset()
+            clipRound.addRoundRect(tmp, r, r, Path.Direction.CW)
+            c.clipPath(clipRound)
+            c.drawColor(p.night)
+            val wash = fillPaint(alpha(p.wall1, 0.55f))
+            wash.shader = LinearGradient(0f, b.top, 0f, b.bottom, alpha(p.wall1, 0.5f),
+                alpha(p.wall2, 0.25f), Shader.TileMode.CLAMP)
+            c.drawRect(b, wash)
+            clockText(c, "12:30", b.centerX(), b.top + b.height() * 0.2f, b.height() * 0.11f,
+                alpha(Color.WHITE, 0.8f))
+
+            val ms = t * loopMs
+            val vw = 360 * dp
+            val vh = 630 * dp
+            val scale = b.width() / vw
+            when (v) {
+                ChargingAnimationSettings.OFF -> {
+                    val s = b.width() * 0.22f
+                    val paint = strokePaint(alpha(Color.WHITE, 0.45f), s * 0.08f)
+                    c.drawCircle(b.centerX(), b.centerY(), s, paint)
+                    c.drawLine(b.centerX() - s * 0.7f, b.centerY() + s * 0.7f,
+                        b.centerX() + s * 0.7f, b.centerY() - s * 0.7f, paint)
+                }
+                ChargingAnimationSettings.RIPPLE -> {
+                    // A soft accent ripple from the port, like the stock one.
+                    val k = (ms / 1500f).coerceIn(0f, 1f)
+                    if (k < 1f) {
+                        val rad = b.height() * 1.1f * ease(k)
+                        val g = fillPaint(p.accent)
+                        g.shader = RadialGradient(b.centerX(), b.bottom, max(rad, 1f),
+                            intArrayOf(alpha(p.accent, 0f), alpha(p.accent, 0.55f * (1 - k)),
+                                alpha(p.accent, 0f)), floatArrayOf(0f, 0.85f, 1f),
+                            Shader.TileMode.CLAMP)
+                        c.drawCircle(b.centerX(), b.bottom, max(rad, 1f), g)
+                    }
+                }
+                else -> {
+                    if (level < 0) {
+                        level = try {
+                            p.ctx.getSystemService(android.os.BatteryManager::class.java)
+                                ?.getIntProperty(
+                                    android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: 64
+                        } catch (e: Exception) {
+                            64
+                        }.let { if (it in 0..100) it else 64 }
+                    }
+                    val painter = painters.getOrPut(v) {
+                        ChargingStylePainter(p.ctx).also {
+                            it.configure(v, level, vw / 2f, vh, vw.toInt(), vh.toInt(),
+                                IntArray(4) { (28 * dp).toInt() })
+                        }
+                    }
+                    if (ms < painter.durationMs) {
+                        c.translate(b.left, b.top)
+                        c.scale(scale, scale)
+                        painter.draw(c, ms)
+                    }
+                }
+            }
+            c.restore()
+        }
+    }
+
+    private val clipRound = Path()
 
     private fun buildSpecs(): Map<String, Spec> {
         val m = HashMap<String, Spec>()
@@ -1348,6 +1459,10 @@ object OptionPreviews {
                 m2.draw(c)
             }
         }
+
+        // ---- IchthysOS: charger-connected animation (System > Battery and display)
+
+        m[ChargingAnimationSettings.KEY] = chargingSpec()
 
         return m
     }
