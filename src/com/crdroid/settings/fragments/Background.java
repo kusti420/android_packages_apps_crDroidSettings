@@ -74,7 +74,6 @@ public class Background extends SettingsPreferenceFragment {
 
     // The custom duration row only applies while the list says "Custom". Tapping it opens a
     // Clock-app style timer picker: an hours wheel and a minutes wheel (5-minute steps).
-    private static final int DEFAULT_MAX_MINUTES = 90;
     private static final int MAX_MINUTES = 48 * 60;
 
     private void setupBackstageLimit() {
