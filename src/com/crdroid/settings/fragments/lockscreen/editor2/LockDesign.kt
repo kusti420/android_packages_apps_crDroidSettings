@@ -26,6 +26,7 @@ import android.util.Log
 import com.android.internal.util.crdroid.ThemeUtils
 import com.android.settings.R
 import com.android.settingslib.ichthys.clock.DepthClockView
+import com.android.settingslib.ichthys.clock.LockNotifications
 import com.android.settingslib.ichthys.clock.LockWeather
 import com.android.settingslib.ichthys.clock.ProjectedClock
 import com.android.settingslib.ichthys.sky.LivingSky
@@ -65,9 +66,20 @@ object LockKeys {
     const val GLASS_OPACITY = DepthClockView.KEY_GLASS_OPACITY
     const val DATE_POS = DepthClockView.KEY_DATE_POS
     const val DATE_ALIGN = DepthClockView.KEY_DATE_ALIGN
-    /** IchthysOS projected clock: flat or on the wallpaper's wall, and the saved quads. */
+    /** IchthysOS projected clock: flat or on the wallpaper's wall, the saved surfaces, style, kind. */
     const val PLACEMENT = DepthClockView.KEY_PLACEMENT
     const val QUADS = ProjectedClock.KEY_QUADS
+    const val PROJECTED_STYLE = ProjectedClock.KEY_STYLE
+    const val SURFACE_KIND = ProjectedClock.KEY_SURFACE_KIND
+    /** IchthysOS Quiet dock (LockNotifications). */
+    const val NOTIF_MODE = LockNotifications.KEY_MODE
+    const val NOTIF_ANCHOR = LockNotifications.KEY_ANCHOR
+    const val DOCK_DIM = LockNotifications.KEY_DOCK_DIM
+    /** IchthysOS fingerprint icon and its animation (Settings.System, IchthysUdfpsSettings). */
+    const val FP_ICON = "ichthys_udfps_icon_style"
+    const val FP_EFFECT = "ichthys_udfps_anim_effect"
+    const val FP_ICON_DEFAULT = 8
+    const val FP_EFFECT_DEFAULT = 4
     const val LOOK = "ichthys_lockscreen_look"
     const val LOOKS = "ichthys_lockscreen_looks"
     const val SHOW_NOTIFICATIONS = "lock_screen_show_notifications"
@@ -137,14 +149,25 @@ data class LockDesign(
     val skyWeather: Boolean = true,
     val skyIntensity: Int = 100,
     /**
-     * IchthysOS projected clock: the Depth face flat over the picture or painted onto a wall plane
-     * of it (DepthClockView.PLACEMENT_*). [quad]: the draft's corners for the previewed wallpaper
-     * (fractions of the screen, 8 values; null: the saved one for it, else the default), saved
-     * under the wallpaper's key on Apply; [quads]: the saved quads as read ([LockKeys.QUADS]).
+     * IchthysOS projected clock: the Depth face flat over the picture or painted onto a surface of
+     * it (DepthClockView.PLACEMENT_*). [surface]: the draft's surface for the previewed wallpaper
+     * (null: the saved one for it, else the default of [surfaceKind]), saved under the wallpaper's
+     * key on Apply; [surfaces]: the saved surfaces as read ([LockKeys.QUADS]). [projectedStyle]:
+     * ProjectedClock.STYLE_*; [surfaceKind]: ProjectedClock.KIND_*, what a new wallpaper starts with.
      */
     val placement: Int = DepthClockView.PLACEMENT_FLAT,
-    val quad: List<Float>? = null,
-    val quads: String? = null,
+    val surface: ProjectedClock.Surface? = null,
+    val surfaces: String? = null,
+    val projectedStyle: Int = ProjectedClock.STYLE_PAINTED,
+    val surfaceKind: Int = ProjectedClock.KIND_PLANE,
+    // IchthysOS Quiet dock (LockNotifications): how notifications sit, the cards' anchor (percent
+    // of the height, 0 automatic), the dock's idle dim.
+    val notifMode: Int = LockNotifications.MODE_DOCK,
+    val notifAnchor: Int = LockNotifications.ANCHOR_AUTO,
+    val dockDim: Boolean = true,
+    // IchthysOS fingerprint: the icon's style and its touch animation (IchthysUdfpsSettings).
+    val fpIcon: Int = LockKeys.FP_ICON_DEFAULT,
+    val fpEffect: Int = LockKeys.FP_EFFECT_DEFAULT,
 ) {
     val isDepthFace: Boolean
         get() = style == DEPTH_STYLE
@@ -153,10 +176,14 @@ data class LockDesign(
     val isProjected: Boolean
         get() = isDepthFace && placement == DepthClockView.PLACEMENT_PROJECTED
 
-    /** The quad the preview of [picture] draws: the draft's, else the one saved for it, else the default. */
-    fun resolvedQuad(picture: LockPicture): FloatArray =
-        quad?.takeIf { it.size == 8 }?.toFloatArray()?.takeIf { ProjectedClock.isValid(it) }
-            ?: ProjectedClock.quadFor(quads, picture.wallpaperKey)
+    /** The surface the preview of [picture] draws: the draft's, else the one saved for it, else the default. */
+    fun resolvedSurface(picture: LockPicture): ProjectedClock.Surface =
+        surface?.takeIf { it.isValid() }
+            ?: ProjectedClock.surfaceFor(surfaces, picture.wallpaperKey, surfaceKind)
+
+    /** Whether the notifications are the dock (or the glance), not cards. */
+    val isDock: Boolean
+        get() = notifMode != LockNotifications.MODE_CARDS
 
     /** The weather options as the lock screen reads them. */
     val weatherOptions: LockWeather.Options
@@ -181,10 +208,10 @@ data class LockDesign(
     fun sameClockAs(o: LockDesign): Boolean =
         copy(shortcutStart = "", shortcutEnd = "", showNotifications = true,
             privateNotifications = true, look = "", dx = 0f, dy = 0f, scale = 1f, rot = 0f,
-            quad = null, quads = null) ==
+            surface = null, surfaces = null) ==
             o.copy(shortcutStart = "", shortcutEnd = "", showNotifications = true,
                 privateNotifications = true, look = "", dx = 0f, dy = 0f, scale = 1f, rot = 0f,
-                quad = null, quads = null) &&
+                surface = null, surfaces = null) &&
             abs(dx - o.dx) < 1 && abs(dy - o.dy) < 1 && abs(scale - o.scale) < 0.005f &&
             abs(rot - o.rot) < 0.5f
 
@@ -221,6 +248,11 @@ data class LockDesign(
             .put("weatherSize", weatherSize)
             .put("livingSky", livingSky)
             .put("placement", placement)
+            .put("projectedStyle", projectedStyle)
+            .put("surfaceKind", surfaceKind)
+            .put("notifMode", notifMode)
+            .put("fpIcon", fpIcon)
+            .put("fpEffect", fpEffect)
 
     /** [o] (a saved look; v1 looks have only the first few fields) over this design. */
     fun withLook(o: JSONObject): LockDesign =
@@ -255,8 +287,14 @@ data class LockDesign(
             weatherSize = o.optInt("weatherSize", weatherSize),
             // Looks saved before Living Sky keep it as it is.
             livingSky = o.optBoolean("livingSky", livingSky),
-            // IchthysOS projected clock: a look's placement; the quad stays the wallpaper's.
+            // IchthysOS projected clock: a look's placement and style; the surface's points stay
+            // the wallpaper's. Looks saved before them keep what is set.
             placement = o.optInt("placement", DepthClockView.PLACEMENT_FLAT),
+            projectedStyle = o.optInt("projectedStyle", projectedStyle),
+            surfaceKind = o.optInt("surfaceKind", surfaceKind),
+            notifMode = o.optInt("notifMode", notifMode),
+            fpIcon = o.optInt("fpIcon", fpIcon),
+            fpEffect = o.optInt("fpEffect", fpEffect),
         )
 }
 
@@ -360,6 +398,9 @@ object LockStore {
         Settings.System.putIntForUser(context.contentResolver, key, value, UserHandle.USER_CURRENT)
     }
 
+    private fun sysInt(context: Context, key: String, def: Int) =
+        Settings.System.getIntForUser(context.contentResolver, key, def, UserHandle.USER_CURRENT)
+
     /** The lock screen as the settings have it now ([start] / [end]: the shortcuts SystemUI has). */
     fun read(context: Context, start: String = "", end: String = ""): LockDesign {
         val margin = int(context, LockKeys.MARGIN_TOP, LockKeys.DEFAULT_MARGIN_TOP)
@@ -403,7 +444,16 @@ object LockStore {
             skyWeather = sky.weather,
             skyIntensity = sky.intensity,
             placement = int(context, LockKeys.PLACEMENT, DepthClockView.PLACEMENT_FLAT),
-            quads = str(context, LockKeys.QUADS),
+            surfaces = str(context, LockKeys.QUADS),
+            projectedStyle = int(context, LockKeys.PROJECTED_STYLE, ProjectedClock.STYLE_PAINTED)
+                .coerceIn(0, ProjectedClock.STYLE_COUNT - 1),
+            surfaceKind = int(context, LockKeys.SURFACE_KIND, ProjectedClock.KIND_PLANE)
+                .coerceIn(0, ProjectedClock.KIND_COUNT - 1),
+            notifMode = LockNotifications.readMode(context.contentResolver, UserHandle.USER_CURRENT),
+            notifAnchor = LockNotifications.readAnchor(context.contentResolver, UserHandle.USER_CURRENT),
+            dockDim = LockNotifications.readDockDim(context.contentResolver, UserHandle.USER_CURRENT),
+            fpIcon = sysInt(context, LockKeys.FP_ICON, LockKeys.FP_ICON_DEFAULT),
+            fpEffect = sysInt(context, LockKeys.FP_EFFECT, LockKeys.FP_EFFECT_DEFAULT),
         )
     }
 
@@ -473,15 +523,25 @@ object LockStore {
         i(LivingSky.KEY_INTENSITY, draft.skyIntensity, original.skyIntensity)
         i(LivingSky.KEY_WEATHER, b(draft.skyWeather), b(original.skyWeather))
         i(LivingSky.KEY_ENABLED, b(draft.livingSky), b(original.livingSky))
-        // IchthysOS projected clock: the corners go under the wallpaper that is now the lock
-        // screen's (set above: its ids are new then), the placement after them.
-        val quad = draft.quad?.takeIf { it.size == 8 }?.toFloatArray()
-        if (quad != null && ProjectedClock.isValid(quad)) {
+        // IchthysOS projected clock: the surface goes under the wallpaper that is now the lock
+        // screen's (set above: its ids are new then), the style, kind and placement after it.
+        val surface = draft.surface?.takeIf { it.isValid() }
+        if (surface != null) {
             currentWallpaperKey(context)?.let { key ->
-                put(context, LockKeys.QUADS, ProjectedClock.withQuad(str(context, LockKeys.QUADS), key, quad))
+                put(context, LockKeys.QUADS,
+                    ProjectedClock.withSurface(str(context, LockKeys.QUADS), key, surface))
             }
         }
+        i(LockKeys.PROJECTED_STYLE, draft.projectedStyle, original.projectedStyle)
+        i(LockKeys.SURFACE_KIND, draft.surfaceKind, original.surfaceKind)
         i(LockKeys.PLACEMENT, draft.placement, original.placement)
+        // IchthysOS Quiet dock; SystemUI follows these live.
+        i(LockKeys.NOTIF_ANCHOR, draft.notifAnchor, original.notifAnchor)
+        i(LockKeys.DOCK_DIM, b(draft.dockDim), b(original.dockDim))
+        i(LockKeys.NOTIF_MODE, draft.notifMode, original.notifMode)
+        // IchthysOS fingerprint icon and animation (Settings.System; SystemUI follows them live).
+        if (draft.fpIcon != original.fpIcon) putSys(context, LockKeys.FP_ICON, draft.fpIcon)
+        if (draft.fpEffect != original.fpEffect) putSys(context, LockKeys.FP_EFFECT, draft.fpEffect)
         if (draft.look != original.look) put(context, LockKeys.LOOK, draft.look)
         if (draft.shortcutStart != original.shortcutStart) {
             LockShortcuts.select(context, LockShortcuts.SLOT_START, draft.shortcutStart)

@@ -222,4 +222,61 @@
     <string name="ichthys_ed2_sky_sun_down">sun %1$d\u00b0 down</string>
     <string name="ichthys_ed2_sky_times">Sunrise %1$s \u00b7 sunset %2$s</string>
     <string name="ichthys_ed2_idea_sky">Living sky</string>
+    <!-- IchthysOS Shoal studio (the editor's redesign): bars and the tool rail -->
+    <string name="ichthys_ed2_undo">Undo</string>
+    <string name="ichthys_ed2_redo">Redo</string>
+    <string name="ichthys_ed2_shortcuts">Shortcuts</string>
+    <string name="ichthys_ed2_fingerprint">Fingerprint</string>
+    <string name="ichthys_ed2_tab_face">Face</string>
+    <string name="ichthys_ed2_date_other_face">This face draws its own date. The Depth face has a date line to place.</string>
+    <string name="ichthys_ed2_date_drag_hint">Drag the date line on the preview to one of its six places.</string>
+    <string name="ichthys_ed2_looks_hint">Whole looks, live. Save yours; a look keeps the clock, its wall and style, the notifications and the fingerprint icon.</string>
+    <string name="ichthys_ed2_look_wall">On the wall</string>
+    <string name="ichthys_ed2_look_neon">Light strip</string>
+
+    <!-- IchthysOS projected clock: styles and surfaces -->
+    <string name="ichthys_ed2_proj_style">Style</string>
+    <string name="ichthys_ed2_proj_painted">Painted</string>
+    <string name="ichthys_ed2_proj_light">Light strip</string>
+    <string name="ichthys_ed2_proj_engraved">Engraved</string>
+    <string name="ichthys_ed2_proj_signage">Signage plate</string>
+    <string name="ichthys_ed2_proj_beam">Projector beam</string>
+    <string name="ichthys_ed2_proj_shadow">Cast shadow</string>
+    <string name="ichthys_ed2_proj_beam_note">The beam shows at night; by day the digits are painted.</string>
+    <string name="ichthys_ed2_surface">Surface</string>
+    <string name="ichthys_ed2_surface_plane">Plane</string>
+    <string name="ichthys_ed2_surface_fold">Corner fold</string>
+    <string name="ichthys_ed2_surface_curve">Curve</string>
+    <string name="ichthys_ed2_surface_mesh">Free mesh</string>
+    <string name="ichthys_ed2_surface_fold_hint">Two faces sharing the corner's edge: drag the four outer corners and the two fold handles. The clock is one row, split at the fold; each face takes its own light.</string>
+    <string name="ichthys_ed2_surface_curve_hint">Drag the corners; pull the diamond in the middle of the top or bottom edge to bow it. The cylinder bend wraps it round a vertical axis.</string>
+    <string name="ichthys_ed2_surface_mesh_hint">Nine handles, anywhere. Edges snap to the lines found in the picture (yellow) and to a rectangle. Two fingers scale about the centre.</string>
+    <string name="ichthys_ed2_fit_auto">Auto-fit to edges</string>
+    <string name="ichthys_ed2_fit_working">Looking…</string>
+    <string name="ichthys_ed2_fit_lines"><xliff:g id="count">%1$d</xliff:g> lines found in the picture; the handles snap to them.</string>
+    <string name="ichthys_ed2_fold_split">Digits on the first face</string>
+    <string name="ichthys_ed2_fold_split_1">H | HMM</string>
+    <string name="ichthys_ed2_fold_split_2">HH | MM</string>
+    <string name="ichthys_ed2_fold_split_3">HHM | M</string>
+    <string name="ichthys_ed2_curve_cylinder">Cylinder bend</string>
+
+    <!-- IchthysOS Quiet dock (the notifications) -->
+    <string name="ichthys_ed2_notif_mode">On the lock screen</string>
+    <string name="ichthys_ed2_notif_dock">Quiet dock</string>
+    <string name="ichthys_ed2_notif_cards">Cards</string>
+    <string name="ichthys_ed2_notif_glance">Glance</string>
+    <string name="ichthys_ed2_notif_dock_hint">No cards at rest: a quiet row of app icons and the newest line above the shortcuts. Tap or swipe up on it for the notifications; swipe down puts them away.</string>
+    <string name="ichthys_ed2_notif_cards_hint">The stack of cards under the clock. Drag the card on the preview to where it should start.</string>
+    <string name="ichthys_ed2_notif_glance_hint">The dock with counts only. What they say comes after the unlock.</string>
+    <string name="ichthys_ed2_notif_anchor">Starts at</string>
+    <string name="ichthys_ed2_notif_anchor_hint">Never above the clock, never into the fingerprint sensor's zone. Auto keeps a clear gap under the clock and its date.</string>
+    <string name="ichthys_ed2_dock_dim">Dim when idle</string>
+    <string name="ichthys_ed2_dock_dim_hint">The icons fade a little after ten seconds without a touch.</string>
+    <string name="ichthys_ed2_dock_sample_line">Mari · are you coming tonight?</string>
+    <string name="ichthys_ed2_dock_sample_glance">7 notifications · unlock to read</string>
+
+    <!-- IchthysOS fingerprint sheet -->
+    <string name="ichthys_ed2_fp_icon">Icon on the sensor</string>
+    <string name="ichthys_ed2_fp_effect">Touch animation</string>
+    <string name="ichthys_ed2_fp_note">Colours, speed and the success and failure effects are on the Fingerprint effects page.</string>
 </resources>

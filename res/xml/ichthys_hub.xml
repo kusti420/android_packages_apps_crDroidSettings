@@ -26,6 +26,7 @@
        Sound and notifications  crdroid_settings_sound.xml (Notifications one level down)
        Weather                  weather_settings.xml
        Privacy                  Guard (GuardActivity)
+       Shared values            SharedValuesActivity (home city, trips, units, fake place)
        Apps                     ichthys_apps.xml
        System                   ichthys_system.xml
 
@@ -99,6 +100,17 @@
         <intent
             android:targetPackage="com.android.settings"
             android:targetClass="com.android.settings.ichthys.guard.ui.GuardActivity" />
+    </Preference>
+
+    <!-- IchthysOS: Shared values moved here out of Guard (home city, trips, units, fake place). -->
+    <Preference
+        android:key="ichthys_hub_shared_values"
+        android:icon="@drawable/ic_map_marker"
+        android:title="@string/ichthys_hub_shared_values_title"
+        android:summary="@string/ichthys_hub_shared_values_summary">
+        <intent
+            android:targetPackage="com.android.settings"
+            android:targetClass="com.android.settings.ichthys.guard.ui.SharedValuesActivity" />
     </Preference>
 
     <Preference

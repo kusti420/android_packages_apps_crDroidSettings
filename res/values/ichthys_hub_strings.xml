@@ -23,7 +23,9 @@
     <string name="ichthys_hub_privacy_title">Privacy</string>
     <!-- IchthysOS: Guard finds and shows trackers but doesn't block them (HostRules.ENFORCED =
          false); the per-app firewall and data shields do work. Don't imply tracker blocking. -->
-    <string name="ichthys_hub_privacy_summary">Guard: per-app firewall, data access, tracker scan and network activity</string>
+    <string name="ichthys_hub_shared_values_title">Shared values</string>
+    <string name="ichthys_hub_shared_values_summary">Home city, trips, units and the fake place, set once for weather, sun times and Guard</string>
+    <string name="ichthys_hub_privacy_summary">Guard: presets per app, firewall, data shields, verification and activity</string>
     <string name="ichthys_hub_apps_title">Apps</string>
     <!-- IchthysOS: the Apps page holds Ichthys Apps, Background (mostly lifts limits:
          unrestricted apps, Backstage), Installing (downgrades) and Integrity. -->

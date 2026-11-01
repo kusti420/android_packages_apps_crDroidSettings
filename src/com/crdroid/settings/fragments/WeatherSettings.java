@@ -25,7 +25,7 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.crdroid.OmniJawsClient;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
-import com.android.settings.ichthys.guard.ui.GuardActivity;
+import com.android.settings.ichthys.guard.ui.SharedValuesActivity;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.search.SearchIndexable;
 import com.crdroid.settings.utils.SystemUtils;
@@ -54,11 +54,11 @@ public class WeatherSettings extends SettingsPreferenceFragment
         if (mWeather != null) {
             mWeather.setOnPreferenceChangeListener(this);
         }
-        // IchthysOS: the place the weather is for is a shared value (Guard > Rules > Shared
-        // values); this row shows it and opens that screen.
+        // IchthysOS: the place the weather is for is a shared value (Settings > IchthysOS >
+        // Shared values); this row shows it and opens that screen.
         mLocation = findPreference(KEY_LOCATION);
         if (mLocation != null) {
-            mLocation.setIntent(GuardActivity.sharedValuesIntent(getContext()));
+            mLocation.setIntent(SharedValuesActivity.intent(getContext()));
         }
     }
 

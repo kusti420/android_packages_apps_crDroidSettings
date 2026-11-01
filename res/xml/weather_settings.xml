@@ -44,7 +44,7 @@
             android:summary="%s" />
         <!-- IchthysOS: the weather follows the shared place (a trip under way, else the home
              city; IchthysPlacesService), not a city of its own. WeatherSettings.java shows the
-             active place here and opens Guard > Rules > Shared values to change it. -->
+             active place here and opens Settings > IchthysOS > Shared values to change it. -->
         <Preference
             android:key="weather_location"
             android:icon="@drawable/ic_map_marker"

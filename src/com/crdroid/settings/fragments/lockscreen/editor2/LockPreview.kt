@@ -17,9 +17,11 @@
 package com.crdroid.settings.fragments.lockscreen.editor2
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color as AColor
 import android.graphics.drawable.Drawable
+import android.hardware.fingerprint.FingerprintManager
 import android.provider.Settings
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -33,15 +35,20 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -54,6 +61,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -65,12 +73,14 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
@@ -81,6 +91,8 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -89,24 +101,30 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.settings.R
 import com.android.settingslib.ichthys.clock.DepthClockView
 import com.android.settingslib.ichthys.clock.IchthysClockFace
+import com.android.settingslib.ichthys.clock.LockNotifications
 import com.android.settingslib.ichthys.clock.LockWeather
 import com.android.settingslib.ichthys.clock.LockWeatherView
+import com.android.settingslib.ichthys.clock.ProjectedClock
 import com.android.settingslib.ichthys.sky.LivingSky
 import com.crdroid.settings.fragments.lockscreen.ClockUtils
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** What can be selected on the preview. */
-enum class LockElement { CLOCK, DATE, WEATHER, NOTIFICATIONS, SHORTCUT_START, SHORTCUT_END }
+enum class LockElement { CLOCK, DATE, WEATHER, NOTIFICATIONS, SHORTCUT_START, SHORTCUT_END, FINGERPRINT }
 
 /**
  * Where everything ended up on the previewed lock screen, in screen pixels, and [k], the preview's
  * scale (preview px = screen px * k). For hit tests and the selection frame.
  * IchthysOS polish: the clock's rectangle hugs what its face shows (not its whole box) and is
  * turned by [clockRot] degrees about [clockPivot], as the clock itself is.
+ * IchthysOS Quiet dock: [zone] is the one bottom model (the sensor's keep-out, the dock) the lock
+ * screen lays its bottom out with ([LockNotifications.bottomZone]); [sensor] the sensor's circle.
  */
 class LockLayout(
     val k: Float,
@@ -115,10 +133,17 @@ class LockLayout(
     val clockRot: Float = 0f,
     val clockPivot: Offset = Offset.Zero,
     /**
-     * IchthysOS projected clock: the wall quad's corners (screen px; top left, top right, bottom
-     * right, bottom left) while the Depth face is projected, else null. The editor's handles.
+     * IchthysOS projected clock: the surface the Depth face stands on while projected, and its
+     * mapper on the previewed screen (px), else null. The editor's handles come from it.
      */
-    val quad: List<Offset>? = null,
+    val surface: ProjectedClock.Surface? = null,
+    val mapper: ProjectedClock.Mapper? = null,
+    val zone: LockNotifications.BottomZone? = null,
+    val sensor: Rect = Rect.Zero,
+    /** Cards mode: the lowest the card's top may go (the keep-out, minus the card). */
+    val cardsMaxTop: Float = 0f,
+    /** Cards mode: the highest the card's top may go (under the clock as you see it). */
+    val cardsMinTop: Float = 0f,
 ) {
     /** [p] in the clock's own, unturned frame (where [rects]' clock rectangle is). */
     fun unturn(p: Offset): Offset = turn(p, clockPivot, -clockRot)
@@ -134,6 +159,25 @@ class LockLayout(
     /** The clock's middle on the screen (turned like the clock). */
     val clockCentre: Offset
         get() = rects[LockElement.CLOCK]?.let { turn(it.center, clockPivot, clockRot) } ?: Offset.Zero
+
+    /** IchthysOS projected clock: the surface's points on the previewed screen, px. */
+    fun surfacePoints(): List<Offset> {
+        val s = surface ?: return emptyList()
+        val m = mapper ?: return emptyList()
+        return List(s.pointCount) { i -> Offset(s.points[i * 2] * m.w, s.points[i * 2 + 1] * m.h) }
+    }
+
+    /** IchthysOS projected clock, a curve: the bow handles (top edge's middle, bottom edge's), px. */
+    fun bowHandles(): List<Offset> {
+        val s = surface ?: return emptyList()
+        val m = mapper ?: return emptyList()
+        if (s.kind != ProjectedClock.KIND_CURVE) return emptyList()
+        val pt = FloatArray(2)
+        m.map(0.5f, 0f, pt)
+        val top = Offset(pt[0], pt[1])
+        m.map(0.5f, 1f, pt)
+        return listOf(top, Offset(pt[0], pt[1]))
+    }
 }
 
 /** [p] turned by [degrees] (clockwise on the screen, like rotationZ) about [pivot]. */
@@ -158,11 +202,40 @@ fun rememberScreen(): IntSize {
 }
 
 /**
+ * IchthysOS: the fingerprint sensor's circle on a [w] x [h] screen (px): the UDFPS sensor's own
+ * bounds (FingerprintManager's properties, what SystemUI's lock icon takes), else where the lock
+ * icon stands without one. Read once.
+ */
+object LockSensor {
+    private var cached: FloatArray? = null
+
+    /** Centre x, centre y, radius. */
+    fun get(context: Context, w: Int, h: Int): FloatArray {
+        cached?.let { return it }
+        val density = context.resources.displayMetrics.density
+        var out = floatArrayOf(w / 2f, h - (32f + 36f) * density, 36f * density)
+        try {
+            val fpm = context.getSystemService(FingerprintManager::class.java)
+            val props = fpm?.sensorPropertiesInternal?.firstOrNull()
+            val loc = props?.location
+            if (loc != null && loc.sensorRadius > 0 && loc.sensorLocationY > h / 2) {
+                out = floatArrayOf(loc.sensorLocationX.toFloat(), loc.sensorLocationY.toFloat(),
+                    loc.sensorRadius.toFloat())
+            }
+        } catch (e: Exception) {
+            // No fingerprint hardware to ask: the lock icon's place.
+        }
+        cached = out
+        return out
+    }
+}
+
+/**
  * IchthysOS lock screen editor v2: the lock screen of [design] on [picture], drawn at the screen's
  * real size and scaled into the space it has. The face is the picker's own layout (what
  * KeyguardCustomClockView inflates), placed like KeyguardCustomClockView places it; the Depth face
  * gets the design's options and the picture's outline (its Shape mode works in the preview).
- * - [chrome]: shortcuts, fingerprint, notification card (off for small thumbnails).
+ * - [chrome]: shortcuts, fingerprint, the notifications (off for small thumbnails).
  * - [input]: a modifier for the phone-sized box, given the scale (the editor's gestures).
  * - [overlay]: drawn last, in screen pixels (guides).
  * - [selected]: framed (IchthysOS polish: the frame glides from one selection to the next, hugs
@@ -171,6 +244,8 @@ fun rememberScreen(): IntSize {
  * - IchthysOS Living Sky: the picture graded as the lock screen grades it, at [skyMinute] (minutes
  *   after midnight; null: now). Its weather moves only in the editor's own preview (with
  *   [onLayout]), not in thumbnails.
+ * - IchthysOS Quiet dock: the bottom is laid out with the lock screen's one keep-out model
+ *   ([LockNotifications.bottomZone]) from the real sensor's bounds ([LockSensor]).
  */
 @Composable
 fun LockScreenPreview(
@@ -186,6 +261,8 @@ fun LockScreenPreview(
     selected: LockElement? = null,
     zoom: () -> Float = { 0f },
     skyMinute: Float? = null,
+    /** The notification anchor a finger is dragging (screen px, the card's top), else null. */
+    draggedCardTop: Float? = null,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -217,6 +294,7 @@ fun LockScreenPreview(
     }
     val motion = remember { FrameMotion() }
     val placedAt = remember { FloatArray(4) }
+    val sensor = remember(screen) { LockSensor.get(context, screen.width, screen.height) }
 
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val k = minOf(constraints.maxWidth.toFloat() / screen.width,
@@ -234,15 +312,15 @@ fun LockScreenPreview(
         val whole = Rect(cx - faceW * design.scale / 2f, top, cx + faceW * design.scale / 2f,
             top + faceH * design.scale)
         val report = faceContent?.takeIf { it.style == design.style }
-        // IchthysOS projected clock: the digits are on the wallpaper's wall (ProjectedClock); the
-        // clock element is the quad's box, its corners the handles. The face keeps the date line.
+        // IchthysOS projected clock: the digits are on the wallpaper's surface (ProjectedClock);
+        // the clock element is the surface's box, its points the handles. The face keeps the date.
         val projected = design.isProjected && picture.source != null
-        val quadFr = if (projected) design.resolvedQuad(picture) else null
-        val quadPx =
-            quadFr?.let { q -> List(4) { i -> Offset(q[i * 2] * w, q[i * 2 + 1] * h) } }
+        val surface = if (projected) design.resolvedSurface(picture) else null
+        val mapper = remember(surface, screen) { surface?.let { ProjectedClock.Mapper(it, screen.width, screen.height) } }
         val clock =
-            quadPx?.let { q ->
-                Rect(q.minOf { it.x }, q.minOf { it.y }, q.maxOf { it.x }, q.maxOf { it.y })
+            surface?.let { s ->
+                val b = s.bounds()
+                Rect(b.left * w, b.top * h, b.right * w, b.bottom * h)
             } ?: report?.content ?: whole
         // Turned about the scaled box's middle (KeyguardCustomClockView: pivot in the middle, the
         // scaled top put back).
@@ -256,9 +334,9 @@ fun LockScreenPreview(
         // The weather line under the clock: where the Depth face wants it (under the digits you
         // see), else under the face's scaled box, as SystemUI's LockWeatherView places it.
         // IchthysOS: and under the turned clock's lowest point (a turn takes one side lower).
-        val turn = Math.toRadians(design.rot.toDouble())
-        val turnDrop = (clock.width / 2f * kotlin.math.abs(kotlin.math.sin(turn)) -
-            clock.height / 2f * (1 - kotlin.math.abs(kotlin.math.cos(turn)))).toFloat()
+        val turnRad = Math.toRadians(design.rot.toDouble())
+        val turnDrop = (clock.width / 2f * kotlin.math.abs(kotlin.math.sin(turnRad)) -
+            clock.height / 2f * (1 - kotlin.math.abs(kotlin.math.cos(turnRad)))).toFloat()
         val underY = (report?.underTop ?: whole.bottom) + maxOf(0f, turnDrop)
         val weatherAtTop = weatherPlace == LockWeather.POS_TOP_START ||
             weatherPlace == LockWeather.POS_TOP_END
@@ -268,30 +346,51 @@ fun LockScreenPreview(
             if (!design.weather) null
             else if (weatherPlace == LockWeather.POS_DATE) faceWeather
             else viewWeather
-        // IchthysOS polish: the notifications start under the clock as you see it (and its
-        // weather line), and with a subject in front never higher than under its face: the same
-        // SubjectOutline.faceSafe line SystemUI's upper region keeps to.
+
+        // IchthysOS Quiet dock: the one bottom model. The sensor's circle (the real one), its
+        // keep-out, the dock above it (dock and glance modes, with notifications shown) and the
+        // upper region's end above that: the same numbers SystemUI's root lays out with.
+        val sensorRect = Rect(Offset(sensor[0], sensor[1]), sensor[2])
+        val dockShown = chrome && design.showNotifications && design.isDock
+        val zone = LockNotifications.bottomZone(sensorRect.top, sensorRect.bottom, d,
+            if (dockShown) LockNotifications.DOCK_HEIGHT_DP * d else 0f)
+        val dockRect = Rect(LockNotifications.DOCK_SIDE_DP * d, zone.dockTop, w - LockNotifications.DOCK_SIDE_DP * d,
+            zone.dockBottom)
+        // Cards: under the clock as you see it (and its weather line), never higher than under
+        // the subject's face (the same SubjectOutline.faceSafe line SystemUI's region keeps to),
+        // at the owner's anchor when set; never into the keep-out.
         val visibleBottom =
             if (weather != null && weatherPlace == LockWeather.POS_UNDER) weather.bottom + d
-            else underY
+            else maxOf(underY, clock.bottom)
         val outline = picture.outline
         val floor =
             if (design.depth != DepthClockView.DEPTH_OFF && outline != null && outline.faceSafe > 0f)
                 outline.faceSafe * h
             else 0f
-        val notifTop = (maxOf(visibleBottom, floor) + 24 * d).coerceAtMost(h * 0.74f)
-        val notif = Rect(16 * d, notifTop, w - 16 * d, notifTop + 72 * d)
-        val r = 34 * d
-        val scStart = Rect(Offset(r * 1.6f, h - r * 2.4f), r)
-        val scEnd = Rect(Offset(w - r * 1.6f, h - r * 2.4f), r)
+        val cardH = CARD_H_DP * d
+        val cardsMinTop = maxOf(visibleBottom, floor) + LockNotifications.CARDS_GAP_DP * d / 2f
+        val cardsMaxTop = zone.upperBottom - cardH
+        val autoTop = maxOf(visibleBottom, floor) + LockNotifications.CARDS_GAP_DP * d
+        val anchoredTop =
+            if (design.notifAnchor == LockNotifications.ANCHOR_AUTO) autoTop
+            else maxOf(cardsMinTop, h * design.notifAnchor / 100f)
+        val cardTop = (draggedCardTop ?: anchoredTop).coerceIn(minOf(cardsMinTop, cardsMaxTop), maxOf(cardsMinTop, cardsMaxTop))
+        val card = Rect(16 * d, cardTop, w - 16 * d, cardTop + cardH)
+        val notif = if (design.isDock) dockRect else card
+        // The shortcuts as SystemUI lays them out: 48 dp, 16 dp in from the sides, 32 dp up.
+        val r = SHORTCUT_DP / 2f * d
+        val scStart = Rect(Offset(16 * d + r, h - 32 * d - r), r)
+        val scEnd = Rect(Offset(w - 16 * d - r, h - 32 * d - r), r)
         val rects = HashMap<LockElement, Rect>()
         rects[LockElement.CLOCK] = clock
         if (design.isDepthFace && design.showDate) rects[LockElement.DATE] = date
         if (weather != null) rects[LockElement.WEATHER] = weather
-        rects[LockElement.NOTIFICATIONS] = notif
+        if (design.showNotifications) rects[LockElement.NOTIFICATIONS] = notif
         rects[LockElement.SHORTCUT_START] = scStart
         rects[LockElement.SHORTCUT_END] = scEnd
-        val layout = LockLayout(k, rects, cx, if (quadPx != null) 0f else design.rot, pivot, quadPx)
+        rects[LockElement.FINGERPRINT] = sensorRect
+        val layout = LockLayout(k, rects, cx, if (surface != null) 0f else design.rot, pivot, surface, mapper,
+            zone, sensorRect, cardsMaxTop, cardsMinTop)
         if (onLayout != null) SideEffect { onLayout(layout) }
 
         // The selection frame's glide (see FrameMotion).
@@ -348,10 +447,10 @@ fun LockScreenPreview(
                     else Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 } ?: if (chrome) Box(Modifier.fillMaxSize().background(Color(0xFF0B1418))) else Unit
 
-                // IchthysOS projected clock: the digits on the wallpaper's wall, over the picture
-                // and under the subject (drawn below), as SystemUI's depth layers draw them.
-                if (quadFr != null) {
-                    ProjectedClockImage(design, picture, quadFr, accent, screen.width, screen.height,
+                // IchthysOS projected clock: the digits on the wallpaper's surface, over the
+                // picture and under the subject (drawn below), as SystemUI's depth layers do.
+                if (surface != null) {
+                    ProjectedClockImage(design, picture, surface, sky, accent, screen.width, screen.height,
                         Modifier.fillMaxSize())
                 }
 
@@ -436,8 +535,15 @@ fun LockScreenPreview(
                 }
 
                 if (chrome) {
+                    // IchthysOS Quiet dock: the notifications as the lock screen shows them at
+                    // rest: the dock (or the glance's counts) above the keep-out, or the cards.
                     if (design.showNotifications) {
-                        NotificationCard(notif, design.privateNotifications)
+                        if (design.isDock) {
+                            PreviewDock(dockRect, glance = design.notifMode == LockNotifications.MODE_GLANCE,
+                                live = onLayout != null)
+                        } else {
+                            NotificationCard(card, design.privateNotifications)
+                        }
                     }
                     // IchthysOS: a shortcut the lock screen won't show (none, or one that needs
                     // setting up, like Device controls without a controls app) is a faint ghost
@@ -446,20 +552,32 @@ fun LockScreenPreview(
                     val end = shortcuts?.byId(design.shortcutEnd)
                     Shortcut(scStart, start?.icon, shown = start?.enabled == true)
                     Shortcut(scEnd, end?.icon, shown = end?.enabled == true)
+                    // IchthysOS: the fingerprint icon in its style, on the sensor itself.
                     Canvas(Modifier.fillMaxSize()) {
-                        drawCircle(Color(0x80F6F1EA), 26 * d, Offset(w / 2f, h * 0.865f),
-                            style = Stroke(2 * d))
+                        fingerprintGlyph(design.fpIcon, sensorRect.center, sensorRect.width / 2f * 0.62f,
+                            Color(0xE6F6F1EA), d)
                     }
                 }
                 if (overlay != null || onLayout != null) {
                     Canvas(Modifier.fillMaxSize()) {
                         overlay?.invoke(this, layout)
                         val target = selected?.let { rects[it] }
-                        // IchthysOS projected clock: its handles are the quad's own corners (the
-                        // editor draws them), not the frame's.
-                        motion.draw(this, target, selected == LockElement.CLOCK && quadPx == null,
-                            if (selected == LockElement.CLOCK && quadPx == null) design.rot else 0f,
-                            if (selected == LockElement.CLOCK) pivot else target?.center ?: Offset.Zero, d)
+                        // IchthysOS projected clock: its handles are the surface's own points (the
+                        // editor draws them), not the frame's. The sensor is framed as a circle.
+                        if (selected == LockElement.FINGERPRINT && target != null) {
+                            val a = motion.alphaNow()
+                            if (a > 0.01f) {
+                                drawCircle(Color.Black.copy(alpha = 0.22f * a), target.width / 2f + FRAME_PAD_DP * d,
+                                    target.center, style = Stroke(4.5f * d))
+                                drawCircle(Color.White.copy(alpha = a), target.width / 2f + FRAME_PAD_DP * d,
+                                    target.center, style = Stroke(2f * d))
+                            }
+                            motion.draw(this, null, false, 0f, Offset.Zero, d)
+                        } else {
+                            motion.draw(this, target, selected == LockElement.CLOCK && surface == null,
+                                if (selected == LockElement.CLOCK && surface == null) design.rot else 0f,
+                                if (selected == LockElement.CLOCK) pivot else target?.center ?: Offset.Zero, d)
+                        }
                     }
                 }
             }
@@ -467,16 +585,22 @@ fun LockScreenPreview(
     }
 }
 
+/** The notification card's height in the preview (one card). */
+private const val CARD_H_DP = 72f
+/** SystemUI's keyguard_affordance_fixed_height / width. */
+private const val SHORTCUT_DP = 48f
+
 /**
  * IchthysOS Living Sky in the preview: the grade of the moment, the weather the grade paints into
  * the scene, and (in the editor's own preview) its frames, as SystemUI's LivingSkyMotion; shared by
  * the backdrop and the subject drawn over the clock.
  */
-private class PreviewSky(val width: Int, val height: Int) {
+class PreviewSky(val width: Int, val height: Int) {
     var grade: LivingSky.Grade? = null
     var info: LivingSky.SkyInfo? = null
     var intensity = 1f
     var weather: LivingSky.Weather? = null
+    var sun: LivingSky.Sun? = null
     var time = 0f
     var flash = 0f
     val frame = mutableLongStateOf(0L)
@@ -512,7 +636,7 @@ private fun rememberPreviewSky(
     }
     val info = picture.skyInfo ?: LivingSky.SkyInfo.UNKNOWN
     val weather = if (design.skyWeather) now?.let { LivingSky.weatherFor(it.code) } else null
-    val grade =
+    val sunAndGrade =
         remember(tick, minute, weather, info, now?.sunrise, now?.sunset) {
             val times = LivingSky.sunTimes(context)
             val sun =
@@ -520,9 +644,11 @@ private fun rememberPreviewSky(
                     LivingSky.sun(times, minute,
                         java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR))
                 } else LivingSky.sunNow(times)
-            LivingSky.grade(sun, weather, info.horizon, LivingSky.moonPhase())
+            sun to LivingSky.grade(sun, weather, info.horizon, LivingSky.moonPhase())
         }
+    val grade = sunAndGrade.second
     sky.grade = grade
+    sky.sun = sunAndGrade.first
     sky.info = info
     sky.intensity = design.skyIntensity / 100f
     // IchthysOS: the Depth face's contrast follows the preview's graded sky (as on the lock screen).
@@ -610,16 +736,18 @@ private fun LivingSkyImage(sky: PreviewSky, picture: LockPicture, mask: Bitmap?,
 }
 
 /**
- * IchthysOS projected clock: the Depth face's digits painted onto [quad] (fractions) of the
- * wallpaper's wall, through the same renderer SystemUI's depth layers use (ProjectedClock), at the
- * time now (a new minute redraws it). The picture itself is the wall: its light tints the paint,
- * its shading is multiplied into it.
+ * IchthysOS projected clock: the Depth face's digits on [surface] of the wallpaper in the design's
+ * style, through the same renderer SystemUI's depth layers use (ProjectedClock), at the time now
+ * (a new minute redraws it). The picture itself is the wall: its light tints the paint, its
+ * shading is multiplied into it; the light of the moment comes from the preview's Living Sky (its
+ * scrubbed minute too), else from the clock.
  */
 @Composable
 private fun ProjectedClockImage(
     design: LockDesign,
     picture: LockPicture,
-    quad: FloatArray,
+    surface: ProjectedClock.Surface,
+    sky: PreviewSky?,
     accent: Int,
     w: Int,
     h: Int,
@@ -627,7 +755,7 @@ private fun ProjectedClockImage(
 ) {
     val wall = picture.source ?: return
     val context = LocalContext.current
-    val renderer = remember { com.android.settingslib.ichthys.clock.ProjectedClock.Renderer() }
+    val renderer = remember { ProjectedClock.Renderer() }
     var tick by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -640,13 +768,25 @@ private fun ProjectedClockImage(
         tick
         val c = java.util.Calendar.getInstance()
         val h24 = c.get(java.util.Calendar.HOUR_OF_DAY)
+        val minute = c.get(java.util.Calendar.MINUTE)
         val hour =
             if (android.text.format.DateFormat.is24HourFormat(context)) h24
             else (h24 % 12).let { if (it == 0) 12 else it }
+        val g = sky?.grade
+        val sun = sky?.sun
+        val light =
+            if (g != null && sun != null) {
+                ProjectedClock.Light(
+                    exposure = kotlin.math.sqrt(g.exposure),
+                    night = g.nightness.coerceIn(0f, 1f),
+                    sunX = g.sunX,
+                    sunY = g.sunY,
+                    lowSun = (1f - sun.elevation / 40f).coerceIn(0f, 1f),
+                )
+            } else ProjectedClock.Light.forClock(h24, minute)
         drawIntoCanvas {
-            renderer.draw(it.nativeCanvas, w, h, quad, hour, c.get(java.util.Calendar.MINUTE),
-                design.font, colour, design.opacity.coerceIn(0, 100) / 100f, wall, wall, 1f, 0f,
-                density)
+            renderer.draw(it.nativeCanvas, w, h, surface, design.projectedStyle, hour, minute, design.font,
+                colour, design.opacity.coerceIn(0, 100) / 100f, wall, wall, light, 0f, density)
         }
     }
 }
@@ -670,6 +810,8 @@ private class FrameMotion {
     private var lastRot = 0f
     private var lastPivot = Offset.Zero
     private var lastHandles = false
+
+    fun alphaNow(): Float = alpha.value
 
     suspend fun retarget(selected: LockElement?, density: Float) {
         if (selected == null) {
@@ -731,6 +873,100 @@ fun MiniLock(design: LockDesign, picture: LockPicture, modifier: Modifier = Modi
     LockScreenPreview(design, picture, modifier, chrome = false, rounded = false)
 }
 
+/** A small lock screen WITH its chrome (dock, cards, shortcuts, fingerprint): the notification chips. */
+@Composable
+fun MiniLockChrome(design: LockDesign, picture: LockPicture, modifier: Modifier = Modifier) {
+    LockScreenPreview(design, picture, modifier, chrome = true, rounded = false)
+}
+
+/** The lock screen's off-white ink (the clock's default), as the dock draws with. */
+private val INK = Color(0xFFF6F1EA)
+
+/**
+ * IchthysOS Quiet dock, previewed: the icons of a few of the owner's own apps (the launcher's first
+ * ones, so the row looks like this phone's), the hairline, the newest line; in [glance] the count
+ * rings and "N notifications · unlock to read". Icons load off the main thread ([live] previews
+ * only; thumbnails draw quiet discs).
+ */
+@Composable
+private fun PreviewDock(at: Rect, glance: Boolean, live: Boolean) {
+    val density = LocalDensity.current
+    val context = LocalContext.current
+    val icons by produceState<List<ImageBitmap>>(emptyList(), live) {
+        if (!live) return@produceState
+        value = withContext(Dispatchers.IO) { sampleAppIcons(context) }
+    }
+    Column(
+        Modifier.offset { IntOffset(at.left.roundToInt(), at.top.roundToInt()) }
+            .size(with(density) { at.width.toDp() }, with(density) { at.height.toDp() }),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(LockNotifications.DOCK_ICON_GAP_DP.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.graphicsLayer { alpha = LockNotifications.ALPHA_AWAKE },
+        ) {
+            val counts = listOf(3, 2, 1, 1)
+            for (i in 0 until 4) {
+                if (glance) {
+                    Box(Modifier.size(LockNotifications.DOCK_ICON_DP.dp), contentAlignment = Alignment.Center) {
+                        Canvas(Modifier.size(LockNotifications.DOCK_ICON_DP.dp)) {
+                            drawCircle(INK.copy(alpha = 0.7f), size.minDimension / 2f - 0.75f * density.density,
+                                style = Stroke(1f * density.density))
+                        }
+                        Text("${counts[i]}", fontSize = 10.sp, color = INK, maxLines = 1)
+                    }
+                } else {
+                    val img = icons.getOrNull(i)
+                    if (img != null) Image(img, null, Modifier.size(LockNotifications.DOCK_ICON_DP.dp))
+                    else Canvas(Modifier.size(LockNotifications.DOCK_ICON_DP.dp)) {
+                        drawCircle(INK.copy(alpha = 0.3f), size.minDimension / 2f)
+                    }
+                }
+            }
+            Text("+3", fontSize = 11.sp, color = INK, maxLines = 1)
+        }
+        Spacer(Modifier.height(LockNotifications.DOCK_HAIRLINE_GAP_DP.dp))
+        Box(Modifier.width(132.dp).height(1.dp).background(INK.copy(alpha = 0.38f)))
+        Spacer(Modifier.height(LockNotifications.DOCK_LINE_GAP_DP.dp))
+        Text(
+            stringResource(
+                if (glance) R.string.ichthys_ed2_dock_sample_glance else R.string.ichthys_ed2_dock_sample_line),
+            fontSize = LockNotifications.DOCK_LINE_SP.sp, lineHeight = 14.sp, color = INK,
+            maxLines = 1, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.graphicsLayer { alpha = LockNotifications.LINE_DIM },
+        )
+    }
+}
+
+/** A few of this phone's app icons (launcher activities), small, for the dock's preview. */
+private fun sampleAppIcons(context: Context): List<ImageBitmap> =
+    try {
+        val pm = context.packageManager
+        val main = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val px = (LockNotifications.DOCK_ICON_DP * 2 * context.resources.displayMetrics.density).toInt()
+        pm.queryIntentActivities(main, 0)
+            .asSequence()
+            .map { it.activityInfo.packageName }
+            .distinct()
+            .filter { it != context.packageName }
+            .take(4)
+            .mapNotNull { pkg ->
+                try {
+                    val d = pm.getApplicationIcon(pkg)
+                    val b = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
+                    d.setBounds(0, 0, px, px)
+                    d.draw(android.graphics.Canvas(b))
+                    b.asImageBitmap()
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            .toList()
+    } catch (e: Exception) {
+        emptyList()
+    }
+
 @Composable
 private fun NotificationCard(at: Rect, showContent: Boolean) {
     val density = LocalDensity.current
@@ -765,7 +1001,7 @@ private fun Shortcut(at: Rect, icon: Drawable?, shown: Boolean = true) {
             .background(Color(0xB31E1A1E)),
         contentAlignment = Alignment.Center,
     ) {
-        if (image != null) Image(image, null, Modifier.size(28.dp))
+        if (image != null) Image(image, null, Modifier.size(24.dp))
     }
 }
 
@@ -777,6 +1013,84 @@ private fun toImage(d: Drawable): ImageBitmap {
     copy.setBounds(0, 0, 96, 96)
     copy.draw(c)
     return b.asImageBitmap()
+}
+
+/**
+ * IchthysOS: the fingerprint icon's styles as SystemUI's IchthysFpIconDrawable draws them (0
+ * system / 1 classic / 2 minimal / 3 dotted / 4 ring / 5 split / 6 radar / 7 pulse ring / 8 shoal),
+ * in outline, at [centre] with [radius]: the preview's sensor and the Fingerprint sheet's chips.
+ */
+fun DrawScope.fingerprintGlyph(style: Int, centre: Offset, radius: Float, ink: Color, d: Float) {
+    val stroke = Stroke(1.6f * d, cap = StrokeCap.Round)
+    val thin = Stroke(1.1f * d, cap = StrokeCap.Round)
+    fun arc(r: Float, start: Float, sweep: Float, s: Stroke = stroke, c: Color = ink) =
+        drawArc(c, start, sweep, false, Offset(centre.x - r, centre.y - r), Size(2 * r, 2 * r), style = s)
+    when (style) {
+        1 -> { // classic: concentric fingerprint arcs
+            for (i in 1..4) arc(radius * i / 4f, 200f, 320f - i * 25f)
+        }
+        2 -> { // minimal: three arcs
+            arc(radius * 0.45f, 215f, 290f)
+            arc(radius * 0.72f, 225f, 270f)
+            arc(radius, 235f, 250f)
+        }
+        3 -> { // dotted
+            for (ring in 1..3) {
+                val r = radius * ring / 3f
+                val n = 6 * ring
+                for (i in 0 until n) {
+                    val a = Math.toRadians(360.0 * i / n)
+                    drawCircle(ink, 1.3f * d, Offset(centre.x + r * cos(a).toFloat(), centre.y + r * sin(a).toFloat()))
+                }
+            }
+        }
+        4 -> { // ring with a small print
+            drawCircle(ink, radius, centre, style = stroke)
+            arc(radius * 0.3f, 210f, 300f, thin)
+            arc(radius * 0.52f, 220f, 280f, thin)
+        }
+        5 -> { // split: halves offset vertically
+            for (i in 1..3) {
+                val r = radius * i / 3f
+                arc(r, 100f, 160f, stroke)
+                drawArc(ink, 280f, 160f, false, Offset(centre.x - r, centre.y - r + 4 * d), Size(2 * r, 2 * r),
+                    style = stroke)
+            }
+        }
+        6 -> { // radar: rings and a sweep
+            drawCircle(ink, radius * 0.5f, centre, style = thin)
+            drawCircle(ink, radius, centre, style = thin)
+            drawLine(ink, centre, Offset(centre.x + radius * 0.72f, centre.y - radius * 0.69f), 1.6f * d, StrokeCap.Round)
+        }
+        7 -> { // pulse ring: thick inner, thin outer
+            drawCircle(ink, radius * 0.62f, centre, style = Stroke(3f * d))
+            drawCircle(ink.copy(alpha = 0.6f), radius, centre, style = thin)
+        }
+        8 -> { // shoal: honeycomb dots in a circle
+            val step = radius * 0.42f
+            var row = -2
+            while (row <= 2) {
+                val y = centre.y + row * step * 0.87f
+                val off = if (row % 2 == 0) 0f else step / 2f
+                var col = -3
+                while (col <= 3) {
+                    val x = centre.x + col * step + off
+                    if ((x - centre.x) * (x - centre.x) + (y - centre.y) * (y - centre.y) <= radius * radius) {
+                        drawCircle(ink, 1.5f * d, Offset(x, y))
+                    }
+                    col++
+                }
+                row++
+            }
+        }
+        else -> { // system: the stock print
+            arc(radius * 0.35f, 220f, 280f, thin)
+            arc(radius * 0.6f, 215f, 290f, thin)
+            arc(radius * 0.85f, 210f, 300f, thin)
+            drawLine(ink, Offset(centre.x, centre.y - radius * 0.1f), Offset(centre.x, centre.y + radius * 0.5f),
+                1.1f * d, StrokeCap.Round)
+        }
+    }
 }
 
 /**
@@ -817,7 +1131,9 @@ private class FaceFrame(context: Context, attrs: AttributeSet? = null) : FrameLa
         // IchthysOS: moving, sizing or turning the clock changes only where it is drawn (the
         // preview's offset and scale, outside this view). Re-applying every option to the face's
         // views on each frame of a drag made the editor stutter; only a real change does it.
-        val look = d.copy(dx = 0f, dy = 0f, scale = 1f, rot = if (d.rot != 0f) 1f else 0f)
+        // IchthysOS projected clock: nor does the surface (the depth layers draw the digits).
+        val look = d.copy(dx = 0f, dy = 0f, scale = 1f, rot = if (d.rot != 0f) 1f else 0f, surface = null,
+            notifAnchor = 0)
         if (look == boundLook && p === boundPicture && accent == boundAccent && tag == d.style) {
             place()
             if (!d.isDepthFace && onContent != null) post { emitContent() }
@@ -1081,15 +1397,29 @@ fun DrawScope.selectionFrame(r: Rect, handles: Boolean, density: Float, alpha: F
     }
 }
 
-/** Guard rails: the zones a clock should keep clear (status bar, fingerprint, shortcuts). */
-fun DrawScope.guardRails(density: Float) {
-    val rail = Color(0x55F6F1EA)
+/**
+ * Guard rails: the zones the moved thing should keep clear, from the lock screen's own bottom
+ * model ([LockLayout.zone]): the status bar, the sensor's keep-out, the dock's band and the
+ * shortcuts. The one being dragged towards a zone sees it light up ([hot]).
+ */
+fun DrawScope.guardRails(lay: LockLayout, density: Float, hot: Boolean = false) {
+    val rail = if (hot) Color(0xCCFFB4A2) else Color(0x55F6F1EA)
+    val fill = if (hot) Color(0x33FFB4A2) else Color(0x22F6F1EA)
     val dash = PathEffect.dashPathEffect(floatArrayOf(12f, 10f))
-    drawRect(Color(0x22F6F1EA), size = Size(size.width, 40 * density))
-    drawCircle(rail, 60 * density, Offset(size.width / 2f, size.height * 0.865f),
-        style = Stroke(2f, pathEffect = dash))
-    val r = 34 * density
-    drawCircle(rail, r, Offset(r * 1.6f, size.height - r * 2.4f), style = Stroke(2f, pathEffect = dash))
-    drawCircle(rail, r, Offset(size.width - r * 1.6f, size.height - r * 2.4f),
-        style = Stroke(2f, pathEffect = dash))
+    drawRect(fill, size = Size(size.width, LockKeys.STATUS_BAR_DP * density))
+    val z = lay.zone
+    if (z != null) {
+        // The keep-out around the sensor: a soft band, the sensor's own circle inside it.
+        drawRect(fill, Offset(0f, z.keepOutTop), Size(size.width, z.keepOutBottom - z.keepOutTop))
+        drawCircle(rail, lay.sensor.width / 2f, lay.sensor.center, style = Stroke(2f, pathEffect = dash))
+        if (z.dockTop < z.dockBottom - 1f) {
+            drawRoundRect(rail, Offset(LockNotifications.DOCK_SIDE_DP * density - 8 * density, z.dockTop - 6 * density),
+                Size(size.width - 2 * (LockNotifications.DOCK_SIDE_DP * density - 8 * density),
+                    z.dockBottom - z.dockTop + 12 * density),
+                androidx.compose.ui.geometry.CornerRadius(14 * density), style = Stroke(2f, pathEffect = dash))
+        }
+    }
+    for (e in listOf(LockElement.SHORTCUT_START, LockElement.SHORTCUT_END)) {
+        lay.rects[e]?.let { drawCircle(rail, it.width / 2f + 6 * density, it.center, style = Stroke(2f, pathEffect = dash)) }
+    }
 }
