@@ -80,6 +80,9 @@ public class DangerSwitchPreference extends SecureSettingSwitchPreference {
             final Drawable glyph = icon.getDrawable().mutate();
             glyph.setTint(0xFFFFFFFF);
             icon.setImageDrawable(glyph);
+            // IchthysOS: the row's ImageView tint (the accent) won over the drawable's own tint,
+            // leaving a pink glyph on the red card.
+            icon.setImageTintList(android.content.res.ColorStateList.valueOf(0xFFFFFFFF));
         }
     }
 
