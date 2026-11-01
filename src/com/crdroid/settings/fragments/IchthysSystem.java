@@ -26,6 +26,7 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 
 import com.android.internal.logging.nano.MetricsProto;
@@ -43,7 +44,7 @@ import java.util.List;
 /**
  * IchthysOS &gt; System: how the phone behaves. Links to Buttons &amp; gestures, Notifications and
  * Sound &amp; haptics, then charging control, Smart Pixels, the screenshot preview duration, the
- * duress PIN, and the About rows (changelog, source, community).
+ * duress PIN, auto restart when locked, and the About rows (changelog, source, community).
  */
 @SearchIndexable
 public class IchthysSystem extends SettingsPreferenceFragment {
@@ -54,6 +55,8 @@ public class IchthysSystem extends SettingsPreferenceFragment {
     private static final String KEY_SOURCE = "crdroid_source";
     private static final String KEY_TELEGRAM = "crdroid_telegram";
     private static final String KEY_CHANGELOG = "crdroid_changelog";
+    /** IchthysOS: auto reboot (IchthysAutoRebootService), Settings.Global, milliseconds. */
+    private static final String KEY_AUTO_REBOOT = "ichthys_auto_reboot_timeout";
     /** What ChangelogFragment shows. IchthysOS: nothing in the build installs it yet. */
     private static final String CHANGELOG_PATH = "/system/etc/Changelog.txt";
 
@@ -89,6 +92,24 @@ public class IchthysSystem extends SettingsPreferenceFragment {
             if (chargingControl != null && chargingControl.getParent() != null) {
                 chargingControl.getParent().removePreference(chargingControl);
             }
+        }
+
+        // IchthysOS: a timeout that isn't one of the choices (an adb test value) has no entry;
+        // say what it is instead of showing an empty summary.
+        final ListPreference autoReboot = findPreference(KEY_AUTO_REBOOT);
+        if (autoReboot != null) {
+            autoReboot.setSummaryProvider(p -> {
+                final ListPreference list = (ListPreference) p;
+                if (list.getEntry() != null) return list.getEntry();
+                // Never empty: GlobalSettingListPreference would then call setSummary(), which
+                // throws while a SummaryProvider is set.
+                try {
+                    final long ms = Long.parseLong(list.getValue());
+                    return getString(R.string.ichthys_auto_reboot_custom, (int) (ms / 60000L));
+                } catch (NumberFormatException | NullPointerException e) {
+                    return String.valueOf(list.getValue());
+                }
+            });
         }
 
         // IchthysOS: the changelog page reads CHANGELOG_PATH and is empty without it, so the row

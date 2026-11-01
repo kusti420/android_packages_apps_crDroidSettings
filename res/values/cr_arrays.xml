@@ -1526,4 +1526,34 @@
         <item>2</item>
     </string-array>
 
+    <!-- IchthysOS: auto reboot (Settings.Global ichthys_auto_reboot_timeout, milliseconds).
+         IchthysOptions.AUTO_REBOOT_MS (ichthys.nix security.autoReboot) holds the same values. -->
+    <string-array name="ichthys_auto_reboot_entries" translatable="false">
+        <item>@string/ichthys_auto_reboot_off</item>
+        <item>@string/ichthys_auto_reboot_1h</item>
+        <item>@string/ichthys_auto_reboot_2h</item>
+        <item>@string/ichthys_auto_reboot_4h</item>
+        <item>@string/ichthys_auto_reboot_8h</item>
+        <item>@string/ichthys_auto_reboot_12h</item>
+        <item>@string/ichthys_auto_reboot_18h</item>
+        <item>@string/ichthys_auto_reboot_24h</item>
+        <item>@string/ichthys_auto_reboot_36h</item>
+        <item>@string/ichthys_auto_reboot_48h</item>
+        <item>@string/ichthys_auto_reboot_72h</item>
+    </string-array>
+
+    <string-array name="ichthys_auto_reboot_values" translatable="false">
+        <item>0</item>
+        <item>3600000</item>
+        <item>7200000</item>
+        <item>14400000</item>
+        <item>28800000</item>
+        <item>43200000</item>
+        <item>64800000</item>
+        <item>86400000</item>
+        <item>129600000</item>
+        <item>172800000</item>
+        <item>259200000</item>
+    </string-array>
+
 </resources>

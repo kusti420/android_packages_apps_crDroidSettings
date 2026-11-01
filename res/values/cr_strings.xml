@@ -1758,6 +1758,7 @@
     <string name="duress_final_warning_confirm">I understand, set the code</string>
     <string name="duress_saved">Emergency wipe code set</string>
     <string name="duress_removed">Emergency wipe code removed</string>
+
     <string name="duress_error_mismatch">The two entries do not match</string>
     <string name="duress_error_too_short">Must be at least %1$d characters</string>
     <string name="duress_error_too_short_generic">That code is too short</string>
@@ -1766,6 +1767,22 @@
     <string name="duress_error_autoconfirm_length">PIN auto-confirm is on, so the emergency PIN must have exactly the same number of digits as your real PIN — otherwise it could never be typed at the lock screen</string>
     <string name="duress_error_generic">Could not set the emergency wipe code</string>
     <string name="duress_unsupported_type">Emergency wipe codes are only supported when your lock screen uses a PIN or a password</string>
+
+    <!-- IchthysOS: auto reboot after the phone stayed locked (IchthysAutoRebootService) -->
+    <string name="ichthys_auto_reboot_title">Auto restart when locked</string>
+    <string name="ichthys_auto_reboot_custom">%1$d minutes (set outside Settings)</string>
+    <string name="ichthys_auto_reboot_keywords" translatable="false">auto reboot, auto restart, automatic reboot, inactivity reboot, reboot timer, restart when locked, before first unlock, bfu, data at rest</string>
+    <string name="ichthys_auto_reboot_off">Off</string>
+    <string name="ichthys_auto_reboot_1h">After 1 hour</string>
+    <string name="ichthys_auto_reboot_2h">After 2 hours</string>
+    <string name="ichthys_auto_reboot_4h">After 4 hours</string>
+    <string name="ichthys_auto_reboot_8h">After 8 hours</string>
+    <string name="ichthys_auto_reboot_12h">After 12 hours</string>
+    <string name="ichthys_auto_reboot_18h">After 18 hours (default)</string>
+    <string name="ichthys_auto_reboot_24h">After 24 hours</string>
+    <string name="ichthys_auto_reboot_36h">After 36 hours</string>
+    <string name="ichthys_auto_reboot_48h">After 48 hours</string>
+    <string name="ichthys_auto_reboot_72h">After 72 hours</string>
 
     <!-- Navbar style picker: IchthysOS code-drawn styles (navBar.style) -->
     <string name="navbar_style_shoal">Shoal (outlined circles, accent home)</string>

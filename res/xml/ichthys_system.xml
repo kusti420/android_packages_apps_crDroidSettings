@@ -73,6 +73,21 @@
             android:summary="@string/duress_credential_summary"
             settings:keywords="@string/duress_credential_keywords"
             android:fragment="com.crdroid.settings.fragments.security.DuressCredentialSettings" />
+
+        <!-- IchthysOS: auto reboot. IchthysAutoRebootService (system_server) restarts the phone
+             after it stayed locked this long, so user data is at rest again. The key holds
+             milliseconds, 0 is off; unset is 18 hours (the defaultValue here and in the service,
+             ichthys.nix security.autoReboot). -->
+        <com.crdroid.settings.preferences.GlobalSettingListPreference
+            android:key="ichthys_auto_reboot_timeout"
+            android:icon="@drawable/ic_restart"
+            android:title="@string/ichthys_auto_reboot_title"
+            android:dialogTitle="@string/ichthys_auto_reboot_title"
+            android:entries="@array/ichthys_auto_reboot_entries"
+            android:entryValues="@array/ichthys_auto_reboot_values"
+            android:summary="%s"
+            settings:keywords="@string/ichthys_auto_reboot_keywords"
+            android:defaultValue="64800000" />
     </PreferenceCategory>
 
     <!-- ichthys.nix -->
