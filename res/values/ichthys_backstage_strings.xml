@@ -57,4 +57,12 @@
     <!-- Summary of the custom duration: hours and minutes, e.g. "6 h 30 min". -->
     <string name="backstage_max_minutes_hours_minutes"><xliff:g id="hours" example="6">%1$d</xliff:g> h <xliff:g id="minutes" example="30">%2$d</xliff:g> min</string>
     <string name="backstage_max_minutes_hours"><xliff:g id="hours" example="6">%1$d</xliff:g> h</string>
+    <string name="backstage_picker_h">h</string>
+    <string name="backstage_picker_m">min</string>
+    <string name="backstage_picker_hours" translatable="false">%1$d</string>
+    <string name="backstage_picker_minutes" translatable="false">%1$s</string>
+    <plurals name="backstage_duration_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
 </resources>

@@ -651,10 +651,11 @@ private fun rememberPreviewSky(
     sky.sun = sunAndGrade.first
     sky.info = info
     sky.intensity = design.skyIntensity / 100f
-    // IchthysOS: the Depth face's contrast follows the preview's graded sky (as on the lock screen).
+    // IchthysOS: the Depth face's contrast and its glass's tint follow the preview's graded sky
+    // (as on the lock screen: one grade for the picture and the time on it).
     SideEffect {
         com.android.settingslib.ichthys.clock.ClockBackdrop.publish(
-            LivingSky.brightnessBehindClock(grade, sky.intensity, info))
+            LivingSky.colourBehindClock(grade, sky.intensity, info), info.skyColour)
     }
 
     val saver = remember {
@@ -782,6 +783,8 @@ private fun ProjectedClockImage(
                     sunX = g.sunX,
                     sunY = g.sunY,
                     lowSun = (1f - sun.elevation / 40f).coerceIn(0f, 1f),
+                    // IchthysOS: the wall lit as the graded land (as on the lock screen).
+                    land = LivingSky.landLight(g),
                 )
             } else ProjectedClock.Light.forClock(h24, minute)
         drawIntoCanvas {

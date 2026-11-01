@@ -34,7 +34,6 @@ import com.android.settingslib.search.SearchIndexable;
 
 import com.crdroid.settings.fragments.backstage.Backstage;
 import com.crdroid.settings.fragments.misc.UnrestrictedBackgroundApps;
-import com.crdroid.settings.preferences.CustomSeekBarPreference;
 
 /**
  * IchthysOS &gt; Apps &gt; Background: what apps may do while they are not on screen. Unrestricted
@@ -61,7 +60,7 @@ public class Background extends SettingsPreferenceFragment {
     private Preference mUnrestrictedPersist;
     private Preference mBackstage;
     private ListPreference mBackstageMaxHours;
-    private CustomSeekBarPreference mBackstageMaxMinutes;
+    private Preference mBackstageMaxMinutes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,22 +72,25 @@ public class Background extends SettingsPreferenceFragment {
         setupBackstageLimit();
     }
 
-    // The custom duration row only applies while the list says "Custom"; its summary reads in
-    // hours and minutes (the slider itself counts minutes).
+    // The custom duration row only applies while the list says "Custom". Tapping it opens a
+    // Clock-app style timer picker: an hours wheel and a minutes wheel (5-minute steps).
+    private static final int DEFAULT_MAX_MINUTES = 90;
+    private static final int MAX_MINUTES = 48 * 60;
+
     private void setupBackstageLimit() {
         mBackstageMaxHours = findPreference(KEY_BACKSTAGE_MAX_HOURS);
         mBackstageMaxMinutes = findPreference(KEY_BACKSTAGE_MAX_MINUTES);
         if (mBackstageMaxHours == null || mBackstageMaxMinutes == null) return;
 
         mBackstageMaxHours.setOnPreferenceChangeListener((p, v) -> {
-            updateBackstageLimit(Integer.parseInt((String) v), mBackstageMaxMinutes.getValue());
+            updateBackstageLimit(Integer.parseInt((String) v));
             return true;
         });
-        mBackstageMaxMinutes.setOnPreferenceChangeListener((p, v) -> {
-            updateBackstageLimit(backstageMaxHours(), (Integer) v);
+        mBackstageMaxMinutes.setOnPreferenceClickListener(p -> {
+            showDurationPicker();
             return true;
         });
-        updateBackstageLimit(backstageMaxHours(), mBackstageMaxMinutes.getValue());
+        updateBackstageLimit(backstageMaxHours());
     }
 
     private int backstageMaxHours() {
@@ -96,20 +98,78 @@ public class Background extends SettingsPreferenceFragment {
                 ? 0 : Integer.parseInt(mBackstageMaxHours.getValue());
     }
 
-    private void updateBackstageLimit(int hours, int minutes) {
+    private int backstageMaxMinutes() {
+        return Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                KEY_BACKSTAGE_MAX_MINUTES, DEFAULT_MAX_MINUTES, UserHandle.USER_CURRENT);
+    }
+
+    private void updateBackstageLimit(int hours) {
         if (mBackstageMaxMinutes == null) return;
         mBackstageMaxMinutes.setVisible(hours == MAX_HOURS_CUSTOM);
-        // CustomSeekBarPreference prefixes the value ("390 min"); the user summary adds the
-        // readable form once it is an hour or more.
-        if (minutes < 60) {
-            mBackstageMaxMinutes.setSummary(null);
-        } else if (minutes % 60 == 0) {
-            mBackstageMaxMinutes.setSummary(
-                    getString(R.string.backstage_max_minutes_hours, minutes / 60));
-        } else {
-            mBackstageMaxMinutes.setSummary(getString(
-                    R.string.backstage_max_minutes_hours_minutes, minutes / 60, minutes % 60));
+        mBackstageMaxMinutes.setSummary(formatDuration(backstageMaxMinutes()));
+    }
+
+    private String formatDuration(int minutes) {
+        final int h = minutes / 60;
+        final int m = minutes % 60;
+        if (h == 0) {
+            return getResources().getQuantityString(R.plurals.backstage_duration_minutes, m, m);
         }
+        return m == 0
+                ? getString(R.string.backstage_max_minutes_hours, h)
+                : getString(R.string.backstage_max_minutes_hours_minutes, h, m);
+    }
+
+    private void showDurationPicker() {
+        final Context ctx = getContext();
+        final int current = backstageMaxMinutes();
+        final android.widget.NumberPicker hours = new android.widget.NumberPicker(ctx);
+        hours.setMinValue(0);
+        hours.setMaxValue(MAX_MINUTES / 60);
+        hours.setValue(Math.min(current / 60, MAX_MINUTES / 60));
+        final String[] minuteLabels = new String[12];
+        for (int i = 0; i < 12; i++) minuteLabels[i] = String.format("%02d", i * 5);
+        final android.widget.NumberPicker mins = new android.widget.NumberPicker(ctx);
+        mins.setMinValue(0);
+        mins.setMaxValue(11);
+        mins.setDisplayedValues(minuteLabels);
+        mins.setValue((current % 60) / 5);
+        hours.setFormatter(v -> getString(R.string.backstage_picker_hours, v));
+        mins.setFormatter(v -> getString(R.string.backstage_picker_minutes, minuteLabels[v]));
+
+        final android.widget.LinearLayout row = new android.widget.LinearLayout(ctx);
+        row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        row.setGravity(android.view.Gravity.CENTER);
+        final int pad = Math.round(16 * getResources().getDisplayMetrics().density);
+        row.setPadding(pad, pad, pad, 0);
+        final android.widget.TextView hLabel = label(ctx, R.string.backstage_picker_h);
+        final android.widget.TextView mLabel = label(ctx, R.string.backstage_picker_m);
+        row.addView(hours);
+        row.addView(hLabel);
+        row.addView(mins);
+        row.addView(mLabel);
+
+        new androidx.appcompat.app.AlertDialog.Builder(ctx)
+                .setTitle(R.string.backstage_max_minutes_title)
+                .setView(row)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, (d, w) -> {
+                    int value = hours.getValue() * 60 + mins.getValue() * 5;
+                    value = Math.max(5, Math.min(MAX_MINUTES, value));
+                    Settings.Secure.putIntForUser(ctx.getContentResolver(),
+                            KEY_BACKSTAGE_MAX_MINUTES, value, UserHandle.USER_CURRENT);
+                    updateBackstageLimit(backstageMaxHours());
+                })
+                .show();
+    }
+
+    private static android.widget.TextView label(Context ctx, int res) {
+        final android.widget.TextView t = new android.widget.TextView(ctx);
+        t.setText(res);
+        t.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18);
+        final int pad = Math.round(8 * ctx.getResources().getDisplayMetrics().density);
+        t.setPadding(pad, 0, pad * 2, 0);
+        return t;
     }
 
     // The mode row explains what the chosen mode does; the app picker and keep-after-reboot rows

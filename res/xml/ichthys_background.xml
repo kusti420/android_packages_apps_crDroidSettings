@@ -83,15 +83,12 @@
         <!-- The custom duration behind the list's "Custom" (-1) entry; Background.java shows it
              only then and keeps its summary in hours and minutes. Hand-written option
              background.backstageMaxMinutes (IchthysOptions.java). -->
-        <com.crdroid.settings.preferences.SecureSettingSeekBarPreference
+        <!-- Opens a Clock-style hours / minutes picker (Background.java); no slider. -->
+        <Preference
             android:key="ichthys_backstage_max_minutes"
             android:icon="@drawable/ic_timer_outline"
             android:title="@string/backstage_max_minutes_title"
-            android:defaultValue="90"
-            android:max="2880"
-            settings:min="5"
-            settings:interval="5"
-            settings:units="@string/backstage_max_minutes_unit" />
+            android:persistent="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

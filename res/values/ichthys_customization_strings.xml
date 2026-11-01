@@ -96,12 +96,16 @@
     <string name="ichthys_notif_dot_color_accent">Accent</string>
     <string name="ichthys_notif_dot_color_white">White</string>
     <string name="ichthys_notif_dot_color_app">Colour of the newest app</string>
+    <!-- IchthysOS: the default, like a Sony Xperia's notification LED: the notification's own colour, white when it has none. Stored value 3. -->
+    <string name="ichthys_notif_dot_color_default">Default (Sony): the notification\'s colour, else white</string>
     <string-array name="ichthys_notif_dot_color_entries" translatable="false">
+        <item>@string/ichthys_notif_dot_color_default</item>
         <item>@string/ichthys_notif_dot_color_accent</item>
         <item>@string/ichthys_notif_dot_color_white</item>
         <item>@string/ichthys_notif_dot_color_app</item>
     </string-array>
     <string-array name="ichthys_notif_dot_color_values" translatable="false">
+        <item>3</item>
         <item>0</item>
         <item>1</item>
         <item>2</item>

@@ -167,7 +167,8 @@ public class StatusBar extends SettingsPreferenceFragment implements
         Settings.System.putIntForUser(resolver, NOTIF_DOT_ENABLED, 1, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, NOTIF_DOT_LOGIC, 0, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, NOTIF_DOT_AOD, 1, UserHandle.USER_CURRENT);
-        Settings.System.putIntForUser(resolver, NOTIF_DOT_COLOR, 0, UserHandle.USER_CURRENT);
+        // IchthysOS: 3 = Default (Sony), the notification's own colour, else white.
+        Settings.System.putIntForUser(resolver, NOTIF_DOT_COLOR, 3, UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, NOTIF_DOT_REPLACE_ICONS, 0,
                 UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, PRIVACY_INDICATOR_STYLE,
