@@ -38,7 +38,7 @@
             android:summary="%s"
             android:entries="@array/ichthys_fp_anim_effect_entries"
             android:entryValues="@array/ichthys_fp_anim_effect_values"
-            android:defaultValue="0" />
+            android:defaultValue="4" />
 
         <!-- Which animation of the pack plays; used by the "Animation pack" effect. -->
         <com.crdroid.settings.preferences.UdfpsPackPreference
@@ -105,7 +105,7 @@
             android:key="ichthys_udfps_anim_enroll"
             android:title="@string/ichthys_fp_anim_enroll_title"
             android:summary="@string/ichthys_fp_anim_enroll_summary"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
 
     </PreferenceCategory>
 
@@ -155,7 +155,7 @@
             android:summary="%s"
             android:entries="@array/ichthys_fp_icon_style_entries"
             android:entryValues="@array/ichthys_fp_icon_style_values"
-            android:defaultValue="0" />
+            android:defaultValue="8" />
 
         <!-- Which icon of the pack shows; used by the "System" icon style. -->
         <com.crdroid.settings.preferences.UdfpsPackPreference

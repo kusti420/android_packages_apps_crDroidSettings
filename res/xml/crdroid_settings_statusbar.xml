@@ -344,7 +344,7 @@
             android:icon="@drawable/ic_double_tap"
             android:title="@string/statusbar_doubletap_sleep_title"
             android:summary="@string/statusbar_doubletap_sleep_summary"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="status_bar_brightness_control"
             android:icon="@drawable/ic_brightness_auto"

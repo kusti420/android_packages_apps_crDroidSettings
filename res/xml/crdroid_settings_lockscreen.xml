@@ -114,7 +114,7 @@
                 android:icon="@drawable/ic_double_tap"
                 android:title="@string/lockscreen_doubletap_sleep_title"
                 android:summary="@string/lockscreen_doubletap_sleep_summary"
-                android:defaultValue="true" />
+                android:defaultValue="false" />
     </PreferenceCategory>
 
 

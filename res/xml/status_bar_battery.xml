@@ -81,7 +81,7 @@
             android:key="ichthys_battery_charging_indicator"
             android:title="@string/ichthys_battery_charging_indicator_title"
             android:summary="@string/ichthys_battery_charging_indicator_summary"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
 
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="ichthys_battery_powersave_indicator"
