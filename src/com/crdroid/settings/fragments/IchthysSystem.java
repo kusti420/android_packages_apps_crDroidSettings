@@ -44,8 +44,9 @@ import java.util.List;
 /**
  * IchthysOS &gt; System: how the phone behaves. Links to Buttons &amp; gestures, Notifications and
  * Sound &amp; haptics, then charging control, the charging animation (style, and whether it
- * turns the screen on), Smart Pixels, the screenshot preview duration, the
- * duress PIN, auto restart when locked, and the About rows (changelog, source, community).
+ * turns the screen on), whether a cover magnet wakes the screen, Smart Pixels, the screenshot
+ * preview duration, the duress PIN, auto restart when locked, and the About rows (changelog,
+ * source, community).
  */
 @SearchIndexable
 public class IchthysSystem extends SettingsPreferenceFragment {
@@ -63,6 +64,8 @@ public class IchthysSystem extends SettingsPreferenceFragment {
     private static final String KEY_CHARGING_ANIM_WAKE = "ichthys_charging_animation_wake";
     private static final String CHARGING_ANIM_DEFAULT = "pulse";
     private static final String CHARGING_ANIM_OFF = "off";
+    /** IchthysOS: "Wake with cover magnet", read by PhoneWindowManager (Settings.System). */
+    private static final String KEY_LID_WAKE = "ichthys_lid_wake_enabled";
     /** What ChangelogFragment shows. IchthysOS: nothing in the build installs it yet. */
     private static final String CHANGELOG_PATH = "/system/etc/Changelog.txt";
 
@@ -181,6 +184,7 @@ public class IchthysSystem extends SettingsPreferenceFragment {
                 UserHandle.USER_CURRENT);
         Settings.System.putIntForUser(resolver, KEY_CHARGING_ANIM_WAKE, 0,
                 UserHandle.USER_CURRENT);
+        Settings.System.putIntForUser(resolver, KEY_LID_WAKE, 1, UserHandle.USER_CURRENT);
     }
 
     @Override

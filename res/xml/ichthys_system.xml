@@ -64,6 +64,18 @@
             android:summary="@string/ichthys_charging_animation_wake_summary"
             android:defaultValue="false" />
 
+        <!-- IchthysOS: the hall sensor reports a magnet as a closed lid; PhoneWindowManager
+             wakes the screen when it opens. Off: PhoneWindowManager ignores the lid switch and
+             treats the lid as always open (earbud cases and other magnets stop waking the
+             phone). Unset = on, the stock behaviour. -->
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="ichthys_lid_wake_enabled"
+            android:icon="@drawable/ic_wake"
+            android:title="@string/ichthys_lid_wake_title"
+            android:summary="@string/ichthys_lid_wake_summary"
+            settings:keywords="@string/ichthys_lid_wake_keywords"
+            android:defaultValue="true" />
+
         <!-- Smart Pixels -->
         <Preference
             android:key="smart_pixels"

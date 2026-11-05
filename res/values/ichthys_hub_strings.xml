@@ -79,6 +79,10 @@
     <string name="ichthys_sound_haptics_title">Sound &amp; haptics</string>
     <string name="ichthys_sound_haptics_summary">Volume panel and steps, adaptive playback, vibration</string>
     <string name="ichthys_system_battery_display_category">Battery and display</string>
+    <!-- IchthysOS: ichthys_lid_wake_enabled (PhoneWindowManager lid switch). -->
+    <string name="ichthys_lid_wake_title">Wake with cover magnet</string>
+    <string name="ichthys_lid_wake_summary">Turn the screen on or off when a magnetic cover opens or closes. Turn off if earbuds or other magnets wake the phone</string>
+    <string name="ichthys_lid_wake_keywords">flip cover, case, magnet, hall sensor, lid, earbuds, wake, screen turns on</string>
     <string name="ichthys_notifications_counts_category">Counts and limits</string>
     <string name="ichthys_gestures_statusbar_category">Status bar gestures</string>
     <string name="ichthys_gestures_lockscreen_category">Lock screen gestures</string>
