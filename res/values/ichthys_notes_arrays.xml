@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IchthysOS: choices of the quick settings notes page (crdroid_settings_quicksettings.xml). -->
+<resources>
+    <string-array name="ichthys_qs_notes_layout_entries">
+        <item>List</item>
+        <item>Two columns</item>
+    </string-array>
+    <string-array name="ichthys_qs_notes_layout_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="ichthys_qs_notes_ticked_entries">
+        <item>Sink to the bottom</item>
+        <item>Stay put</item>
+        <item>Hide</item>
+    </string-array>
+    <string-array name="ichthys_qs_notes_ticked_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="ichthys_qs_notes_locked_entries">
+        <item>Shapes only</item>
+        <item>Hide the page</item>
+    </string-array>
+    <string-array name="ichthys_qs_notes_locked_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+</resources>

@@ -235,7 +235,17 @@
 
     <!-- Quick settings: notes page left of the tiles -->
     <string name="ichthys_qs_notes_page_title">Notes page</string>
-    <string name="ichthys_qs_notes_page_summary">Swipe right on the tiles for pinned notes. While locked only their colours show; the text waits for unlock</string>
+    <string name="ichthys_qs_notes_page_summary">Swipe right on the tiles: write, tick and act without leaving quick settings</string>
+    <string name="ichthys_qs_notes_layout_title">Layout</string>
+    <string name="ichthys_qs_notes_actions_title">Tap to act</string>
+    <string name="ichthys_qs_notes_actions_summary">Codes copy, numbers dial, links open</string>
+    <string name="ichthys_qs_notes_clipboard_title">Offer the clipboard</string>
+    <string name="ichthys_qs_notes_clipboard_summary">Text copied in the last two minutes shows as a row you can pin</string>
+    <string name="ichthys_qs_notes_ticked_title">Ticked items</string>
+    <string name="ichthys_qs_notes_locked_title">On the lock screen</string>
+    <string name="ichthys_qs_notes_time_title">Show when a note was changed</string>
+    <string name="ichthys_qs_notes_colours_title">Note colours</string>
+    <string name="ichthys_qs_notes_colours_summary">Five tints derived from your accent</string>
 
     <!-- Clock picker: depth lock screen (tracker#58) -->
     <string name="ichthys_depth_title">Depth</string>

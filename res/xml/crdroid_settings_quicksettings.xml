@@ -190,13 +190,67 @@
             android:summary="@string/ichthys_qs_media_dock_custom_action_summary"
             android:defaultValue="false" />
 
-        <!-- IchthysOS: notes page left of the tiles in expanded quick settings.
-             Backend: Settings.System "qs_notes_page", observed by SystemUI QuickSettingsScene.kt. -->
+        <!-- IchthysOS: the notes page left of the tiles in expanded quick settings.
+             Backend: Settings.System qs_notes_* read live by SystemUI (ichthys/notes/ui). -->
         <com.crdroid.settings.preferences.SystemSettingSwitchPreference
             android:key="qs_notes_page"
             android:icon="@drawable/ic_pencil"
             android:title="@string/ichthys_qs_notes_page_title"
             android:summary="@string/ichthys_qs_notes_page_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_notes_layout"
+            android:dependency="qs_notes_page"
+            android:title="@string/ichthys_qs_notes_layout_title"
+            android:summary="%s"
+            android:entries="@array/ichthys_qs_notes_layout_entries"
+            android:entryValues="@array/ichthys_qs_notes_layout_values"
+            android:defaultValue="0" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="qs_notes_actions"
+            android:dependency="qs_notes_page"
+            android:title="@string/ichthys_qs_notes_actions_title"
+            android:summary="@string/ichthys_qs_notes_actions_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="qs_notes_clipboard"
+            android:dependency="qs_notes_page"
+            android:title="@string/ichthys_qs_notes_clipboard_title"
+            android:summary="@string/ichthys_qs_notes_clipboard_summary"
+            android:defaultValue="true" />
+
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_notes_ticked"
+            android:dependency="qs_notes_page"
+            android:title="@string/ichthys_qs_notes_ticked_title"
+            android:summary="%s"
+            android:entries="@array/ichthys_qs_notes_ticked_entries"
+            android:entryValues="@array/ichthys_qs_notes_ticked_values"
+            android:defaultValue="0" />
+
+        <com.crdroid.settings.preferences.SystemSettingListPreference
+            android:key="qs_notes_locked"
+            android:dependency="qs_notes_page"
+            android:title="@string/ichthys_qs_notes_locked_title"
+            android:summary="%s"
+            android:entries="@array/ichthys_qs_notes_locked_entries"
+            android:entryValues="@array/ichthys_qs_notes_locked_values"
+            android:defaultValue="0" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="qs_notes_time"
+            android:dependency="qs_notes_page"
+            android:title="@string/ichthys_qs_notes_time_title"
+            android:defaultValue="false" />
+
+        <com.crdroid.settings.preferences.SystemSettingSwitchPreference
+            android:key="qs_notes_colours"
+            android:dependency="qs_notes_page"
+            android:title="@string/ichthys_qs_notes_colours_title"
+            android:summary="@string/ichthys_qs_notes_colours_summary"
             android:defaultValue="true" />
 
     </PreferenceCategory>
