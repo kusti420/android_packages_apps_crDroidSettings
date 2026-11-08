@@ -22,7 +22,7 @@
          and goes back to its hidden screen when you leave it; switching it off here brings it
          back to the screen; hidden tasks still show in recents (services.md B11), so not
          "never shown anywhere"; a hidden app keeps the whole phone awake. -->
-    <string name="backstage_intro">Apps in Backstage keep running as if they were open on screen, for example to finish an upload that stops when you leave the app. You can use the phone and lock it as usual. Open an app from its icon, recents or its notification to use it; when you leave it, it goes back to running out of sight. To take an app out, switch it off here (it comes back on screen) or tap Stop in its notification (it closes). Add the Backstage tile to Quick Settings to send the app on screen with one tap. While an app runs out of sight the phone doesn\'t go into deep sleep, so Backstage uses a lot more battery. It is cleared when the phone restarts. Up to 3 apps at a time.</string>
+    <string name="backstage_intro">Apps in Backstage keep running as if they were open on screen, for example to finish an upload that stops when you leave the app. You can use the phone and lock it as usual. Open an app from its icon, recents or its notification to use it; when you leave it, it goes back to running out of sight. To take an app out, switch it off here (it comes back on screen) or tap Stop in its notification (it closes). Add the Backstage tile to Quick Settings to send the app on screen with one tap. While an app runs out of sight the phone doesn\'t go into deep sleep, so Backstage uses a lot more battery; an app you don\'t use for an hour (see Stop keeping the phone awake when unused) pauses until you open it again. It is cleared when the phone restarts. Up to 3 apps at a time.</string>
     <string name="backstage_apps_category">Apps</string>
     <string name="backstage_app_running">In Backstage</string>
     <string name="backstage_full">Backstage is full (3 apps)</string>
@@ -52,6 +52,27 @@
         <item>-1</item>
     </string-array>
     <!-- IchthysOS: the custom duration, shown only while "Custom" is chosen. -->
+    <!-- IchthysOS idle cap: a hidden app nobody uses (not opened, no network traffic) stops
+         keeping the phone awake after this long; it stays in Backstage, paused, until it is
+         opened again or Resume is tapped in its notification. %s is the chosen entry. -->
+    <string name="backstage_idle_minutes_title">Stop keeping the phone awake when unused</string>
+    <string name="backstage_idle_minutes_summary">%s. An app that isn\'t opened and moves no data for that long pauses until you open it again</string>
+    <string-array name="backstage_idle_minutes_entries" translatable="false">
+        <item>Never</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>4 hours</item>
+    </string-array>
+    <string-array name="backstage_idle_minutes_values" translatable="false">
+        <item>0</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>240</item>
+    </string-array>
     <string name="backstage_max_minutes_title">Custom duration</string>
     <string name="backstage_max_minutes_unit">min</string>
     <!-- Summary of the custom duration: hours and minutes, e.g. "6 h 30 min". -->

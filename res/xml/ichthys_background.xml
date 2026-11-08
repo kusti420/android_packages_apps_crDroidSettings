@@ -89,6 +89,18 @@
             android:icon="@drawable/ic_timer_outline"
             android:title="@string/backstage_max_minutes_title"
             android:persistent="false" />
+
+        <!-- IchthysOS idle cap (IchthysBackstageService KEY_IDLE_MINUTES, default 60, 0 = never):
+             a hidden app not used for this long stops keeping the phone awake. Hand-written
+             option background.backstageIdleMinutes (IchthysOptions.java). -->
+        <com.crdroid.settings.preferences.SecureSettingListPreference
+            android:key="ichthys_backstage_idle_minutes"
+            android:icon="@drawable/ic_timer_outline"
+            android:title="@string/backstage_idle_minutes_title"
+            android:summary="@string/backstage_idle_minutes_summary"
+            android:entries="@array/backstage_idle_minutes_entries"
+            android:entryValues="@array/backstage_idle_minutes_values"
+            android:defaultValue="60" />
     </PreferenceCategory>
 
     <PreferenceCategory

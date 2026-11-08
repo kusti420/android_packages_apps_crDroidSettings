@@ -54,6 +54,9 @@ public class Background extends SettingsPreferenceFragment {
     /** KEY_BACKSTAGE_MAX_HOURS value meaning "the custom duration in KEY_BACKSTAGE_MAX_MINUTES". */
     private static final int MAX_HOURS_CUSTOM = -1;
     private static final int DEFAULT_MAX_MINUTES = 90;
+    /** IchthysOS idle cap: IchthysBackstageService.KEY_IDLE_MINUTES / DEFAULT_IDLE_MINUTES. */
+    private static final String KEY_BACKSTAGE_IDLE_MINUTES = "ichthys_backstage_idle_minutes";
+    private static final int DEFAULT_IDLE_MINUTES = 60;
 
     private ListPreference mUnrestrictedMode;
     private Preference mUnrestrictedApps;
@@ -257,6 +260,8 @@ public class Background extends SettingsPreferenceFragment {
         Settings.Secure.putIntForUser(resolver, KEY_BACKSTAGE_MAX_HOURS, 0,
                 UserHandle.USER_CURRENT);
         Settings.Secure.putIntForUser(resolver, KEY_BACKSTAGE_MAX_MINUTES, DEFAULT_MAX_MINUTES,
+                UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(resolver, KEY_BACKSTAGE_IDLE_MINUTES, DEFAULT_IDLE_MINUTES,
                 UserHandle.USER_CURRENT);
     }
 
